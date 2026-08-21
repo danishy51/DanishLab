@@ -16,311 +16,60 @@
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             --border: #e2e8f0;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--light);
-            color: var(--dark);
-            padding-bottom: 50px;
-        }
-
-        .navbar {
-            background-color: var(--primary);
-            color: var(--white);
-            padding: 15px 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .dashboard-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .counter-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            border-left: 6px solid var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .counter-card.earnings {
-            border-left-color: var(--success);
-        }
-
-        .counter-info h6 {
-            font-size: 0.9rem;
-            color: #718096;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .counter-info h2 {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-        }
-
-        @media (min-width: 992px) {
-            .main-layout { grid-template-columns: 450px 1fr; }
-        }
-
-        .section-card {
-            background: var(--white);
-            border-radius: 14px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            border: 1px solid var(--border);
-            height: fit-content;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #4a5568;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 11px 15px;
-            font-size: 0.95rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            background-color: #f8fafc;
-            transition: all 0.2s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: var(--white);
-        }
-
-        .row-flex {
-            display: flex;
-            gap: 15px;
-        }
-
-        .row-flex .form-group {
-            flex: 1;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            width: auto;
-        }
-
-        .btn-outline-danger {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .btn-outline-danger:hover {
-            background: var(--danger);
-            color: var(--white);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: var(--white);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 10px;
-            margin-bottom: 25px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background-color: var(--light);
-            color: #4a5568;
-            padding: 14px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        td {
-            padding: 14px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
-
-        .badge-test {
-            background-color: #edf2f7;
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Printable Receipt / Bill Style */
-        .invoice-card {
-            background: var(--white);
-            border: 2px dashed #a0aec0;
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 10px;
-        }
-
-        .invoice-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .invoice-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: 1px;
-        }
-
-        .invoice-sub {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-top: 4px;
-        }
-
-        .invoice-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .invoice-table {
-            width: 100%;
-            margin: 20px 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); padding-bottom: 50px; }
+        .navbar { background-color: var(--primary); color: var(--white); padding: 15px 30px; font-size: 1.3rem; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; }
+        .dashboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .counter-card { background: var(--white); padding: 25px; border-radius: 12px; box-shadow: var(--shadow); border-left: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .counter-card.earnings { border-left-color: var(--success); }
+        .counter-info h6 { font-size: 0.9rem; color: #718096; text-transform: uppercase; margin-bottom: 5px; }
+        .counter-info h2 { font-size: 2rem; font-weight: 700; }
+        .main-layout { display: grid; grid-template-columns: 1fr; gap: 30px; }
+        @media (min-width: 992px) { .main-layout { grid-template-columns: 450px 1fr; } }
+        .section-card { background: var(--white); border-radius: 14px; box-shadow: var(--shadow); padding: 25px; border: 1px solid var(--border); height: fit-content; }
+        .section-title { font-size: 1.25rem; color: var(--primary); font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--light); display: flex; justify-content: space-between; align-items: center; }
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #4a5568; }
+        .form-control { width: 100%; padding: 11px 15px; font-size: 0.95rem; border: 1px solid #cbd5e0; border-radius: 8px; background-color: #f8fafc; transition: all 0.2s; }
+        .row-flex { display: flex; gap: 15px; }
+        .row-flex .form-group { flex: 1; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; font-size: 1rem; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; width: 100%; text-align: center; }
+        .btn-primary { background-color: var(--primary); color: var(--white); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; width: auto; }
+        .btn-outline-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+        .btn-outline-danger:hover { background: var(--danger); color: var(--white); }
+        .btn-success { background-color: var(--success); color: var(--white); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background-color: var(--light); color: #4a5568; padding: 14px; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid var(--border); }
+        td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        .badge-test { background-color: #edf2f7; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .invoice-card { background: var(--white); border: 2px dashed #a0aec0; border-radius: 12px; padding: 30px; margin-top: 10px; }
+        .invoice-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .invoice-title { font-size: 1.8rem; font-weight: 800; color: var(--primary); letter-spacing: 1px; }
+        .invoice-sub { font-size: 0.85rem; color: #718096; margin-top: 4px; }
+        .invoice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; font-size: 0.95rem; }
+        .invoice-table { width: 100%; margin: 20px 0; }
         .invoice-table th { background: #f7fafc; }
-
-        .invoice-total {
-            text-align: right;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border);
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            .container { margin: 0; width: 100%; padding: 0; }
-            .invoice-card { border: none; padding: 0; margin: 0; }
-        }
-        
+        .invoice-total { text-align: right; font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); }
+        @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .container { margin: 0; width: 100%; padding: 0; } .invoice-card { border: none; padding: 0; margin: 0; } }
         .d-none { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="navbar no-print">
-        AL Shifa Lab — HMIS Dashboard
-    </div>
+    <div class="navbar no-print">AL Shifa Lab — HMIS Dashboard</div>
 
     <div class="container">
-        
-        <!-- Top Statistics -->
+        <!-- Dashboard Statistics -->
         <div class="dashboard-row no-print">
-            <div class="counter-card">
-                <div class="counter-info">
-                    <h6>Total Patients Today</h6>
-                    <h2 id="total-patients-count">0</h2>
-                </div>
-            </div>
-            <div class="counter-card earnings">
-                <div class="counter-info">
-                    <h6>Today's Gross Earnings</h6>
-                    <h2>Rs. <span id="total-earnings-count">0</span></h2>
-                </div>
-            </div>
+            <div class="counter-card"><div class="counter-info"><h6>Total Patients Today</h6><h2 id="total-patients-count">0</h2></div></div>
+            <div class="counter-card earnings"><div class="counter-info"><h6>Today's Gross Earnings</h6><h2>Rs. <span id="total-earnings-count">0</span></h2></div></div>
         </div>
 
-        <!-- Layout Body Grid -->
         <div class="main-layout">
-            
-            <!-- LEFT SIDE: Registration Form -->
+            <!-- Left Panel: Form -->
             <div class="section-card no-print">
                 <div class="section-title">New Patient Entry</div>
                 <form id="patient-form">
@@ -328,12 +77,10 @@
                         <label class="form-label">Patient Full Name</label>
                         <input type="text" id="p-name" class="form-control" required placeholder="e.g., Muhammad Danish">
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Patient Address</label>
-                        <input type="text" id="p-address" class="form-control" required placeholder="e.g., Street 4, Medical City">
+                        <input type="text" id="p-address" class="form-control" required placeholder="e.g., Mohallah Sarwar Shah">
                     </div>
-                    
                     <div class="row-flex">
                         <div class="form-group">
                             <label class="form-label">Age (Years)</label>
@@ -348,7 +95,49 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Select Investigation / Test</label>
                         <select id="p-test" class="form-control" onchange="updatePrice()">
+                            <option value="500" data-name="Blood Sugar (Fasting)">Blood Sugar (Fasting) — Rs. 500</option>
+                            <option value="1200" data-name="Complete Blood Count (CBC)">Complete Blood Count (CBC) — Rs. 1,200</option>
+                            <option value="2500" data-name="Liver Function Test (LFT)">Liver Function Test (LFT) — Rs. 2,500</option>
+                            <option value="1500" data-name="Lipid Profile">Lipid Profile — Rs. 1,500</option>
+                            <option value="800" data-name="Urine Routine Examination">Urine Routine Examination — Rs. 800</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Test Fee / Payable Amount (PKR)</label>
+                        <input type="number" id="p-price" class="form-control" value="500" readonly style="font-weight: bold; color: var(--primary); background-color: #eef2f7;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Bill & Save Record</button>
+                </form>
+            </div>
+
+            <!-- Right Panel: Data Logs -->
+            <div class="section-card">
+                <div class="section-title no-print">
+                    <span>Active Patient Logs</span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearAllData()">Clear Logs</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr><th>Patient Details</th><th>Required Test</th><th>Fee Paid</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="patient-table-body"></tbody>
+                    </table>
+                </div>
+                
+                <!-- Bill Receipt Printable -->
+                <div id="invoice-print" class="invoice-card d-none">
+                    <div class="invoice-header">
+                        <div class="invoice-title">AL SHIFA LAB</div>
+                        <div class="invoice-sub">Main Hospital Road, Medical City | Emergency: +92 300 1234567</div>
+                    </div>
+                    <div class="invoice-grid">
+                        <div>
+                            <strong>Patient Name:</strong> <span id="print-name">-</span><br>
+                            <strong>Age / Gender:</strong> <span id="print-age-gender">-</span><br>
+                            <strong>Address:</strong> <span id="print-address">-</span>
+                        </div>
+                        <div style="text-align: right;">
