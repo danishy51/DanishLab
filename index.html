@@ -3,177 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AL Shifa Lab | HMIS Dashboard</title>
-    <!-- Bootstrap CSS & FontAwesome Icons -->
-    <link href="https://jsdelivr.net" rel="stylesheet">
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <title>AL Shifa Lab | Modern HMIS</title>
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar { background-color: #0f4c81; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .card-counter { background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-left: 5px solid #0f4c81; }
-        .main-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 25px; margin-top: 20px; }
-        .btn-primary { background-color: #0f4c81; border: none; }
-        .btn-primary:hover { background-color: #1d6fa5; }
-        @media print { .no-print { display: none; } .print-area { display: block !important; } }
+        /* Modern CSS Variables & Reset */
+        :root {
+            --primary: #0f4c81;
+            --primary-hover: #1762a1;
+            --success: #2ec4b6;
+            --danger: #e63946;
+            --dark: #1d2d44;
+            --light: #f4f6f9;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            padding-bottom: 50px;
+        }
+
+        /* Top Header Navbar */
+        .navbar {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Dashboard Top Counter Row */
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .counter-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 6px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .counter-card.earnings {
+            border-left-color: var(--success);
+        }
+
+        .counter-info h6 {
+            font-size: 0.9rem;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .counter-info h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* 2-Column Responsive Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @min-width: 992px {
+            .main-layout {
+                grid-template-columns: 420px 1fr;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .main-layout { grid-template-columns: 420px 1fr; }
+        }
+
+        /* Classified Section Cards */
+        .section-card {
+            background: var(--white);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Elegant Forms and Inputs */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5568;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 15px;
+            font-size: 0.95rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.15);
+        }
+
+        .row-flex {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row-flex .form-group {
+            flex: 1;
+        }
+
+        /* Modern UI Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        /* Beautiful Responsive Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--light);
+            color: #4a5568;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .patient-meta {
+            font-size: 0.82rem;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .badge-test {
+            background-color: #edf2f7;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Printable Receipt Section */
+        .invoice-card {
+            background: var(--white);
+            border: 2px dashed #a0aec0;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .invoice-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .invoice-sub {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .invoice-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .invoice-table th { background: #f7fafc; }
+
+        .invoice-total {
+            text-align: right;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-top: 15px;
+        }
+
+        /* Printing Adjustments */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { margin: 0; width: 100%; padding: 0; }
+            .invoice-card { border: none; padding: 0; margin: 0; }
+        }
+        
+        .d-none { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <nav class="navbar navbar-expand-lg navbar-dark no-print">
-        <div class="container">
-            <a class="navbar-brand" href="#"><i class="fa-solid fa-heart-pulse me-2"></i> AL Shifa Lab - HMIS</a>
-        </div>
-    </nav>
-
-    <div class="container my-4 print-area">
-        <!-- Dashboard Counter Cards (No Print during reports) -->
-        <div class="row g-3 no-print">
-            <div class="col-md-6 col-lg-4">
-                <div class="card-counter">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Total Patients Today</h6>
-                            <h2 id="total-patients-count">0</h2>
-                        </div>
-                        <i class="fa-solid fa-users fa-2x text-primary"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="card-counter" style="border-left-color: #2ec4b6;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Today's Earnings</h6>
-                            <h2>Rs. <span id="total-earnings-count">0</span></h2>
-                        </div>
-                        <i class="fa-solid fa-money-bill-wave fa-2x text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Form & Content Split -->
-        <div class="row mt-2">
-            <!-- Patient Registration & Bill Form -->
-            <div class="col-lg-5 no-print">
-                <div class="main-card">
-                    <h5 class="mb-3 text-primary"><i class="fa-solid fa-user-plus me-2"></i> New Patient Registration</h5>
-                    <form id="patient-form">
-                        <div class="mb-3">
-                            <label class="form-label">Patient Name</label>
-                            <input type="text" id="p-name" class="form-control" required placeholder="e.g., Ali Khan">
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label">Age</label>
-                                <input type="number" id="p-age" class="form-control" required placeholder="Years">
-                            </div>
-                            <div class="col">
-                                <label class="form-label">Gender</label>
-                                <select id="p-gender" class="form-control">
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Select Test Type</label>
-                            <select id="p-test" class="form-control" onchange="updatePrice()">
-                                <option value="500" data-name="Blood Sugar (Fasting)">Blood Sugar (Fasting) - Rs. 500</option>
-                                <option value="1200" data-name="Complete Blood Count (CBC)">Complete Blood Count (CBC) - Rs. 1,200</option>
-                                <option value="2500" data-name="Liver Function Test (LFT)">Liver Function Test (LFT) - Rs. 2,500</option>
-                                <option value="1500" data-name="Lipid Profile">Lipid Profile - Rs. 1,500</option>
-                                <option value="800" data-name="Urine Routine Examination">Urine Routine Examination - Rs. 800</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Total Amount (Rs.)</label>
-                            <input type="number" id="p-price" class="form-control" value="500" readonly>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-receipt me-2"></i> Generate Bill & Save</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Patient Records & Reports Management -->
-            <div class="col-lg-7">
-                <div class="main-card">
-                    <h5 class="mb-3 text-primary d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-folder-open me-2"></i> Patient Log & Reports</span>
-                        <button class="btn btn-sm btn-outline-danger no-print" onclick="clearAllData()"><i class="fa-solid fa-trash-can"></i> Clear All</button>
-                    </h5>
-                    <div class="table-responsive no-print">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Test</th>
-                                    <th>Bill</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="patient-table-body">
-                                <!-- Dynamic Rows -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Printable Invoice/Report Card (Hidden initially, visible during print action) -->
-                    <div id="invoice-print" class="d-none border p-4 bg-white rounded mt-4">
-                        <div class="text-center mb-4">
-                            <h2 class="text-uppercase fw-bold text-success" style="letter-spacing: 2px;">AL SHIFA LAB</h2>
-                            <p class="text-muted small">Main Hospital Road, Medical City | Tel: +92 300 1234567</p>
-                            <hr style="border-top: 2px dashed #000;">
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Patient Name:</strong> <span id="print-name">-</span></div>
-                            <div class="col-6 text-end"><strong>Age/Gender:</strong> <span id="print-age-gender">-</span></div>
-                        </div>
-                        <table class="table table-bordered my-4">
-                            <thead>
-                                <tr class="table-light">
-                                    <th>Prescribed Investigation / Test</th>
-                                    <th class="text-end">Amount (PKR)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td id="print-test-name">-</td>
-                                    <td class="text-end" id="print-test-cost">0.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="text-end mt-4">
-                            <h4>Total Paid: <strong>Rs. <span id="print-total">0</span></strong></h4>
-                        </div>
-                        <div class="mt-5 pt-4 text-center">
-                            <p class="text-muted small">Generated via Al Shifa HMIS System. Thank you.</p>
-                            <button class="btn btn-success btn-sm no-print mt-2" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Now</button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <!-- Header Navbar -->
+    <div class="navbar no-print">
+        AL Shifa Lab — HMIS Dashboard
     </div>
 
-    <!-- HMIS Business Logic Code -->
-    <script>
-        let patients = JSON.parse(localStorage.getItem('alshifa_patients')) || [];
+    <div class="container">
+        
+        <!-- Top Stats Row -->
+        <div class="dashboard-row no-print">
+            <div class="counter-card">
+                <div class="counter-info">
+                    <h6>Total Patients Today</h6>
+                    <h2 id="total-patients-count">0</h2>
+                </div>
+            </div>
+            <div class="counter-card earnings">
+                <div class="counter-info">
+                    <h6>Today's Gross Earnings</h6>
+                    <h2>Rs. <span id="total-earnings-count">0</span></h2>
+                </div>
+            </div>
+        </div>
 
-        function updatePrice() {
-            const select = document.getElementById('p-test');
-            document.getElementById('p-price').value = select.value;
-        }
-
-        document.getElementById('patient-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('p-name').value;
-            const age = document.getElementById('p-age').value;
-            const gender = document.getElementById('p-gender').value;
-            const select = document.getElementById('p-test');
-            const testName = select.options[select.selectedIndex].getAttribute('data-name');
-            const price = select.value;
-
+        <!-- Layout Body Grid -->
+        <div class="main-layout">
+            
+            <!-- Left Side: Registration Section -->
+            <div class="section-card no-print">
+                <div class="section-title">New Patient Entry</div>
+                <form id="patient-form">
+                    <div class="form-group">
+                        <label class="form-label">Patient Full Name</label>
+                        <input type="text" id="p-name" class="form-control" required placeholder="e.g., Muhammad Danish">
+                    </div>
+                    
+                    <div class="row-flex">
+                        <div class="form-group">
+                            <label class="form-label">Age (Years)</label>
+                            <input type="number" id="p-age" class="form-control" required placeholder="23">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
