@@ -14,7 +14,6 @@
       margin: 0;
       padding: 20px;
     }
-    /* Navbar Header */
     .navbar {
       background-color: #0b4f8a;
       color: white;
@@ -98,7 +97,6 @@
       width: auto;
       cursor: pointer;
     }
-    /* Receipt Styling */
     .receipt-card {
       margin-top: 25px;
       border: 2px dashed #8faec4;
@@ -177,39 +175,16 @@
     .btn-print:hover {
       background-color: #12b886;
     }
-
-    /* Patient List Modal / Section */
     #patientListSection {
       display: none;
     }
     .search-box {
       margin-bottom: 15px;
     }
-
-    /* Print settings */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      .navbar, #patientListSection, #formSection, .btn-print {
-        display: none !important;
-      }
-      #printable-receipt, #printable-receipt * {
-        visibility: visible;
-      }
-      #printable-receipt {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        border: none;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation Header -->
   <div class="navbar">
     <div class="title" id="topBanner">Danish Lab — Cash Receipt Desk</div>
     <div class="nav-buttons" id="navBtns">
@@ -220,7 +195,6 @@
 
   <div class="container">
     
-    <!-- Entry Form Section -->
     <div id="formSection">
       <h2>New Patient Receipt Desk</h2>
       
@@ -275,7 +249,6 @@
         </div>
       </div>
 
-      <!-- Live Printable Receipt Area -->
       <div class="receipt-card" id="printable-receipt">
         <div class="receipt-header">
           <div>Danish Lab</div>
@@ -306,7 +279,6 @@
             </tr>
           </thead>
           <tbody id="rTestTable">
-            <!-- Dynamically filled -->
           </tbody>
         </table>
 
@@ -319,11 +291,10 @@
           <div class="qr-text">Scan code to verify official digital invoice</div>
         </div>
 
-        <button class="btn-print" id="printBtn" onclick="printAndSavePatient()">🖨️ Print Official Patient Slip</button>
+        <button class="btn-print" id="printBtn" onclick="printReceiptOnly()">🖨️ Print Official Patient Slip</button>
       </div>
     </div>
 
-    <!-- Saved Patient List Section -->
     <div id="patientListSection">
       <h2>Saved Patient Records</h2>
       
@@ -343,7 +314,6 @@
           </tr>
         </thead>
         <tbody id="patientListTable">
-          <!-- Dynamically Populated -->
         </tbody>
       </table>
     </div>
@@ -393,8 +363,8 @@
       document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}`;
     }
 
-    function printAndSavePatient() {
-      // 1. Save data locally
+    function printReceiptOnly() {
+      // 1. Data Save locally
       const name = document.getElementById('pName').value || '---';
       const address = document.getElementById('pAddress').value || '---';
       const age = document.getElementById('pAge').value || '0';
@@ -412,11 +382,42 @@
       };
 
       let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
-      patients.unshift(patientData); // Add new patient at top
+      patients.unshift(patientData);
       localStorage.setItem('danishLabPatients', JSON.stringify(patients));
 
-      // 2. Trigger Print
-      window.print();
+      // 2. Clean Print Window Logic
+      const receiptHtml = document.getElementById('printable-receipt').outerHTML;
+      const printWindow = window.open('', '', 'height=600,width=800');
+
+      printWindow.document.write('<html><head><title>Print Slip - Danish Lab</title>');
+      printWindow.document.write('<style>');
+      printWindow.document.write(`
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; }
+        .receipt-card { border: 2px dashed #8faec4; border-radius: 8px; padding: 20px; }
+        .receipt-header { text-align: center; color: #0b4f8a; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+        .info-grid { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
+        .info-grid div p { margin: 4px 0; }
+        .status-paid { color: #00a884; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th { background-color: #f0f4f8; text-align: left; padding: 8px; font-size: 14px; }
+        td { padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .total-amount { text-align: center; font-size: 18px; font-weight: bold; margin: 15px 0; color: #111; }
+        .qr-container { text-align: center; margin-top: 15px; }
+        .qr-container img { width: 110px; height: 110px; }
+        .qr-text { font-size: 12px; color: #666; margin-top: 4px; }
+        .btn-print { display: none !important; }
+      `);
+      printWindow.document.write('</style></head><body>');
+      printWindow.document.write(receiptHtml);
+      printWindow.document.write('</body></html>');
+
+      printWindow.document.close();
+      printWindow.focus();
+
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
     }
 
     function showPatientList() {
@@ -482,7 +483,6 @@
         document.getElementById('navBtns').style.display = 'none';
         document.getElementById('topBanner').innerText = 'Danish Lab — Official Digital Invoice';
 
-        // Hide inputs, only show printable area
         document.querySelectorAll('#formSection > .form-group, #formSection > .form-row, #formSection > h2').forEach(el => el.style.display = 'none');
 
         const name = urlParams.get('name');
