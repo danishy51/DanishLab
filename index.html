@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AL Shifa Lab | Modern HMIS</title>
     <style>
-        /* Modern CSS Variables & Reset */
         :root {
             --primary: #0f4c81;
             --primary-hover: #1762a1;
@@ -31,7 +30,6 @@
             padding-bottom: 50px;
         }
 
-        /* Top Header Navbar */
         .navbar {
             background-color: var(--primary);
             color: var(--white);
@@ -39,8 +37,6 @@
             font-size: 1.3rem;
             font-weight: bold;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
         }
 
         .container {
@@ -49,7 +45,6 @@
             padding: 0 20px;
         }
 
-        /* Dashboard Top Counter Row */
         .dashboard-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -77,39 +72,30 @@
             color: #718096;
             text-transform: uppercase;
             margin-bottom: 5px;
-            letter-spacing: 0.5px;
         }
 
         .counter-info h2 {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--dark);
         }
 
-        /* 2-Column Responsive Layout */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr;
             gap: 30px;
         }
 
-        @min-width: 992px {
-            .main-layout {
-                grid-template-columns: 420px 1fr;
-            }
-        }
-
         @media (min-width: 992px) {
-            .main-layout { grid-template-columns: 420px 1fr; }
+            .main-layout { grid-template-columns: 450px 1fr; }
         }
 
-        /* Classified Section Cards */
         .section-card {
             background: var(--white);
             border-radius: 14px;
             box-shadow: var(--shadow);
             padding: 25px;
             border: 1px solid var(--border);
+            height: fit-content;
         }
 
         .section-title {
@@ -124,7 +110,6 @@
             align-items: center;
         }
 
-        /* Elegant Forms and Inputs */
         .form-group {
             margin-bottom: 18px;
         }
@@ -151,7 +136,6 @@
             outline: none;
             border-color: var(--primary);
             background-color: var(--white);
-            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.15);
         }
 
         .row-flex {
@@ -163,7 +147,6 @@
             flex: 1;
         }
 
-        /* Modern UI Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -186,7 +169,6 @@
 
         .btn-primary:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
         }
 
         .btn-sm {
@@ -211,10 +193,10 @@
             color: var(--white);
         }
 
-        /* Beautiful Responsive Table */
         .table-container {
             overflow-x: auto;
             margin-top: 10px;
+            margin-bottom: 25px;
         }
 
         table {
@@ -236,17 +218,6 @@
             padding: 14px;
             border-bottom: 1px solid var(--border);
             font-size: 0.95rem;
-            vertical-align: middle;
-        }
-
-        tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .patient-meta {
-            font-size: 0.82rem;
-            color: #718096;
-            margin-top: 2px;
         }
 
         .badge-test {
@@ -256,16 +227,15 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            display: inline-block;
         }
 
-        /* Printable Receipt Section */
+        /* Printable Receipt / Bill Style */
         .invoice-card {
             background: var(--white);
             border: 2px dashed #a0aec0;
             border-radius: 12px;
             padding: 30px;
-            margin-top: 30px;
+            margin-top: 10px;
         }
 
         .invoice-header {
@@ -288,9 +258,10 @@
             margin-top: 4px;
         }
 
-        .invoice-details {
-            display: flex;
-            justify-content: space-between;
+        .invoice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             margin-bottom: 20px;
             font-size: 0.95rem;
         }
@@ -308,9 +279,10 @@
             font-weight: 700;
             color: var(--dark);
             margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
         }
 
-        /* Printing Adjustments */
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; }
@@ -323,14 +295,13 @@
 </head>
 <body>
 
-    <!-- Header Navbar -->
     <div class="navbar no-print">
         AL Shifa Lab — HMIS Dashboard
     </div>
 
     <div class="container">
         
-        <!-- Top Stats Row -->
+        <!-- Top Statistics -->
         <div class="dashboard-row no-print">
             <div class="counter-card">
                 <div class="counter-info">
@@ -349,13 +320,18 @@
         <!-- Layout Body Grid -->
         <div class="main-layout">
             
-            <!-- Left Side: Registration Section -->
+            <!-- LEFT SIDE: Registration Form -->
             <div class="section-card no-print">
                 <div class="section-title">New Patient Entry</div>
                 <form id="patient-form">
                     <div class="form-group">
                         <label class="form-label">Patient Full Name</label>
                         <input type="text" id="p-name" class="form-control" required placeholder="e.g., Muhammad Danish">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Patient Address</label>
+                        <input type="text" id="p-address" class="form-control" required placeholder="e.g., Street 4, Medical City">
                     </div>
                     
                     <div class="row-flex">
@@ -365,3 +341,14 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Gender</label>
+                            <select id="p-gender" class="form-control">
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Select Investigation / Test</label>
+                        <select id="p-test" class="form-control" onchange="updatePrice()">
