@@ -178,8 +178,28 @@
     #patientListSection, #settingsSection {
       display: none;
     }
-    .search-box {
+    .list-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 15px;
+    }
+    .search-box {
+      flex: 1;
+      margin-right: 15px;
+    }
+    .export-btn {
+      background-color: #0b4f8a;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .export-btn:hover {
+      background-color: #083b68;
     }
     .add-test-card {
       background: #eef6fc;
@@ -187,6 +207,57 @@
       border-radius: 6px;
       margin-bottom: 20px;
       border: 1px solid #bce0fd;
+    }
+    .action-btn-view {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    .action-btn-delete {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    /* Modal Styling */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0;
+      top: 0;
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.5); 
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 650px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close-modal:hover {
+      color: black;
     }
   </style>
 </head>
@@ -238,9 +309,7 @@
 
       <div class="form-group">
         <label>Select Investigation(s) Required</label>
-        <div class="test-list" id="mainTestList">
-          <!-- Dynamically Loaded from JS/LocalStorage -->
-        </div>
+        <div class="test-list" id="mainTestList"></div>
       </div>
 
       <div class="receipt-card" id="printable-receipt">
@@ -272,8 +341,7 @@
               <th style="text-align: right;">Price (PKR)</th>
             </tr>
           </thead>
-          <tbody id="rTestTable">
-          </tbody>
+          <tbody id="rTestTable"></tbody>
         </table>
 
         <div class="total-amount">
@@ -292,9 +360,13 @@
     <!-- Patient List Section -->
     <div id="patientListSection">
       <h2>Saved Patient Records</h2>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Search patient by Name, Receipt No or Address..." onkeyup="filterPatientList()">
+      <div class="list-header-actions">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Search patient by Name, Receipt No or Address..." onkeyup="filterPatientList()">
+        </div>
+        <button class="export-btn" onclick="exportPatientListPDF()">📥 Export PDF Report</button>
       </div>
+      
       <table>
         <thead>
           <tr>
@@ -303,11 +375,10 @@
             <th>Patient Name</th>
             <th>Age/Gender</th>
             <th>Total Paid</th>
-            <th>Action</th>
+            <th style="text-align: center;">Action</th>
           </tr>
         </thead>
-        <tbody id="patientListTable">
-        </tbody>
+        <tbody id="patientListTable"></tbody>
       </table>
     </div>
 
@@ -339,18 +410,25 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="settingsTestTable">
-        </tbody>
+        <tbody id="settingsTestTable"></tbody>
       </table>
     </div>
 
+  </div>
+
+  <!-- Receipt View Modal -->
+  <div id="viewModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <div id="modalReceiptArea"></div>
+      <button class="btn-print" onclick="printModalReceipt()">🖨️ Print This Slip</button>
+    </div>
   </div>
 
   <script>
     let currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
     document.getElementById('rNum').innerText = currentReceiptNum;
 
-    // Default Tests Setup
     const defaultTests = [
       { name: "Complete Blood Count (CBC)", price: 1200 },
       { name: "Liver Function Test (LFT)", price: 2500 },
@@ -396,7 +474,7 @@
           <tr>
             <td><input type="text" value="${t.name}" id="testName_${index}" onchange="updateTestFromSettings(${index})"></td>
             <td><input type="number" value="${t.price}" id="testPrice_${index}" onchange="updateTestFromSettings(${index})"></td>
-            <td><button onclick="deleteTest(${index})" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button></td>
+            <td><button class="action-btn-delete" onclick="deleteTest(${index})">Delete</button></td>
           </tr>
         `;
       });
@@ -481,8 +559,18 @@
       const address = document.getElementById('pAddress').value || '---';
       const age = document.getElementById('pAge').value || '0';
       const gender = document.getElementById('pGender').value;
+      const doctor = document.getElementById('pDoctor').value || 'Self';
       const total = document.getElementById('rTotal').innerText;
       const date = document.getElementById('rDate').innerText;
+
+      const checkboxes = document.querySelectorAll('.test-checkbox:checked');
+      let testArray = [];
+      checkboxes.forEach(cb => {
+        testArray.push({
+          name: cb.getAttribute('data-name'),
+          price: parseInt(cb.getAttribute('data-price'))
+        });
+      });
 
       const patientData = {
         receiptNo: currentReceiptNum,
@@ -490,7 +578,9 @@
         name: name,
         ageGender: `${age} Yrs / ${gender}`,
         address: address,
-        total: total
+        doctor: doctor,
+        total: total,
+        tests: testArray
       };
 
       let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
@@ -498,8 +588,11 @@
       localStorage.setItem('danishLabPatients', JSON.stringify(patients));
 
       const receiptHtml = document.getElementById('printable-receipt').outerHTML;
-      const printWindow = window.open('', '', 'height=600,width=800');
+      openPrintWindow(receiptHtml);
+    }
 
+    function openPrintWindow(htmlContent) {
+      const printWindow = window.open('', '', 'height=600,width=800');
       printWindow.document.write('<html><head><title>Print Slip - Danish Lab</title>');
       printWindow.document.write('<style>');
       printWindow.document.write(`
@@ -519,7 +612,7 @@
         .btn-print { display: none !important; }
       `);
       printWindow.document.write('</style></head><body>');
-      printWindow.document.write(receiptHtml);
+      printWindow.document.write(htmlContent);
       printWindow.document.write('</body></html>');
 
       printWindow.document.close();
@@ -570,9 +663,147 @@
           <td>${p.name.toUpperCase()}</td>
           <td>${p.ageGender}</td>
           <td>Rs. ${p.total}</td>
-          <td><button onclick="deletePatient(${index})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Delete</button></td>
+          <td style="text-align: center;">
+            <button class="action-btn-view" onclick="viewPatientReceipt(${index})" title="View Receipt">👁️ View</button>
+            <button class="action-btn-delete" onclick="deletePatient(${index})" title="Delete Record">🗑️ Delete</button>
+          </td>
         </tr>`;
       });
+    }
+
+    function viewPatientReceipt(index) {
+      const patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      const p = patients[index];
+
+      let testRows = '';
+      if (p.tests && p.tests.length > 0) {
+        p.tests.forEach(t => {
+          testRows += `<tr>
+            <td>${t.name}</td>
+            <td style="text-align: right;">${t.price.toLocaleString()}</td>
+          </tr>`;
+        });
+      } else {
+        testRows = `<tr><td colspan="2" style="text-align:center;">No test breakdown stored</td></tr>`;
+      }
+
+      const modalHtml = `
+        <div class="receipt-card">
+          <div class="receipt-header">
+            <div>Danish Lab</div>
+            <div style="font-size: 13px; font-weight: normal; color: #555; margin-top: 4px;">
+              Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053
+            </div>
+          </div>
+          
+          <div class="info-grid">
+            <div>
+              <p><strong>Patient Name:</strong> <span>${p.name.toUpperCase()}</span></p>
+              <p><strong>Age / Gender:</strong> <span>${p.ageGender}</span></p>
+              <p><strong>Address:</strong> <span>${p.address}</span></p>
+              <p><strong>Ref By:</strong> <span>${p.doctor || 'Self'}</span></p>
+            </div>
+            <div>
+              <p><strong>Date:</strong> <span>${p.date}</span></p>
+              <p><strong>Receipt No:</strong> <span>${p.receiptNo}</span></p>
+              <p><strong>Status:</strong> <span class="status-paid">• Paid Verified</span></p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Investigation Description</th>
+                <th style="text-align: right;">Price (PKR)</th>
+              </tr>
+            </thead>
+            <tbody>${testRows}</tbody>
+          </table>
+
+          <div class="total-amount">
+            Total Cash Paid: Rs. <span>${p.total}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalReceiptArea').innerHTML = modalHtml;
+      document.getElementById('viewModal').style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById('viewModal').style.display = "none";
+    }
+
+    function printModalReceipt() {
+      const content = document.getElementById('modalReceiptArea').innerHTML;
+      openPrintWindow(content);
+    }
+
+    function exportPatientListPDF() {
+      const patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      if (patients.length === 0) {
+        alert("کوئی سیو شدہ ریکارڈ موجود نہیں ہے۔");
+        return;
+      }
+
+      let rowsHtml = '';
+      patients.forEach(p => {
+        let testList = p.tests ? p.tests.map(t => t.name).join(', ') : 'N/A';
+        rowsHtml += `
+          <tr>
+            <td>${p.receiptNo}</td>
+            <td>${p.date}</td>
+            <td>${p.name.toUpperCase()}</td>
+            <td>${p.ageGender}</td>
+            <td>${testList}</td>
+            <td style="text-align: right;">Rs. ${p.total}</td>
+          </tr>
+        `;
+      });
+
+      const exportWindow = window.open('', '', 'height=700,width=900');
+      exportWindow.document.write(`
+        <html>
+        <head>
+          <title>Danish Lab — Patient Database Report</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; }
+            h2 { color: #0b4f8a; text-align: center; margin-bottom: 5px; }
+            p.sub { text-align: center; color: #555; font-size: 13px; margin-top: 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; font-size: 13px; text-align: left; }
+            th { background-color: #0b4f8a; color: white; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          <h2>Danish Lab — Registered Patients Report</h2>
+          <p class="sub">Report Generated Date: ${new Date().toLocaleDateString()}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Receipt #</th>
+                <th>Date</th>
+                <th>Patient Name</th>
+                <th>Age/Gender</th>
+                <th>Tests Performed</th>
+                <th style="text-align: right;">Total Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `);
+
+      exportWindow.document.close();
+      exportWindow.focus();
+      setTimeout(() => {
+        exportWindow.print();
+        exportWindow.close();
+      }, 500);
     }
 
     function filterPatientList() {
@@ -590,10 +821,12 @@
     }
 
     function deletePatient(index) {
-      let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
-      patients.splice(index, 1);
-      localStorage.setItem('danishLabPatients', JSON.stringify(patients));
-      renderPatientTable();
+      if (confirm("کیا آپ واقعی اس پیشنٹ کا ڈیٹا ختم کرنا چاہتے ہیں؟")) {
+        let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+        patients.splice(index, 1);
+        localStorage.setItem('danishLabPatients', JSON.stringify(patients));
+        renderPatientTable();
+      }
     }
 
     function loadFromUrl() {
