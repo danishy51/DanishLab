@@ -3,137 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danishy51 | Welcome</title>
-    <!-- Font Awesome Icons Link -->
+    <title>AL Shifa Lab | HMIS Dashboard</title>
+    <!-- Bootstrap CSS & FontAwesome Icons -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background-color: #161b22;
-            padding: 35px 25px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            border: 1px solid #30363d;
-            max-width: 450px;
-            width: 85%;
-            margin: 20px auto;
-        }
-        h1 {
-            color: #58a6ff;
-            margin-bottom: 10px;
-            font-size: 2.2rem;
-        }
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #8b949e;
-            margin-bottom: 20px;
-        }
-        .social-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        .social-btn {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.05rem;
-            transition: transform 0.2s, filter 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .social-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-        .social-btn i {
-            font-size: 1.4rem;
-            margin-right: 15px;
-            width: 25px;
-            text-align: center;
-        }
-        .social-text {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-        }
-        .social-title {
-            font-size: 0.85rem;
-            opacity: 0.8;
-            font-weight: normal;
-        }
-        .social-username {
-            font-size: 1.05rem;
-        }
-        /* Social Colors */
-        .facebook { background-color: #1877f2; color: white; }
-        .youtube { background-color: #ff0000; color: white; }
-        .whatsapp { background-color: #25d366; color: white; }
-        .linktree { background-color: #39e09b; color: #1d212a; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #0f4c81; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card-counter { background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-left: 5px solid #0f4c81; }
+        .main-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 25px; margin-top: 20px; }
+        .btn-primary { background-color: #0f4c81; border: none; }
+        .btn-primary:hover { background-color: #1d6fa5; }
+        @media print { .no-print { display: none; } .print-area { display: block !important; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Aap ka Assalam-o-Alaikum Page -->
-        <h1>Assalam-o-Alaikum! 👋</h1>
-        <p>Mera naam <strong>Danish</strong> hai.</p>
-        <p>Mubarak ho! Meri pehli website GitHub Pages par bilkul free live ho chuki hai.</p>
-        
-        <!-- Aap ke Social Accounts -->
-        <div class="social-links">
-            <!-- Facebook -->
-            <a href="https://facebook.com\danishy51" target="_blank" class="social-btn facebook">
-                <i class="fab fa-facebook-f"></i>
-                <div class="social-text">
-                    <span class="social-title">Facebook</span>
-                    <span class="social-username">@danishy51</span>
-                </div>
-            </a>
+    <!-- Header Section -->
+    <nav class="navbar navbar-expand-lg navbar-dark no-print">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-heart-pulse me-2"></i> AL Shifa Lab - HMIS</a>
+        </div>
+    </nav>
 
-            <!-- YouTube -->
-            <a href="https://youtube.com/danishy51" target="_blank" class="social-btn youtube">
-                <i class="fab fa-youtube"></i>
-                <div class="social-text">
-                    <span class="social-title">YouTube</span>
-                    <span class="social-username">@danishy51</span>
+    <div class="container my-4 print-area">
+        <!-- Dashboard Counter Cards (No Print during reports) -->
+        <div class="row g-3 no-print">
+            <div class="col-md-6 col-lg-4">
+                <div class="card-counter">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Total Patients Today</h6>
+                            <h2 id="total-patients-count">0</h2>
+                        </div>
+                        <i class="fa-solid fa-users fa-2x text-primary"></i>
+                    </div>
                 </div>
-            </a>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-counter" style="border-left-color: #2ec4b6;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Today's Earnings</h6>
+                            <h2>Rs. <span id="total-earnings-count">0</span></h2>
+                        </div>
+                        <i class="fa-solid fa-money-bill-wave fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- WhatsApp -->
-            <a href="https://wa.me" target="_blank" class="social-btn whatsapp">
-                <i class="fab fa-whatsapp"></i>
-                <div class="social-text">
-                    <span class="social-title">WhatsApp</span>
-                    <span class="social-username">+923067488053</span>
+        <!-- Main Form & Content Split -->
+        <div class="row mt-2">
+            <!-- Patient Registration & Bill Form -->
+            <div class="col-lg-5 no-print">
+                <div class="main-card">
+                    <h5 class="mb-3 text-primary"><i class="fa-solid fa-user-plus me-2"></i> New Patient Registration</h5>
+                    <form id="patient-form">
+                        <div class="mb-3">
+                            <label class="form-label">Patient Name</label>
+                            <input type="text" id="p-name" class="form-control" required placeholder="e.g., Ali Khan">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">Age</label>
+                                <input type="number" id="p-age" class="form-control" required placeholder="Years">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Gender</label>
+                                <select id="p-gender" class="form-control">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Select Test Type</label>
+                            <select id="p-test" class="form-control" onchange="updatePrice()">
+                                <option value="500" data-name="Blood Sugar (Fasting)">Blood Sugar (Fasting) - Rs. 500</option>
+                                <option value="1200" data-name="Complete Blood Count (CBC)">Complete Blood Count (CBC) - Rs. 1,200</option>
+                                <option value="2500" data-name="Liver Function Test (LFT)">Liver Function Test (LFT) - Rs. 2,500</option>
+                                <option value="1500" data-name="Lipid Profile">Lipid Profile - Rs. 1,500</option>
+                                <option value="800" data-name="Urine Routine Examination">Urine Routine Examination - Rs. 800</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Amount (Rs.)</label>
+                            <input type="number" id="p-price" class="form-control" value="500" readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-receipt me-2"></i> Generate Bill & Save</button>
+                    </form>
                 </div>
-            </a>
+            </div>
 
-            <!-- Linktree -->
-            <a href="https://linktr.ee/danishy51" target="_blank" class="social-btn linktree">
-                <i class="fas fa-link"></i>
-                <div class="social-text">
-                    <span class="social-title">Linktree</span>
-                    <span class="social-username">linktr.ee/danishy51</span>
+            <!-- Patient Records & Reports Management -->
+            <div class="col-lg-7">
+                <div class="main-card">
+                    <h5 class="mb-3 text-primary d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-folder-open me-2"></i> Patient Log & Reports</span>
+                        <button class="btn btn-sm btn-outline-danger no-print" onclick="clearAllData()"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+                    </h5>
+                    <div class="table-responsive no-print">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Test</th>
+                                    <th>Bill</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patient-table-body">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Printable Invoice/Report Card (Hidden initially, visible during print action) -->
+                    <div id="invoice-print" class="d-none border p-4 bg-white rounded mt-4">
+                        <div class="text-center mb-4">
+                            <h2 class="text-uppercase fw-bold text-success" style="letter-spacing: 2px;">AL SHIFA LAB</h2>
+                            <p class="text-muted small">Main Hospital Road, Medical City | Tel: +92 300 1234567</p>
+                            <hr style="border-top: 2px dashed #000;">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>Patient Name:</strong> <span id="print-name">-</span></div>
+                            <div class="col-6 text-end"><strong>Age/Gender:</strong> <span id="print-age-gender">-</span></div>
+                        </div>
+                        <table class="table table-bordered my-4">
+                            <thead>
+                                <tr class="table-light">
+                                    <th>Prescribed Investigation / Test</th>
+                                    <th class="text-end">Amount (PKR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="print-test-name">-</td>
+                                    <td class="text-end" id="print-test-cost">0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-end mt-4">
+                            <h4>Total Paid: <strong>Rs. <span id="print-total">0</span></strong></h4>
+                        </div>
+                        <div class="mt-5 pt-4 text-center">
+                            <p class="text-muted small">Generated via Al Shifa HMIS System. Thank you.</p>
+                            <button class="btn btn-success btn-sm no-print mt-2" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Now</button>
+                        </div>
+                    </div>
+
                 </div>
-            </a>
+            </div>
         </div>
     </div>
 
-</body>
-</html>
+    <!-- HMIS Business Logic Code -->
+    <script>
+        let patients = JSON.parse(localStorage.getItem('alshifa_patients')) || [];
+
+        function updatePrice() {
+            const select = document.getElementById('p-test');
+            document.getElementById('p-price').value = select.value;
+        }
+
+        document.getElementById('patient-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value;
+            const age = document.getElementById('p-age').value;
+            const gender = document.getElementById('p-gender').value;
+            const select = document.getElementById('p-test');
+            const testName = select.options[select.selectedIndex].getAttribute('data-name');
+            const price = select.value;
+
