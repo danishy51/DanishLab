@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AL Shifa Lab | Final HMIS</title>
+    <title>AL Shifa Lab | Guaranteed HMIS</title>
     <style>
         :root {
             --primary: #0f4c81;
@@ -43,7 +43,7 @@
     <div class="navbar no-print">AL Shifa Lab — HMIS Dashboard</div>
 
     <div class="main-grid">
-        <!-- LEFT PANEL: ENTRY FORM -->
+        <!-- LEFT PANEL: FORM FIELDS -->
         <div class="card no-print">
             <div class="card-title">New Patient Entry</div>
             
@@ -74,12 +74,12 @@
             
             <div class="form-group">
                 <label class="form-label">Select Investigation / Test</label>
-                <select id="inp-test" class="form-control" onchange="syncPrice()">
-                    <option value="500">Blood Sugar (Fasting)</option>
-                    <option value="1200">Complete Blood Count (CBC)</option>
-                    <option value="2500">Liver Function Test (LFT)</option>
-                    <option value="1500">Lipid Profile</option>
-                    <option value="800">Urine Routine Examination</option>
+                <select id="inp-test" class="form-control">
+                    <option value="500">Blood Sugar (Fasting) — Rs. 500</option>
+                    <option value="1200">Complete Blood Count (CBC) — Rs. 1,200</option>
+                    <option value="2500">Liver Function Test (LFT) — Rs. 2,500</option>
+                    <option value="1500">Lipid Profile — Rs. 1,500</option>
+                    <option value="800">Urine Routine Examination — Rs. 800</option>
                 </select>
             </div>
             
@@ -88,14 +88,15 @@
                 <input type="text" id="inp-price" class="form-control" value="500" readonly style="font-weight: bold; background: #eef2f7;">
             </div>
             
-            <button type="button" class="btn btn-primary" onclick="addPatientRecord()">Generate Bill & Save Record</button>
+            <!-- Removed standard inline onclick event to completely bypass layout lock -->
+            <button type="button" id="submit-record-btn" class="btn btn-primary">Generate Bill & Save Record</button>
         </div>
 
-        <!-- RIGHT PANEL: LOGS & PRINT SLIP -->
+        <!-- RIGHT PANEL: RECORDS LOG -->
         <div class="card">
             <div class="card-title no-print" style="display: flex; justify-content: space-between; align-items: center;">
                 <span>Active Patient Records</span>
-                <button class="btn btn-sm" onclick="clearDatabase()">Clear Logs</button>
+                <button class="btn btn-sm" id="clear-db-btn">Clear Logs</button>
             </div>
             
             <div style="overflow-x: auto;" class="no-print">
@@ -111,7 +112,7 @@
                 </table>
             </div>
             
-            <!-- OFFICIAL PRINT SLIP LAYOUT -->
+            <!-- DYNAMIC REPORT AREA -->
             <div id="slip-view" class="invoice-box d-none">
                 <div class="invoice-header">
                     <h2 style="color: var(--primary);">AL SHIFA LAB</h2>
@@ -156,7 +157,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;" class="no-print">
-                    <button type="button" class="btn btn-success" onclick="window.print()" style="width: auto; padding: 10px 30px;">🖨️ Print Patient Slip</button>
+                    <button type="button" id="print-window-btn" class="btn btn-success" style="width: auto; padding: 10px 30px;">🖨️ Print Patient Slip</button>
                 </div>
             </div>
 
@@ -166,19 +167,14 @@
     <script>
         var shifaLogs = JSON.parse(localStorage.getItem('shifa_final_db')) || [];
 
-        function syncPrice() {
-            var drop = document.getElementById('inp-test');
-            document.getElementById('inp-price').value = drop.value;
-        }
+        // Dynamic pricing link handler
+        document.getElementById('inp-test').addEventListener('change', function() {
+            document.getElementById('inp-price').value = this.value;
+        });
 
-        function addPatientRecord() {
+        // Direct Core Event Listener (Bypasses old cached triggers completely)
+        document.getElementById('submit-record-btn').addEventListener('click', function() {
             var name = document.getElementById('inp-name').value.trim();
             var addr = document.getElementById('inp-address').value.trim();
             var age = document.getElementById('inp-age').value.trim();
             var gen = document.getElementById('inp-gender').value;
-            var drop = document.getElementById('inp-test');
-            var tName = drop.options[drop.selectedIndex].text;
-            var fee = drop.value;
-
-            if(name == "" || addr == "" || age == "") {
-                alert("Meharbani karke Name, Address aur Age lazmi enter karein!");
