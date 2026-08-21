@@ -14,18 +14,37 @@
       margin: 0;
       padding: 20px;
     }
-    .header-banner {
+    /* Navbar Header */
+    .navbar {
       background-color: #0b4f8a;
       color: white;
-      text-align: center;
-      padding: 15px;
-      font-size: 24px;
-      font-weight: bold;
+      padding: 12px 20px;
       border-radius: 6px;
       margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar .title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .nav-buttons button {
+      background-color: #20c997;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .nav-buttons button:hover {
+      background-color: #12b886;
     }
     .container {
-      max-width: 800px;
+      max-width: 850px;
       margin: 0 auto;
       background: white;
       padding: 25px;
@@ -159,10 +178,21 @@
       background-color: #12b886;
     }
 
+    /* Patient List Modal / Section */
+    #patientListSection {
+      display: none;
+    }
+    .search-box {
+      margin-bottom: 15px;
+    }
+
     /* Print settings */
     @media print {
       body * {
         visibility: hidden;
+      }
+      .navbar, #patientListSection, #formSection, .btn-print {
+        display: none !important;
       }
       #printable-receipt, #printable-receipt * {
         visibility: visible;
@@ -174,36 +204,40 @@
         width: 100%;
         border: none;
       }
-      .btn-print {
-        display: none !important;
-      }
     }
   </style>
 </head>
 <body>
 
-  <div class="header-banner" id="topBanner">
-    Danish Lab — Cash Receipt Desk
+  <!-- Top Navigation Header -->
+  <div class="navbar">
+    <div class="title" id="topBanner">Danish Lab — Cash Receipt Desk</div>
+    <div class="nav-buttons" id="navBtns">
+      <button onclick="showNewEntry()">+ New Patient Entry</button>
+      <button onclick="showPatientList()">📋 Patient List</button>
+    </div>
   </div>
 
   <div class="container">
+    
+    <!-- Entry Form Section -->
     <div id="formSection">
       <h2>New Patient Receipt Desk</h2>
       
       <div class="form-group">
         <label>Patient Full Name</label>
-        <input type="text" id="pName" value="Type Full Name Here" oninput="updateReceipt()">
+        <input type="text" id="pName" value="USAMA BASHIR" oninput="updateReceipt()">
       </div>
 
       <div class="form-group">
         <label>Patient Complete Address</label>
-        <input type="text" id="pAddress" value="Type Full Adress Here" oninput="updateReceipt()">
+        <input type="text" id="pAddress" value="Mohallah Sarwar Shah,Ahmad Pur East,Bahawalpur" oninput="updateReceipt()">
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Age (Years)</label>
-          <input type="number" id="pAge" value="age" oninput="updateReceipt()">
+          <input type="number" id="pAge" value="23" oninput="updateReceipt()">
         </div>
         <div class="form-group">
           <label>Gender</label>
@@ -215,7 +249,7 @@
         </div>
         <div class="form-group">
           <label>Referred By (Doctor)</label>
-          <input type="text" id="pDoctor" value="Type Doctor Name Here" oninput="updateReceipt()">
+          <input type="text" id="pDoctor" value="Self / Dr. Ahmed" oninput="updateReceipt()">
         </div>
       </div>
 
@@ -240,58 +274,86 @@
           </div>
         </div>
       </div>
+
+      <!-- Live Printable Receipt Area -->
+      <div class="receipt-card" id="printable-receipt">
+        <div class="receipt-header">
+          <div>Danish Lab</div>
+          <div style="font-size: 13px; font-weight: normal; color: #555; margin-top: 4px;">
+            Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053
+          </div>
+        </div>
+        
+        <div class="info-grid">
+          <div>
+            <p><strong>Patient Name:</strong> <span id="rName">USAMA BASHIR</span></p>
+            <p><strong>Age / Gender:</strong> <span id="rAgeGender">23 Yrs / Male</span></p>
+            <p><strong>Address:</strong> <span id="rAddress">Mohallah Sarwar Shah,Ahmad Pur East,Bahawalpur</span></p>
+            <p><strong>Ref By:</strong> <span id="rDoctor">Self / Dr. Ahmed</span></p>
+          </div>
+          <div>
+            <p><strong>Date:</strong> <span id="rDate"></span></p>
+            <p><strong>Receipt No:</strong> <span id="rNum">DL-8821</span></p>
+            <p><strong>Status:</strong> <span class="status-paid">• Paid Verified</span></p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Investigation Description</th>
+              <th style="text-align: right;">Price (PKR)</th>
+            </tr>
+          </thead>
+          <tbody id="rTestTable">
+            <!-- Dynamically filled -->
+          </tbody>
+        </table>
+
+        <div class="total-amount">
+          Total Cash Paid: Rs. <span id="rTotal">1,800</span>
+        </div>
+
+        <div class="qr-container">
+          <img id="qrCode" src="" alt="QR Code">
+          <div class="qr-text">Scan code to verify official digital invoice</div>
+        </div>
+
+        <button class="btn-print" id="printBtn" onclick="printAndSavePatient()">🖨️ Print Official Patient Slip</button>
+      </div>
     </div>
 
-    <!-- Live Printable Receipt Area -->
-    <div class="receipt-card" id="printable-receipt">
-      <div class="receipt-header">
-        <div>Danish Lab</div>
-        <div style="font-size: 13px; font-weight: normal; color: #555; margin-top: 4px;">
-          Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053
-        </div>
-      </div>
+    <!-- Saved Patient List Section -->
+    <div id="patientListSection">
+      <h2>Saved Patient Records</h2>
       
-      <div class="info-grid">
-        <div>
-          <p><strong>Patient Name:</strong> <span id="rName">USAMA BASHIR</span></p>
-          <p><strong>Age / Gender:</strong> <span id="rAgeGender">23 Yrs / Male</span></p>
-          <p><strong>Address:</strong> <span id="rAddress">Mohallah Sarwar Shah,Ahmad Pur East,Bahawalpur</span></p>
-          <p><strong>Ref By:</strong> <span id="rDoctor">Self / Dr. Ahmed</span></p>
-        </div>
-        <div>
-          <p><strong>Date:</strong> <span id="rDate"></span></p>
-          <p><strong>Receipt No:</strong> <span id="rNum">DL-8821</span></p>
-          <p><strong>Status:</strong> <span class="status-paid">• Paid Verified</span></p>
-        </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Search patient by Name, Receipt No or Address..." onkeyup="filterPatientList()">
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Investigation Description</th>
-            <th style="text-align: right;">Price (PKR)</th>
+            <th>Receipt No</th>
+            <th>Date</th>
+            <th>Patient Name</th>
+            <th>Age/Gender</th>
+            <th>Total Paid</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="rTestTable">
-          <!-- Dynamically filled -->
+        <tbody id="patientListTable">
+          <!-- Dynamically Populated -->
         </tbody>
       </table>
-
-      <div class="total-amount">
-        Total Cash Paid: Rs. <span id="rTotal">1,800</span>
-      </div>
-
-      <div class="qr-container">
-        <img id="qrCode" src="" alt="QR Code">
-        <div class="qr-text">Scan code to verify official digital invoice</div>
-      </div>
-
-      <button class="btn-print" id="printBtn" onclick="window.print()">🖨️ Print Official Patient Slip</button>
     </div>
 
   </div>
 
   <script>
+    let currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('rNum').innerText = currentReceiptNum;
+
     function updateReceipt() {
       const name = document.getElementById('pName').value || '---';
       const address = document.getElementById('pAddress').value || '---';
@@ -325,20 +387,103 @@
 
       document.getElementById('rTotal').innerText = total.toLocaleString();
 
-      // Creating digital receipt URL for QR scanning
       const testsParam = encodeURIComponent(selectedTests.join('|'));
       const fullUrl = `https://danishy51.github.io/?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}&age=${age}&gender=${gender}&doctor=${encodeURIComponent(doctor)}&tests=${testsParam}&total=${total}`;
       
       document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}`;
     }
 
-    // Load from URL Parameters if opened via QR Code Scan
+    function printAndSavePatient() {
+      // 1. Save data locally
+      const name = document.getElementById('pName').value || '---';
+      const address = document.getElementById('pAddress').value || '---';
+      const age = document.getElementById('pAge').value || '0';
+      const gender = document.getElementById('pGender').value;
+      const total = document.getElementById('rTotal').innerText;
+      const date = document.getElementById('rDate').innerText;
+
+      const patientData = {
+        receiptNo: currentReceiptNum,
+        date: date,
+        name: name,
+        ageGender: `${age} Yrs / ${gender}`,
+        address: address,
+        total: total
+      };
+
+      let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      patients.unshift(patientData); // Add new patient at top
+      localStorage.setItem('danishLabPatients', JSON.stringify(patients));
+
+      // 2. Trigger Print
+      window.print();
+    }
+
+    function showPatientList() {
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('patientListSection').style.display = 'block';
+      renderPatientTable();
+    }
+
+    function showNewEntry() {
+      document.getElementById('patientListSection').style.display = 'none';
+      document.getElementById('formSection').style.display = 'block';
+      currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('rNum').innerText = currentReceiptNum;
+    }
+
+    function renderPatientTable() {
+      const patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      const tbody = document.getElementById('patientListTable');
+      tbody.innerHTML = '';
+
+      if (patients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No patient records saved yet.</td></tr>`;
+        return;
+      }
+
+      patients.forEach((p, index) => {
+        tbody.innerHTML += `<tr>
+          <td><strong>${p.receiptNo}</strong></td>
+          <td>${p.date}</td>
+          <td>${p.name.toUpperCase()}</td>
+          <td>${p.ageGender}</td>
+          <td>Rs. ${p.total}</td>
+          <td><button onclick="deletePatient(${index})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Delete</button></td>
+        </tr>`;
+      });
+    }
+
+    function filterPatientList() {
+      const filter = document.getElementById('searchInput').value.toUpperCase();
+      const rows = document.getElementById('patientListTable').getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].innerText || rows[i].textContent;
+        if (text.toUpperCase().indexOf(filter) > -1) {
+          rows[i].style.display = "";
+        } else {
+          rows[i].style.display = "none";
+        }
+      }
+    }
+
+    function deletePatient(index) {
+      let patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      patients.splice(index, 1);
+      localStorage.setItem('danishLabPatients', JSON.stringify(patients));
+      renderPatientTable();
+    }
+
     function loadFromUrl() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('name')) {
-        // Hide form fields so user only sees clean verified receipt
-        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('navBtns').style.display = 'none';
         document.getElementById('topBanner').innerText = 'Danish Lab — Official Digital Invoice';
+
+        // Hide inputs, only show printable area
+        document.querySelectorAll('#formSection > .form-group, #formSection > .form-row, #formSection > h2').forEach(el => el.style.display = 'none');
 
         const name = urlParams.get('name');
         const address = urlParams.get('address');
@@ -366,7 +511,6 @@
           }
         });
 
-        // Current page URL inside the scanned QR code as well
         document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
       } else {
         updateReceipt();
@@ -378,10 +522,10 @@
     });
 
     loadFromUrl();
-    // Password Verification
-    const CORRECT_PASSWORD = "1234"; // یہاں اپنا مرضی کا پاسورڈ رکھیں
-    const userPass = prompt("Danish Lab System - پاسورڈ درج کریں:");
 
+    // Password Check
+    const CORRECT_PASSWORD = "1234";
+    const userPass = prompt("Danish Lab System - پاسورڈ درج کریں:");
     if (userPass !== CORRECT_PASSWORD) {
       alert("غلط پاسورڈ! آپ کو رسائی کی اجازت نہیں ہے۔");
       document.body.innerHTML = "<h2 style='text-align:center; color:red; margin-top:50px;'>Access Denied — Incorrect Password</h2>";
