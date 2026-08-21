@@ -1,142 +1,337 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danish Lab | Cash Counter</title>
-    <style>
-        :root {
-            --primary: #0f4c81;
-            --success: #2ec4b6;
-            --dark: #1d2d44;
-            --light: #f4f6f9;
-            --white: #ffffff;
-            --border: #e2e8f0;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background-color: var(--light); color: var(--dark); padding: 20px; }
-        .navbar { background-color: var(--primary); color: var(--white); padding: 15px; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; border-radius: 8px; text-align: center; }
-        .main-container { max-width: 700px; margin: 0 auto; background: var(--white); border-radius: 12px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .section-title { font-size: 1.3rem; font-weight: bold; color: var(--primary); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--light); text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; color: #4a5568; }
-        .form-control { width: 100%; padding: 12px; font-size: 0.95rem; border: 1px solid #cbd5e0; border-radius: 8px; background-color: #f8fafc; }
-        .row-flex { display: flex; gap: 15px; }
-        .row-flex .form-group { flex: 1; }
-        
-        /* Interactive Slip Mechanics using pure CSS */
-        .invoice-box { border: 2px dashed #a0aec0; padding: 25px; margin-top: 30px; border-radius: 8px; background: white; display: none; }
-        .invoice-header { text-align: center; margin-bottom: 20px; }
-        .qr-section { text-align: center; margin-top: 20px; padding: 10px; background: #f8fafc; border-radius: 6px; }
-        
-        /* Direct Action CSS States */
-        #show-slip:input:placeholder-shown ~ .invoice-box { display: none; }
-        #show-slip:not(:placeholder-shown) ~ .invoice-box { display: block; }
-        
-        .btn { width: 100%; padding: 14px; font-size: 1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; text-align: center; display: block; text-decoration: none; }
-        .btn-primary { background-color: var(--primary); color: var(--white); }
-        .btn-success { background-color: var(--success); color: var(--white); margin-top: 15px; }
-        
-        @media print { .no-print { display: none !important; } body { background: white; padding: 0; .main-container { border: none; box-shadow: none; padding: 0; } .invoice-box { border: none; display: block !important; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danish Lab — Cash Receipt Desk</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+    }
+    .header-banner {
+      background-color: #0b4f8a;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #0b4f8a;
+      text-align: center;
+      margin-top: 0;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 15px;
+      background-color: #fafafa;
+    }
+    .test-list {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      background: #fafafa;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .test-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .test-item input {
+      width: auto;
+      cursor: pointer;
+    }
+    /* Receipt Styling */
+    .receipt-card {
+      margin-top: 25px;
+      border: 2px dashed #8faec4;
+      border-radius: 8px;
+      padding: 20px;
+      background: #ffffff;
+    }
+    .receipt-header {
+      text-align: center;
+      color: #0b4f8a;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .info-grid {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    .info-grid div p {
+      margin: 4px 0;
+    }
+    .status-paid {
+      color: #00a884;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    th {
+      background-color: #f0f4f8;
+      text-align: left;
+      padding: 8px;
+      font-size: 14px;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    .total-amount {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #111;
+    }
+    .qr-container {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .qr-container img {
+      width: 90px;
+      height: 90px;
+    }
+    .qr-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .btn-print {
+      width: 100%;
+      background-color: #20c997;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .btn-print:hover {
+      background-color: #12b886;
+    }
+
+    /* Print settings */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-receipt, #printable-receipt * {
+        visibility: visible;
+      }
+      #printable-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+      }
+      .btn-print {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="navbar no-print">Danish Lab — Cash Receipt Desk</div>
+  <div class="header-banner">
+    Danish Lab — Cash Receipt Desk
+  </div>
 
-    <div class="main-container">
-        
-        <!-- Live Mirror Activation Box (No Script Needed) -->
-        <div class="no-print">
-            <div class="section-title">New Patient Receipt Desk</div>
-            
-            <div class="form-group">
-                <label class="form-label">Patient Full Name</label>
-                <!-- This specific field mirrors inside the slip below instantly -->
-                <input type="text" id="show-slip" class="form-control" placeholder="Type name here to instantly generate slip below..." oninput="document.getElementById('lbl-name').innerText = this.value; if(this.value != ''){document.getElementById('slip-view').style.display='block';}else{document.getElementById('slip-view').style.display='none';}">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Patient Complete Address</label>
-                <input type="text" class="form-control" placeholder="e.g., Enter Full Adress Here" oninput="document.getElementById('lbl-address').innerText = this.value;">
-            </div>
-            
-            <div class="row-flex">
-                <div class="form-group">
-                    <label class="form-label">Age (Years)</label>
-                    <input type="number" class="form-control" placeholder="age" oninput="document.getElementById('lbl-age').innerText = this.value + ' Yrs';">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Gender</label>
-                    <select class="form-control" onchange="document.getElementById('lbl-gen').innerText = this.value;">
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Select Investigation Required</label>
-                <select class="form-control" onchange="var val=this.value.split('|'); document.getElementById('lbl-test').innerText=val[0]; document.getElementById('lbl-cost').innerText=val[1]; document.getElementById('lbl-total').innerText=val[1];">
-                    <option value="Blood Sugar (Fasting)|500">Blood Sugar (Fasting) — Rs. 500</option>
-                    <option value="Complete Blood Count (CBC)|1,200">Complete Blood Count (CBC) — Rs. 1,200</option>
-                    <option value="Liver Function Test (LFT)|2,500">Liver Function Test (LFT) — Rs. 2,500</option>
-                    <option value="Lipid Profile|1,500">Lipid Profile — Rs. 1,500</option>
-                    <option value="Urine Routine Examination|800">Urine Routine Examination — Rs. 800</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- OFFICIAL PRINT SLIP LAYOUT (Live Generation Area) -->
-        <div id="slip-view" class="invoice-box">
-            <div class="invoice-header">
-                <h2 style="color: var(--primary); letter-spacing: 1px;">Danish Lab</h2>
-                <p style="font-size: 0.85rem; color: #718096; margin-top: 3px;"Main Chowk Muneer Shaheed Road, Ahmad Pur East | Emergency: +923067488053</p>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
-                <div>
-                    <strong>Patient Name:</strong> <span id="lbl-name" style="text-transform: uppercase; font-weight: bold; color: #000;">-</span><br>
-                    <strong>Age / Gender:</strong> <span id="lbl-age">23 Yrs</span> / <span id="lbl-gen">Male</span><br>
-                    <strong>Address:</strong> <span id="lbl-address">-</span>
-                </div>
-                <div style="text-align: right;">
-                    <strong>Date:</strong> <span>Aug 21, 2026</span><br>
-                    <strong>Status:</strong> <span style="color: var(--success); font-weight: bold;">● Paid Verified</span>
-                </div>
-            </div>
-            
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <thead>
-                    <tr style="background: #f7fafc;">
-                        <th style="padding: 10px; border-bottom: 2px solid var(--border); text-align: left;">Investigation Description</th>
-                        <th style="padding: 10px; border-bottom: 2px solid var(--border); text-align: right;">Price (PKR)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="lbl-test" style="padding: 12px 10px; border-bottom: 1px solid var(--border);">Blood Sugar (Fasting)</td>
-                        <td id="lbl-cost" style="padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: right; font-weight: bold;">500</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div style="text-align: right; font-size: 1.3rem; font-weight: bold; margin-top: 15px; border-top: 2px solid #333; padding-top: 12px;">
-                Total Cash Paid: Rs. <span id="lbl-total">500</span>
-            </div>
-            
-            <!-- Secure Encoded Custom QR Field -->
-            <div class="qr-section">
-                <img src="https://qrserver.com" alt="QR Link Verification" style="width: 115px; height: 115px; background: white; border: 1px solid #ddd; padding: 4px;">
-                <p style="font-size: 0.75rem; color: #718096; margin-top: 6px; font-weight: 600;">Scan code to verify official digital invoice</p>
-            </div>
-            
-            <div class="no-print">
-                <button type="button" class="btn btn-success" onclick="window.print()">🖨️ Print Official Patient Slip</button>
-            </div>
-        </div>
-
+  <div class="container">
+    <h2>New Patient Receipt Desk</h2>
+    
+    <div class="form-group">
+      <label>Patient Full Name</label>
+      <input type="text" id="pName" value="Muhammad Danish" oninput="updateReceipt()">
     </div>
+
+    <div class="form-group">
+      <label>Patient Complete Address</label>
+      <input type="text" id="pAddress" value="Mohallah Sarwar Shah" oninput="updateReceipt()">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age (Years)</label>
+        <input type="number" id="pAge" value="23" oninput="updateReceipt()">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="pGender" onchange="updateReceipt()">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Referred By (Doctor)</label>
+        <input type="text" id="pDoctor" value="Self / Dr. Ahmed" oninput="updateReceipt()">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Select Investigation(s) Required</label>
+      <div class="test-list">
+        <div class="test-item">
+          <input type="checkbox" class="test-checkbox" data-name="Complete Blood Count (CBC)" data-price="1200" checked onchange="updateReceipt()">
+          <label>Complete Blood Count (CBC) — Rs. 1,200</label>
+        </div>
+        <div class="test-item">
+          <input type="checkbox" class="test-checkbox" data-name="Liver Function Test (LFT)" data-price="2500" onchange="updateReceipt()">
+          <label>Liver Function Test (LFT) — Rs. 2,500</label>
+        </div>
+        <div class="test-item">
+          <input type="checkbox" class="test-checkbox" data-name="Urine Routine Examination" data-price="600" onchange="updateReceipt()">
+          <label>Urine Routine Examination — Rs. 600</label>
+        </div>
+        <div class="test-item">
+          <input type="checkbox" class="test-checkbox" data-name="Blood Glucose Fasting" data-price="500" onchange="updateReceipt()">
+          <label>Blood Glucose Fasting — Rs. 500</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Printable Receipt Area -->
+    <div class="receipt-card" id="printable-receipt">
+      <div class="receipt-header">Danish Lab</div>
+      
+      <div class="info-grid">
+        <div>
+          <p><strong>Patient Name:</strong> <span id="rName">MUHAMMAD DANISH</span></p>
+          <p><strong>Age / Gender:</strong> <span id="rAgeGender">23 Yrs / Male</span></p>
+          <p><strong>Address:</strong> <span id="rAddress">Mohallah Sarwar Shah</span></p>
+          <p><strong>Ref By:</strong> <span id="rDoctor">Self / Dr. Ahmed</span></p>
+        </div>
+        <div>
+          <p><strong>Date:</strong> <span id="rDate"></span></p>
+          <p><strong>Receipt No:</strong> <span id="rNum">DL-8821</span></p>
+          <p><strong>Status:</strong> <span class="status-paid">• Paid Verified</span></p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Investigation Description</th>
+            <th style="text-align: right;">Price (PKR)</th>
+          </tr>
+        </thead>
+        <tbody id="rTestTable">
+          <!-- Dynamically filled -->
+        </tbody>
+      </table>
+
+      <div class="total-amount">
+        Total Cash Paid: Rs. <span id="rTotal">1,200</span>
+      </div>
+
+      <div class="qr-container">
+        <img id="qrCode" src="" alt="QR Code">
+        <div class="qr-text">Scan code to verify official digital invoice</div>
+      </div>
+
+      <button class="btn-print" onclick="window.print()">🖨️ Print Official Patient Slip</button>
+    </div>
+
+  </div>
+
+  <script>
+    function updateReceipt() {
+      // Get values
+      const name = document.getElementById('pName').value || '---';
+      const address = document.getElementById('pAddress').value || '---';
+      const age = document.getElementById('pAge').value || '0';
+      const gender = document.getElementById('pGender').value;
+      const doctor = document.getElementById('pDoctor').value || 'Self';
+
+      // Set text
+      document.getElementById('rName').innerText = name.toUpperCase();
+      document.getElementById('rAddress').innerText = address;
+      document.getElementById('rAgeGender').innerText = `${age} Yrs / ${gender}`;
+      document.getElementById('rDoctor').innerText = doctor;
+
+      // Handle tests
+      const checkboxes = document.querySelectorAll('.test-checkbox:checked');
+      const tbody = document.getElementById('rTestTable');
+      tbody.innerHTML = '';
+      
+      let total = 0;
+      checkboxes.forEach(cb => {
+        const testName = cb.getAttribute('data-name');
+        const testPrice = parseInt(cb.getAttribute('data-price'));
+        total += testPrice;
+
+        const row = `<tr>
+          <td>${testName}</td>
+          <td style="text-align: right;">${testPrice.toLocaleString()}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+
+      document.getElementById('rTotal').innerText = total.toLocaleString();
+
+      // Update QR Code with dynamic API
+      const qrData = encodeURIComponent(`Danish Lab | Patient: ${name} | Total Paid: Rs. ${total}`);
+      document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+    }
+
+    // Set today's date automatically
+    document.getElementById('rDate').innerText = new Date().toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+
+    // Initialize receipt on load
+    updateReceipt();
+  </script>
+
 </body>
 </html>
