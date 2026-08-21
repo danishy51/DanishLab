@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Danish Lab — Cash Receipt Desk</title>
+  <title>Danish Lab — Cash Receipt & Report Desk</title>
   <style>
     * {
       box-sizing: border-box;
@@ -23,6 +23,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .navbar .title {
       font-size: 20px;
@@ -32,12 +34,12 @@
       background-color: #20c997;
       color: white;
       border: none;
-      padding: 8px 15px;
-      font-size: 14px;
+      padding: 8px 12px;
+      font-size: 13px;
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
-      margin-left: 8px;
+      margin-left: 4px;
     }
     .nav-buttons button:hover {
       background-color: #12b886;
@@ -71,7 +73,7 @@
       margin-bottom: 5px;
       color: #333;
     }
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -175,7 +177,7 @@
     .btn-print:hover {
       background-color: #12b886;
     }
-    #patientListSection, #settingsSection {
+    #patientListSection, #settingsSection, #testReportSection, #reportListSection {
       display: none;
     }
     .list-header-actions {
@@ -227,7 +229,6 @@
       cursor: pointer;
       font-size: 14px;
     }
-    /* Modal Styling */
     .modal {
       display: none; 
       position: fixed; 
@@ -259,15 +260,24 @@
     .close-modal:hover {
       color: black;
     }
+    .report-input-group {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border: 1px solid #e9ecef;
+    }
   </style>
 </head>
 <body>
 
   <div class="navbar">
-    <div class="title" id="topBanner">Danish Lab — Cash Receipt Desk</div>
+    <div class="title" id="topBanner">Danish Lab — Cash Receipt & Report Desk</div>
     <div class="nav-buttons" id="navBtns">
       <button onclick="showNewEntry()">+ New Patient Entry</button>
       <button onclick="showPatientList()">📋 Patient List</button>
+      <button onclick="showTestReportSection()" style="background-color: #9b59b6;">🧪 Test Report</button>
+      <button onclick="showReportListSection()" style="background-color: #34495e;">📄 Report List</button>
       <button onclick="showSettings()" style="background-color: #f39c12;">⚙️ Settings</button>
     </div>
   </div>
@@ -382,6 +392,51 @@
       </table>
     </div>
 
+    <!-- Test Report Section -->
+    <div id="testReportSection">
+      <h2>🧪 Add Patient Test Report</h2>
+      
+      <div class="add-test-card">
+        <label>Search Patient by Receipt No or Name</label>
+        <div style="display: flex; gap: 10px; margin-top: 5px;">
+          <input type="text" id="reportSearchInput" placeholder="Enter Receipt No (e.g. DL-8821) or Name...">
+          <button onclick="searchPatientForReport()" style="background:#0b4f8a; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Search</button>
+        </div>
+      </div>
+
+      <div id="reportFormArea" style="display: none; margin-top: 20px;">
+        <div style="background: #eef6fc; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+          <h3 style="margin: 0 0 10px 0; color: #0b4f8a;" id="repPatientName">Patient Name</h3>
+          <p style="margin: 3px 0;" id="repPatientDetails">Receipt: --- | Age/Gender: ---</p>
+        </div>
+
+        <h4>Enter Investigation Results / Observations</h4>
+        <div id="dynamicReportInputs"></div>
+
+        <button onclick="saveTestReport()" class="btn-print" style="background-color: #9b59b6;">💾 Save Test Report</button>
+      </div>
+    </div>
+
+    <!-- Report List Section -->
+    <div id="reportListSection">
+      <h2>📄 Saved Test Reports</h2>
+      <div class="search-box">
+        <input type="text" id="reportListSearchInput" placeholder="🔍 Search report by Name or Receipt No..." onkeyup="filterReportList()">
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Receipt No</th>
+            <th>Date</th>
+            <th>Patient Name</th>
+            <th>Tests Count</th>
+            <th style="text-align: center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="reportListTable"></tbody>
+      </table>
+    </div>
+
     <!-- Settings Section -->
     <div id="settingsSection">
       <h2>Test Price & Menu Settings</h2>
@@ -416,12 +471,12 @@
 
   </div>
 
-  <!-- Receipt View Modal -->
+  <!-- View Modal -->
   <div id="viewModal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal()">&times;</span>
       <div id="modalReceiptArea"></div>
-      <button class="btn-print" onclick="printModalReceipt()">🖨️ Print This Slip</button>
+      <button class="btn-print" onclick="printModalReceipt()">🖨️ Print Report Slip</button>
     </div>
   </div>
 
@@ -435,6 +490,8 @@
       { name: "Urine Routine Examination", price: 600 },
       { name: "Blood Glucose Fasting", price: 500 }
     ];
+
+    let activeSelectedPatientForReport = null;
 
     function getSavedTests() {
       const saved = localStorage.getItem('danishLabTests');
@@ -549,7 +606,7 @@
       document.getElementById('rTotal').innerText = total.toLocaleString();
 
       const testsParam = encodeURIComponent(selectedTests.join('|'));
-      const fullUrl = `https://danishy51.github.io/?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}&age=${age}&gender=${gender}&doctor=${encodeURIComponent(doctor)}&tests=${testsParam}&total=${total}`;
+      const fullUrl = `https://danishy51.github.io/?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}&age=${age}&gender=${gender}&doctor=${encodeURIComponent(doctor)}&tests=${testsParam}&total=${total}&receiptNo=${currentReceiptNum}`;
       
       document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(fullUrl)}`;
     }
@@ -591,6 +648,182 @@
       openPrintWindow(receiptHtml);
     }
 
+    function searchPatientForReport() {
+      const query = document.getElementById('reportSearchInput').value.trim().toUpperCase();
+      if (!query) {
+        alert("براہ کرم سرچ کے لیے کوئی نام یا رسید نمبر درج کریں۔");
+        return;
+      }
+
+      const patients = JSON.parse(localStorage.getItem('danishLabPatients') || '[]');
+      const found = patients.find(p => p.receiptNo.toUpperCase() === query || p.name.toUpperCase().includes(query));
+
+      if (!found) {
+        alert("اس نام یا رسید نمبر کا کوئی پیشنٹ نہیں ملا۔");
+        document.getElementById('reportFormArea').style.display = 'none';
+        return;
+      }
+
+      activeSelectedPatientForReport = found;
+      document.getElementById('repPatientName').innerText = found.name.toUpperCase();
+      document.getElementById('repPatientDetails').innerText = `Receipt #: ${found.receiptNo} | Age/Gender: ${found.ageGender} | Doctor: ${found.doctor || 'Self'}`;
+
+      const inputsArea = document.getElementById('dynamicReportInputs');
+      inputsArea.innerHTML = '';
+
+      if (found.tests && found.tests.length > 0) {
+        found.tests.forEach((t, i) => {
+          inputsArea.innerHTML += `
+            <div class="report-input-group">
+              <label style="color:#0b4f8a; font-size:16px;">${t.name}</label>
+              <textarea id="repResult_${i}" rows="2" placeholder="ٹیسٹ کی رپورٹ / رزلٹ یہاں لکھیں... (e.g. Normal, 12.5 g/dL)"></textarea>
+            </div>
+          `;
+        });
+      } else {
+        inputsArea.innerHTML = `<p>اس پیشنٹ کے کوئی ٹیسٹ ریکارڈر نہیں ملے۔</p>`;
+      }
+
+      document.getElementById('reportFormArea').style.display = 'block';
+    }
+
+    function saveTestReport() {
+      if (!activeSelectedPatientForReport) return;
+
+      let results = [];
+      activeSelectedPatientForReport.tests.forEach((t, i) => {
+        const val = document.getElementById(`repResult_${i}`).value.trim();
+        results.push({
+          testName: t.name,
+          result: val || "Normal / No Abnormalities Found"
+        });
+      });
+
+      const reportData = {
+        ...activeSelectedPatientForReport,
+        reportDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        results: results
+      };
+
+      let reports = JSON.parse(localStorage.getItem('danishLabReports') || '[]');
+      reports.unshift(reportData);
+      localStorage.setItem('danishLabReports', JSON.stringify(reports));
+
+      alert("ٹیسٹ رپورٹ کامیابی سے سیو ہو گئی ہے!");
+      showReportListSection();
+    }
+
+    function renderReportTable() {
+      const reports = JSON.parse(localStorage.getItem('danishLabReports') || '[]');
+      const tbody = document.getElementById('reportListTable');
+      tbody.innerHTML = '';
+
+      if (reports.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">کوئی ٹیسٹ رپورٹ سیو نہیں ہے۔</td></tr>`;
+        return;
+      }
+
+      reports.forEach((r, index) => {
+        tbody.innerHTML += `<tr>
+          <td><strong>${r.receiptNo}</strong></td>
+          <td>${r.reportDate || r.date}</td>
+          <td>${r.name.toUpperCase()}</td>
+          <td>${r.results ? r.results.length : 0} Tests</td>
+          <td style="text-align: center;">
+            <button class="action-btn-view" onclick="viewFullReport(${index})" title="View Full Report">👁️ View Report</button>
+            <button class="action-btn-delete" onclick="deleteReport(${index})" title="Delete Report">🗑️ Delete</button>
+          </td>
+        </tr>`;
+      });
+    }
+
+    function viewFullReport(index) {
+      const reports = JSON.parse(localStorage.getItem('danishLabReports') || '[]');
+      const r = reports[index];
+
+      let testResultRows = '';
+      let testUrlParam = [];
+      if (r.results && r.results.length > 0) {
+        r.results.forEach(res => {
+          testResultRows += `<tr>
+            <td><strong>${res.testName}</strong></td>
+            <td style="text-align: right; color: #0b4f8a; font-weight: bold;">${res.result}</td>
+          </tr>`;
+          testUrlParam.push(`${res.testName}:${res.result}`);
+        });
+      }
+
+      const reportUrl = `https://danishy51.github.io/?type=report&name=${encodeURIComponent(r.name)}&address=${encodeURIComponent(r.address)}&ageGender=${encodeURIComponent(r.ageGender)}&doctor=${encodeURIComponent(r.doctor || 'Self')}&receiptNo=${r.receiptNo}&results=${encodeURIComponent(testUrlParam.join('|'))}`;
+      const modalQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(reportUrl)}`;
+
+      const modalHtml = `
+        <div class="receipt-card">
+          <div class="receipt-header">
+            <div>Danish Lab</div>
+            <div style="font-size: 13px; font-weight: normal; color: #555; margin-top: 4px;">
+              Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053
+            </div>
+            <div style="font-size: 16px; margin-top: 8px; text-decoration: underline;">OFFICIAL TEST REPORT</div>
+          </div>
+          
+          <div class="info-grid">
+            <div>
+              <p><strong>Patient Name:</strong> <span>${r.name.toUpperCase()}</span></p>
+              <p><strong>Age / Gender:</strong> <span>${r.ageGender}</span></p>
+              <p><strong>Address:</strong> <span>${r.address}</span></p>
+              <p><strong>Ref By:</strong> <span>${r.doctor || 'Self'}</span></p>
+            </div>
+            <div>
+              <p><strong>Report Date:</strong> <span>${r.reportDate || r.date}</span></p>
+              <p><strong>Receipt No:</strong> <span>${r.receiptNo}</span></p>
+              <p><strong>Status:</strong> <span class="status-paid">• Verified Report</span></p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Investigation Performed</th>
+                <th style="text-align: right;">Observed Result / Remarks</th>
+              </tr>
+            </thead>
+            <tbody>${testResultRows}</tbody>
+          </table>
+
+          <div class="qr-container">
+            <img src="${modalQrSrc}" alt="QR Code">
+            <div class="qr-text">Scan code to verify official digital lab report</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalReceiptArea').innerHTML = modalHtml;
+      document.getElementById('viewModal').style.display = "block";
+    }
+
+    function deleteReport(index) {
+      if (confirm("کیا آپ واقعی اس رپورٹ کو ڈیلیٹ کرنا چاہتے ہیں؟")) {
+        let reports = JSON.parse(localStorage.getItem('danishLabReports') || '[]');
+        reports.splice(index, 1);
+        localStorage.setItem('danishLabReports', JSON.stringify(reports));
+        renderReportTable();
+      }
+    }
+
+    function filterReportList() {
+      const filter = document.getElementById('reportListSearchInput').value.toUpperCase();
+      const rows = document.getElementById('reportListTable').getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].innerText || rows[i].textContent;
+        if (text.toUpperCase().indexOf(filter) > -1) {
+          rows[i].style.display = "";
+        } else {
+          rows[i].style.display = "none";
+        }
+      }
+    }
+
     function openPrintWindow(htmlContent) {
       const printWindow = window.open('', '', 'height=600,width=800');
       printWindow.document.write('<html><head><title>Print Slip - Danish Lab</title>');
@@ -625,25 +858,41 @@
     }
 
     function showPatientList() {
-      document.getElementById('formSection').style.display = 'none';
-      document.getElementById('settingsSection').style.display = 'none';
+      hideAllSections();
       document.getElementById('patientListSection').style.display = 'block';
       renderPatientTable();
     }
 
     function showNewEntry() {
-      document.getElementById('patientListSection').style.display = 'none';
-      document.getElementById('settingsSection').style.display = 'none';
+      hideAllSections();
       document.getElementById('formSection').style.display = 'block';
       currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
       document.getElementById('rNum').innerText = currentReceiptNum;
     }
 
     function showSettings() {
-      document.getElementById('formSection').style.display = 'none';
-      document.getElementById('patientListSection').style.display = 'none';
+      hideAllSections();
       document.getElementById('settingsSection').style.display = 'block';
       renderSettingsTests();
+    }
+
+    function showTestReportSection() {
+      hideAllSections();
+      document.getElementById('testReportSection').style.display = 'block';
+    }
+
+    function showReportListSection() {
+      hideAllSections();
+      document.getElementById('reportListSection').style.display = 'block';
+      renderReportTable();
+    }
+
+    function hideAllSections() {
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('patientListSection').style.display = 'none';
+      document.getElementById('settingsSection').style.display = 'none';
+      document.getElementById('testReportSection').style.display = 'none';
+      document.getElementById('reportListSection').style.display = 'none';
     }
 
     function renderPatientTable() {
@@ -683,8 +932,6 @@
             <td style="text-align: right;">${t.price.toLocaleString()}</td>
           </tr>`;
         });
-      } else {
-        testRows = `<tr><td colspan="2" style="text-align:center;">No test breakdown stored</td></tr>`;
       }
 
       const modalHtml = `
@@ -790,9 +1037,7 @@
                 <th style="text-align: right;">Total Paid</th>
               </tr>
             </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
+            <tbody>${rowsHtml}</tbody>
           </table>
         </body>
         </html>
@@ -831,7 +1076,43 @@
 
     function loadFromUrl() {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('name')) {
+      if (urlParams.has('type') && urlParams.get('type') === 'report') {
+        hideAllSections();
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('navBtns').style.display = 'none';
+        document.getElementById('topBanner').innerText = 'Danish Lab — Digital Test Report';
+
+        document.querySelectorAll('#formSection > .form-group, #formSection > .form-row, #formSection > h2').forEach(el => el.style.display = 'none');
+
+        const name = urlParams.get('name');
+        const address = urlParams.get('address');
+        const ageGender = urlParams.get('ageGender');
+        const doctor = urlParams.get('doctor');
+        const receiptNo = urlParams.get('receiptNo');
+        const results = urlParams.get('results') ? urlParams.get('results').split('|') : [];
+
+        document.getElementById('rName').innerText = name.toUpperCase();
+        document.getElementById('rAddress').innerText = address;
+        document.getElementById('rAgeGender').innerText = ageGender;
+        document.getElementById('rDoctor').innerText = doctor;
+        document.getElementById('rNum').innerText = receiptNo;
+
+        const tbody = document.getElementById('rTestTable');
+        tbody.innerHTML = '';
+        results.forEach(t => {
+          const [tName, tRes] = t.split(':');
+          if (tName) {
+            tbody.innerHTML += `<tr>
+              <td><strong>${tName}</strong></td>
+              <td style="text-align: right; color:#0b4f8a; font-weight:bold;">${tRes}</td>
+            </tr>`;
+          }
+        });
+
+        document.querySelector('.total-amount').style.display = 'none';
+        document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+      } else if (urlParams.has('name')) {
+        hideAllSections();
         document.getElementById('formSection').style.display = 'block';
         document.getElementById('navBtns').style.display = 'none';
         document.getElementById('topBanner').innerText = 'Danish Lab — Official Digital Invoice';
@@ -844,12 +1125,14 @@
         const gender = urlParams.get('gender');
         const doctor = urlParams.get('doctor');
         const total = urlParams.get('total');
+        const receiptNo = urlParams.get('receiptNo') || 'DL-Online';
         const tests = urlParams.get('tests') ? urlParams.get('tests').split('|') : [];
 
         document.getElementById('rName').innerText = name.toUpperCase();
         document.getElementById('rAddress').innerText = address;
         document.getElementById('rAgeGender').innerText = `${age} Yrs / ${gender}`;
         document.getElementById('rDoctor').innerText = doctor;
+        document.getElementById('rNum').innerText = receiptNo;
         document.getElementById('rTotal').innerText = parseInt(total).toLocaleString();
 
         const tbody = document.getElementById('rTestTable');
