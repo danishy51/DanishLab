@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AL Shifa Lab | Dynamic HMIS & QR Bill</title>
-    <!-- Dynamic QR Engine Source -->
+    <title>AL Shifa Lab | 100% Accurate HMIS</title>
+    <!-- Stable QR Code Library CDN -->
     <script src="https://cloudflare.com"></script>
     <style>
         :root {
@@ -55,8 +55,8 @@
         .invoice-table { width: 100%; margin: 20px 0; }
         .invoice-table th { background: #f7fafc; }
         .invoice-total { text-align: right; font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); }
-        .qr-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px solid var(--border); }
-        .qr-label { font-size: 0.8rem; font-weight: 600; color: #718096; margin-top: 8px; text-transform: uppercase; }
+        .qr-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px solid var(--border); }
+        .qr-text { font-size: 0.8rem; font-weight: 600; color: #718096; margin-top: 8px; text-transform: uppercase; }
         @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .container { margin: 0; width: 100%; padding: 0; } .invoice-card { border: none; padding: 0; margin: 0; } }
         .d-none { display: none !important; }
     </style>
@@ -66,58 +66,59 @@
     <div class="navbar no-print">AL Shifa Lab — HMIS Dashboard</div>
 
     <div class="container">
-        <!-- Live Counters -->
+        <!-- Dashboard Statistics widgets -->
         <div class="dashboard-row no-print">
             <div class="counter-card"><div class="counter-info"><h6>Total Patients Today</h6><h2 id="total-patients-count">0</h2></div></div>
             <div class="counter-card earnings"><div class="counter-info"><h6>Today's Gross Earnings</h6><h2>Rs. <span id="total-earnings-count">0</span></h2></div></div>
         </div>
 
         <div class="main-layout">
-            <!-- Left Execution Block: Registration -->
+            <!-- Left Panel: Pure Div Based Form (Anti-Reload Structure) -->
             <div class="section-card no-print">
                 <div class="section-title">New Patient Entry</div>
-                <form id="patient-form" onsubmit="savePatientRecord(event)">
+                
+                <div class="form-group">
+                    <label class="form-label">Patient Full Name</label>
+                    <input type="text" id="p-name" class="form-control" placeholder="e.g., Muhammad Danish">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Patient Address</label>
+                    <input type="text" id="p-address" class="form-control" placeholder="e.g., Mohallah Sarwar Shah">
+                </div>
+                <div class="row-flex">
                     <div class="form-group">
-                        <label class="form-label">Patient Full Name</label>
-                        <input type="text" id="p-name" class="form-control" required placeholder="e.g., Muhammad Danish">
+                        <label class="form-label">Age (Years)</label>
+                        <input type="number" id="p-age" class="form-control" placeholder="23">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Patient Address</label>
-                        <input type="text" id="p-address" class="form-control" required placeholder="e.g., Mohallah Sarwar Shah">
-                    </div>
-                    <div class="row-flex">
-                        <div class="form-group">
-                            <label class="form-label">Age (Years)</label>
-                            <input type="number" id="p-age" class="form-control" required placeholder="23">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Gender</label>
-                            <select id="p-gender" class="form-control">
-                                <option>Male</option>
-                                <option>Female</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Select Investigation / Test</label>
-                        <select id="p-test" class="form-control" onchange="updatePrice()">
-                            <option value="500" data-name="Blood Sugar (Fasting)">Blood Sugar (Fasting) — Rs. 500</option>
-                            <option value="1200" data-name="Complete Blood Count (CBC)">Complete Blood Count (CBC) — Rs. 1,200</option>
-                            <option value="2500" data-name="Liver Function Test (LFT)">Liver Function Test (LFT) — Rs. 2,500</option>
-                            <option value="1500" data-name="Lipid Profile">Lipid Profile — Rs. 1,500</option>
-                            <option value="800" data-name="Urine Routine Examination">Urine Routine Examination — Rs. 800</option>
+                        <label class="form-label">Gender</label>
+                        <select id="p-gender" class="form-control">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Test Fee / Payable Amount (PKR)</label>
-                        <input type="number" id="p-price" class="form-control" value="500" readonly style="font-weight: bold; color: var(--primary); background-color: #eef2f7;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Generate Bill & Save Record</button>
-                </form>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Select Investigation / Test</label>
+                    <select id="p-test" class="form-control" onchange="updatePrice()">
+                        <option value="500" data-name="Blood Sugar (Fasting)">Blood Sugar (Fasting) — Rs. 500</option>
+                        <option value="1200" data-name="Complete Blood Count (CBC)">Complete Blood Count (CBC) — Rs. 1,200</option>
+                        <option value="2500" data-name="Liver Function Test (LFT)">Liver Function Test (LFT) — Rs. 2,500</option>
+                        <option value="1500" data-name="Lipid Profile">Lipid Profile — Rs. 1,500</option>
+                        <option value="800" data-name="Urine Routine Examination">Urine Routine Examination — Rs. 800</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Test Fee / Payable Amount (PKR)</label>
+                    <input type="number" id="p-price" class="form-control" value="500" readonly style="font-weight: bold; color: var(--primary); background-color: #eef2f7;">
+                </div>
+                
+                <!-- Explicit Standard Button triggers function directly without form action -->
+                <button type="button" class="btn btn-primary" onclick="processAndSaveData()">Generate Bill & Save Record</button>
             </div>
 
-            <!-- Right Panel: Logs & Slips View -->
+            <!-- Right Panel: Data Logs & Digital Invoice -->
             <div class="section-card">
                 <div class="section-title no-print">
                     <span>Active Patient Logs</span>
@@ -132,7 +133,9 @@
                     </table>
                 </div>
                 
-                <!-- Dynamic Electronic Invoice Grid (With Print Button) -->
+                <!-- Electronic Printable Invoice Sheet -->
                 <div id="invoice-print" class="invoice-card d-none">
                     <div class="invoice-header">
                         <div class="invoice-title">AL SHIFA LAB</div>
+                        <div class="invoice-sub">Main Hospital Road, Medical City | Emergency: +92 300 1234567</div>
+                    </div>
