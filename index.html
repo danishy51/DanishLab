@@ -37,7 +37,7 @@
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
-      margin-left: 10px;
+      margin-left: 8px;
     }
     .nav-buttons button:hover {
       background-color: #12b886;
@@ -84,7 +84,7 @@
       padding: 10px;
       border-radius: 5px;
       background: #fafafa;
-      max-height: 150px;
+      max-height: 180px;
       overflow-y: auto;
     }
     .test-item {
@@ -175,11 +175,18 @@
     .btn-print:hover {
       background-color: #12b886;
     }
-    #patientListSection {
+    #patientListSection, #settingsSection {
       display: none;
     }
     .search-box {
       margin-bottom: 15px;
+    }
+    .add-test-card {
+      background: #eef6fc;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #bce0fd;
     }
   </style>
 </head>
@@ -190,11 +197,13 @@
     <div class="nav-buttons" id="navBtns">
       <button onclick="showNewEntry()">+ New Patient Entry</button>
       <button onclick="showPatientList()">📋 Patient List</button>
+      <button onclick="showSettings()" style="background-color: #f39c12;">⚙️ Settings</button>
     </div>
   </div>
 
   <div class="container">
     
+    <!-- Entry Form Section -->
     <div id="formSection">
       <h2>New Patient Receipt Desk</h2>
       
@@ -229,23 +238,8 @@
 
       <div class="form-group">
         <label>Select Investigation(s) Required</label>
-        <div class="test-list">
-          <div class="test-item">
-            <input type="checkbox" class="test-checkbox" data-name="Complete Blood Count (CBC)" data-price="1200" checked onchange="updateReceipt()">
-            <label>Complete Blood Count (CBC) — Rs. 1,200</label>
-          </div>
-          <div class="test-item">
-            <input type="checkbox" class="test-checkbox" data-name="Liver Function Test (LFT)" data-price="2500" onchange="updateReceipt()">
-            <label>Liver Function Test (LFT) — Rs. 2,500</label>
-          </div>
-          <div class="test-item">
-            <input type="checkbox" class="test-checkbox" data-name="Urine Routine Examination" data-price="600" checked onchange="updateReceipt()">
-            <label>Urine Routine Examination — Rs. 600</label>
-          </div>
-          <div class="test-item">
-            <input type="checkbox" class="test-checkbox" data-name="Blood Glucose Fasting" data-price="500" onchange="updateReceipt()">
-            <label>Blood Glucose Fasting — Rs. 500</label>
-          </div>
+        <div class="test-list" id="mainTestList">
+          <!-- Dynamically Loaded from JS/LocalStorage -->
         </div>
       </div>
 
@@ -295,13 +289,12 @@
       </div>
     </div>
 
+    <!-- Patient List Section -->
     <div id="patientListSection">
       <h2>Saved Patient Records</h2>
-      
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="🔍 Search patient by Name, Receipt No or Address..." onkeyup="filterPatientList()">
       </div>
-
       <table>
         <thead>
           <tr>
@@ -318,11 +311,131 @@
       </table>
     </div>
 
+    <!-- Settings Section -->
+    <div id="settingsSection">
+      <h2>Test Price & Menu Settings</h2>
+      
+      <div class="add-test-card">
+        <h4 style="margin-top:0; color:#0b4f8a;">+ Add New Lab Test</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Test Name</label>
+            <input type="text" id="newTestName" placeholder="e.g. Lipid Profile">
+          </div>
+          <div class="form-group">
+            <label>Price (PKR)</label>
+            <input type="number" id="newTestPrice" placeholder="e.g. 2000">
+          </div>
+        </div>
+        <button onclick="addNewTest()" style="background:#0b4f8a; color:white; border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">Add Test</button>
+      </div>
+
+      <h4 style="color:#0b4f8a;">Manage Existing Tests</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Test Name</th>
+            <th>Price (PKR)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="settingsTestTable">
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
   <script>
     let currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
     document.getElementById('rNum').innerText = currentReceiptNum;
+
+    // Default Tests Setup
+    const defaultTests = [
+      { name: "Complete Blood Count (CBC)", price: 1200 },
+      { name: "Liver Function Test (LFT)", price: 2500 },
+      { name: "Urine Routine Examination", price: 600 },
+      { name: "Blood Glucose Fasting", price: 500 }
+    ];
+
+    function getSavedTests() {
+      const saved = localStorage.getItem('danishLabTests');
+      return saved ? JSON.parse(saved) : defaultTests;
+    }
+
+    function saveTests(tests) {
+      localStorage.setItem('danishLabTests', JSON.stringify(tests));
+      renderMainTests();
+      renderSettingsTests();
+      updateReceipt();
+    }
+
+    function renderMainTests() {
+      const tests = getSavedTests();
+      const container = document.getElementById('mainTestList');
+      container.innerHTML = '';
+      
+      tests.forEach((t, index) => {
+        const isChecked = index === 0 || index === 2 ? 'checked' : '';
+        container.innerHTML += `
+          <div class="test-item">
+            <input type="checkbox" class="test-checkbox" data-name="${t.name}" data-price="${t.price}" ${isChecked} onchange="updateReceipt()">
+            <label>${t.name} — Rs. ${t.price.toLocaleString()}</label>
+          </div>
+        `;
+      });
+    }
+
+    function renderSettingsTests() {
+      const tests = getSavedTests();
+      const tbody = document.getElementById('settingsTestTable');
+      tbody.innerHTML = '';
+
+      tests.forEach((t, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" value="${t.name}" id="testName_${index}" onchange="updateTestFromSettings(${index})"></td>
+            <td><input type="number" value="${t.price}" id="testPrice_${index}" onchange="updateTestFromSettings(${index})"></td>
+            <td><button onclick="deleteTest(${index})" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function addNewTest() {
+      const name = document.getElementById('newTestName').value.trim();
+      const price = parseInt(document.getElementById('newTestPrice').value);
+
+      if (!name || isNaN(price)) {
+        alert("براہ کرم ٹیسٹ کا نام اور صحیح قیمت درج کریں۔");
+        return;
+      }
+
+      let tests = getSavedTests();
+      tests.push({ name: name, price: price });
+      saveTests(tests);
+
+      document.getElementById('newTestName').value = '';
+      document.getElementById('newTestPrice').value = '';
+    }
+
+    function updateTestFromSettings(index) {
+      let tests = getSavedTests();
+      const newName = document.getElementById(`testName_${index}`).value.trim();
+      const newPrice = parseInt(document.getElementById(`testPrice_${index}`).value);
+
+      if (newName && !isNaN(newPrice)) {
+        tests[index].name = newName;
+        tests[index].price = newPrice;
+        saveTests(tests);
+      }
+    }
+
+    function deleteTest(index) {
+      let tests = getSavedTests();
+      tests.splice(index, 1);
+      saveTests(tests);
+    }
 
     function updateReceipt() {
       const name = document.getElementById('pName').value || '---';
@@ -364,7 +477,6 @@
     }
 
     function printReceiptOnly() {
-      // 1. Data Save locally
       const name = document.getElementById('pName').value || '---';
       const address = document.getElementById('pAddress').value || '---';
       const age = document.getElementById('pAge').value || '0';
@@ -385,7 +497,6 @@
       patients.unshift(patientData);
       localStorage.setItem('danishLabPatients', JSON.stringify(patients));
 
-      // 2. Clean Print Window Logic
       const receiptHtml = document.getElementById('printable-receipt').outerHTML;
       const printWindow = window.open('', '', 'height=600,width=800');
 
@@ -422,15 +533,24 @@
 
     function showPatientList() {
       document.getElementById('formSection').style.display = 'none';
+      document.getElementById('settingsSection').style.display = 'none';
       document.getElementById('patientListSection').style.display = 'block';
       renderPatientTable();
     }
 
     function showNewEntry() {
       document.getElementById('patientListSection').style.display = 'none';
+      document.getElementById('settingsSection').style.display = 'none';
       document.getElementById('formSection').style.display = 'block';
       currentReceiptNum = "DL-" + Math.floor(1000 + Math.random() * 9000);
       document.getElementById('rNum').innerText = currentReceiptNum;
+    }
+
+    function showSettings() {
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('patientListSection').style.display = 'none';
+      document.getElementById('settingsSection').style.display = 'block';
+      renderSettingsTests();
     }
 
     function renderPatientTable() {
@@ -513,6 +633,7 @@
 
         document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
       } else {
+        renderMainTests();
         updateReceipt();
       }
     }
