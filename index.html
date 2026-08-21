@@ -75,11 +75,11 @@
             <div class="form-group">
                 <label class="form-label">Select Investigation / Test</label>
                 <select id="inp-test" class="form-control" onchange="syncPrice()">
-                    <option value="500">Blood Sugar (Fasting) — Rs. 500</option>
-                    <option value="1200">Complete Blood Count (CBC) — Rs. 1,200</option>
-                    <option value="2500">Liver Function Test (LFT) — Rs. 2,500</option>
-                    <option value="1500">Lipid Profile — Rs. 1,500</option>
-                    <option value="800">Urine Routine Examination — Rs. 800</option>
+                    <option value="500">Blood Sugar (Fasting)</option>
+                    <option value="1200">Complete Blood Count (CBC)</option>
+                    <option value="2500">Liver Function Test (LFT)</option>
+                    <option value="1500">Lipid Profile</option>
+                    <option value="800">Urine Routine Examination</option>
                 </select>
             </div>
             
@@ -177,7 +177,8 @@
             var age = document.getElementById('inp-age').value.trim();
             var gen = document.getElementById('inp-gender').value;
             var drop = document.getElementById('inp-test');
-            var tName = drop.options[drop.selectedIndex].text.split(' — ')[0];
+            var tName = drop.options[drop.selectedIndex].text;
             var fee = drop.value;
 
             if(name == "" || addr == "" || age == "") {
+                alert("Meharbani karke Name, Address aur Age lazmi enter karein!");
