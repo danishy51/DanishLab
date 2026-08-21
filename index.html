@@ -24,7 +24,7 @@
         .row-flex { display: flex; gap: 15px; }
         .row-flex .form-group { flex: 1; }
         
-        .invoice-box { border: 2px dashed #a0aec0; padding: 25px; margin-top: 30px; border-radius: 8px; background: white; display: block !important; }
+        .invoice-box { border: 2px dashed #a0aec0; padding: 25px; margin-top: 30px; border-radius: 8px; background: white; display: none; }
         .invoice-header { text-align: center; margin-bottom: 20px; }
         .qr-section { text-align: center; margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); }
         .instruction-note { font-size: 0.8rem; color: #718096; margin-top: 4px; font-style: italic; }
@@ -82,7 +82,7 @@
             <div class="form-group">
                 <label class="form-label">Select Investigations Required (Hold Ctrl key to select multiple tests)</label>
                 <select id="inp-tests" class="form-control" multiple style="height: 130px;" onchange="updateInvoiceData()">
-                    <option value="500" selected>Blood Sugar (Fasting) — Rs. 500</option>
+                    <option value="500">Blood Sugar (Fasting) — Rs. 500</option>
                     <option value="1200">Complete Blood Count (CBC) — Rs. 1,200</option>
                     <option value="2500">Liver Function Test (LFT) — Rs. 2,500</option>
                     <option value="1500">Lipid Profile — Rs. 1,500</option>
@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <!-- PERMANENT ACTIVE PRINT SLIP LAYOUT -->
+        <!-- LIVE SLIP LAYOUT (Initially Hidden) -->
         <div id="slip-view" class="invoice-box">
             <div class="invoice-header">
                 <h2 style="color: var(--primary); letter-spacing: 1px;">AL SHIFA LAB</h2>
@@ -101,12 +101,12 @@
             
             <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
                 <div>
-                    <strong>Patient Name:</strong> <span id="lbl-name" style="text-transform: uppercase; font-weight: bold; color: #000;">MUHAMMAD DANISH</span><br>
-                    <strong>Age / Gender:</strong> <span id="lbl-age-gender">23 Yrs / Male</span><br>
-                    <strong>Address:</strong> <span id="lbl-address">Mohallah Sarwar Shah</span>
+                    <strong>Patient Name:</strong> <span id="lbl-name" style="text-transform: uppercase; font-weight: bold; color: #000;">-</span><br>
+                    <strong>Age / Gender:</strong> <span id="lbl-age-gender">-</span><br>
+                    <strong>Address:</strong> <span id="lbl-address">-</span>
                 </div>
                 <div style="text-align: right;">
-                    <strong>Date:</strong> <span id="lbl-current-date">Aug 21, 2026</span><br>
+                    <strong>Date:</strong> <span id="lbl-current-date">-</span><br>
                     <strong>Status:</strong> <span style="color: var(--success); font-weight: bold;">● Paid Verified</span>
                 </div>
             </div>
@@ -119,20 +119,17 @@
                     </tr>
                 </thead>
                 <tbody id="invoice-items-body">
-                    <tr>
-                        <td>Blood Sugar (Fasting)</td>
-                        <td style="text-align: right; font-weight: bold;">500</td>
-                    </tr>
+                    <!-- Dynamic Rows -->
                 </tbody>
             </table>
             
             <div style="text-align: right; font-size: 1.3rem; font-weight: bold; margin-top: 15px; border-top: 2px solid #333; padding-top: 12px;">
-                Total Cash Paid: Rs. <span id="lbl-total-amount">500</span>
+                Total Cash Paid: Rs. <span id="lbl-total-amount">0</span>
             </div>
             
-            <!-- High Visibility Secure QR API Layout -->
+            <!-- High Visibility QR Code Section -->
             <div class="qr-section">
-                <img id="lbl-qr-code" src="https://qrserver.com" alt="QR Verification Link" style="width: 135px; height: 135px; background: white; border: 2px solid #0f4c81; padding: 5px; border-radius: 4px; display: inline-block;">
+                <img id="lbl-qr-code" src="" alt="QR Verification Link" style="width: 140px; height: 140px; background: white; border: 2px solid #0f4c81; padding: 5px; border-radius: 4px; display: inline-block;">
                 <p style="font-size: 0.8rem; color: var(--primary); margin-top: 8px; font-weight: bold; letter-spacing: 0.5px;">SECURE DIGITAL INVOICE VERIFIED</p>
             </div>
             
@@ -150,16 +147,25 @@
             var age = document.getElementById('inp-age').value.trim();
             var gender = document.getElementById('inp-gender').value;
             var selectElement = document.getElementById('inp-tests');
+            var slip = document.getElementById('slip-view');
 
-            // Mirror information texts safely
-            document.getElementById('lbl-name').innerText = name !== "" ? name : "MUHAMMAD DANISH";
+            // Hide slip completely until patient name is introduced (Bypasses dummy defaults)
+            if (name === "") {
+                slip.style.display = "none";
+                return;
+            } else {
+                slip.style.display = "block";
+            }
+
+            // Sync values instantly
+            document.getElementById('lbl-name').innerText = name;
             document.getElementById('lbl-address').innerText = address !== "" ? address : "-";
             document.getElementById('lbl-age-gender').innerText = (age !== "" ? age + " Yrs" : "-") + " / " + gender;
             
             var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
             document.getElementById('lbl-current-date').innerText = today;
 
-            // Handle Multitest row addition directly
+            // Handle Multi-selection
             var tbody = document.getElementById('invoice-items-body');
             tbody.innerHTML = "";
             var totalBill = 0;
@@ -174,3 +180,4 @@
 
                     var rawText = option.text.split(' — ');
 
+                    tbody.innerHTML += `<tr>
