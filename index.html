@@ -378,6 +378,14 @@
     });
 
     loadFromUrl();
+    // Password Verification
+    const CORRECT_PASSWORD = "1234"; // یہاں اپنا مرضی کا پاسورڈ رکھیں
+    const userPass = prompt("Danish Lab System - پاسورڈ درج کریں:");
+
+    if (userPass !== CORRECT_PASSWORD) {
+      alert("غلط پاسورڈ! آپ کو رسائی کی اجازت نہیں ہے۔");
+      document.body.innerHTML = "<h2 style='text-align:center; color:red; margin-top:50px;'>Access Denied — Incorrect Password</h2>";
+    }
   </script>
 
 </body>
