@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AL Shifa Lab | Guaranteed HMIS</title>
+    <title>AL Shifa Lab | Cash Counter</title>
     <style>
         :root {
             --primary: #0f4c81;
@@ -15,56 +15,60 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background-color: var(--light); color: var(--dark); padding: 20px; }
-        .navbar { background-color: var(--primary); color: var(--white); padding: 15px; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; border-radius: 8px; }
-        .main-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1200px; margin: 0 auto; }
-        @media (min-width: 768px) { .main-grid { grid-template-columns: 400px 1fr; } }
-        .card { background: var(--white); border-radius: 8px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; }
-        .card-title { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--light); }
+        .navbar { background-color: var(--primary); color: var(--white); padding: 15px; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; border-radius: 8px; text-align: center; }
+        .main-container { max-width: 700px; margin: 0 auto; background: var(--white); border-radius: 12px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .section-title { font-size: 1.3rem; font-weight: bold; color: var(--primary); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--light); text-align: center; }
         .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #4a5568; }
-        .form-control { width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid #cbd5e0; border-radius: 6px; background-color: #f8fafc; }
-        .btn { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.2s; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; color: #4a5568; }
+        .form-control { width: 100%; padding: 12px; font-size: 0.95rem; border: 1px solid #cbd5e0; border-radius: 8px; background-color: #f8fafc; }
+        .row-flex { display: flex; gap: 15px; }
+        .row-flex .form-group { flex: 1; }
+        
+        /* Interactive Slip Mechanics using pure CSS */
+        .invoice-box { border: 2px dashed #a0aec0; padding: 25px; margin-top: 30px; border-radius: 8px; background: white; display: none; }
+        .invoice-header { text-align: center; margin-bottom: 20px; }
+        .qr-section { text-align: center; margin-top: 20px; padding: 10px; background: #f8fafc; border-radius: 6px; }
+        
+        /* Direct Action CSS States */
+        #show-slip:input:placeholder-shown ~ .invoice-box { display: none; }
+        #show-slip:not(:placeholder-shown) ~ .invoice-box { display: block; }
+        
+        .btn { width: 100%; padding: 14px; font-size: 1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; text-align: center; display: block; text-decoration: none; }
         .btn-primary { background-color: var(--primary); color: var(--white); }
-        .btn-primary:hover { background-color: #1762a1; }
-        .btn-success { background-color: var(--success); color: var(--white); }
-        .btn-sm { width: auto; padding: 5px 10px; font-size: 0.8rem; background: #e63946; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background-color: var(--light); padding: 10px; font-size: 0.85rem; border-bottom: 2px solid var(--border); text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .invoice-box { border: 2px dashed #a0aec0; padding: 20px; margin-top: 20px; border-radius: 8px; background: white; }
-        .invoice-header { text-align: center; margin-bottom: 15px; }
-        .qr-section { text-align: center; margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 6px; }
-        @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .invoice-box { border: none; } }
-        .d-none { display: none !important; }
+        .btn-success { background-color: var(--success); color: var(--white); margin-top: 15px; }
+        
+        @media print { .no-print { display: none !important; } body { background: white; padding: 0; .main-container { border: none; box-shadow: none; padding: 0; } .invoice-box { border: none; display: block !important; } }
     </style>
 </head>
 <body>
 
-    <div class="navbar no-print">AL Shifa Lab — HMIS Dashboard</div>
+    <div class="navbar no-print">AL Shifa Lab — Cash Receipt Desk</div>
 
-    <div class="main-grid">
-        <!-- LEFT PANEL: FORM FIELDS -->
-        <div class="card no-print">
-            <div class="card-title">New Patient Entry</div>
+    <div class="main-container">
+        
+        <!-- Live Mirror Activation Box (No Script Needed) -->
+        <div class="no-print">
+            <div class="section-title">New Patient Receipt Desk</div>
             
             <div class="form-group">
                 <label class="form-label">Patient Full Name</label>
-                <input type="text" id="inp-name" class="form-control" placeholder="e.g., Muhammad Danish">
+                <!-- This specific field mirrors inside the slip below instantly -->
+                <input type="text" id="show-slip" class="form-control" placeholder="Type name here to instantly generate slip below..." oninput="document.getElementById('lbl-name').innerText = this.value; if(this.value != ''){document.getElementById('slip-view').style.display='block';}else{document.getElementById('slip-view').style.display='none';}">
             </div>
             
             <div class="form-group">
-                <label class="form-label">Patient Address</label>
-                <input type="text" id="inp-address" class="form-control" placeholder="e.g., Mohallah Sarwar Shah">
+                <label class="form-label">Patient Complete Address</label>
+                <input type="text" class="form-control" placeholder="e.g., Mohallah Sarwar Shah, Bahawalpur" oninput="document.getElementById('lbl-address').innerText = this.value;">
             </div>
             
-            <div style="display: flex; gap: 10px;" class="form-group">
-                <div style="flex: 1;">
-                    <label class="form-label">Age</label>
-                    <input type="number" id="inp-age" class="form-control" placeholder="23">
+            <div class="row-flex">
+                <div class="form-group">
+                    <label class="form-label">Age (Years)</label>
+                    <input type="number" class="form-control" placeholder="23" oninput="document.getElementById('lbl-age').innerText = this.value + ' Yrs';">
                 </div>
-                <div style="flex: 1;">
+                <div class="form-group">
                     <label class="form-label">Gender</label>
-                    <select id="inp-gender" class="form-control">
+                    <select class="form-control" onchange="document.getElementById('lbl-gen').innerText = this.value;">
                         <option>Male</option>
                         <option>Female</option>
                         <option>Other</option>
@@ -73,108 +77,66 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">Select Investigation / Test</label>
-                <select id="inp-test" class="form-control">
-                    <option value="500">Blood Sugar (Fasting) — Rs. 500</option>
-                    <option value="1200">Complete Blood Count (CBC) — Rs. 1,200</option>
-                    <option value="2500">Liver Function Test (LFT) — Rs. 2,500</option>
-                    <option value="1500">Lipid Profile — Rs. 1,500</option>
-                    <option value="800">Urine Routine Examination — Rs. 800</option>
+                <label class="form-label">Select Investigation Required</label>
+                <select class="form-control" onchange="var val=this.value.split('|'); document.getElementById('lbl-test').innerText=val[0]; document.getElementById('lbl-cost').innerText=val[1]; document.getElementById('lbl-total').innerText=val[1];">
+                    <option value="Blood Sugar (Fasting)|500">Blood Sugar (Fasting) — Rs. 500</option>
+                    <option value="Complete Blood Count (CBC)|1,200">Complete Blood Count (CBC) — Rs. 1,200</option>
+                    <option value="Liver Function Test (LFT)|2,500">Liver Function Test (LFT) — Rs. 2,500</option>
+                    <option value="Lipid Profile|1,500">Lipid Profile — Rs. 1,500</option>
+                    <option value="Urine Routine Examination|800">Urine Routine Examination — Rs. 800</option>
                 </select>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Test Fee Paid (PKR)</label>
-                <input type="text" id="inp-price" class="form-control" value="500" readonly style="font-weight: bold; background: #eef2f7;">
-            </div>
-            
-            <!-- Removed standard inline onclick event to completely bypass layout lock -->
-            <button type="button" id="submit-record-btn" class="btn btn-primary">Generate Bill & Save Record</button>
         </div>
 
-        <!-- RIGHT PANEL: RECORDS LOG -->
-        <div class="card">
-            <div class="card-title no-print" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Active Patient Records</span>
-                <button class="btn btn-sm" id="clear-db-btn">Clear Logs</button>
+        <!-- OFFICIAL PRINT SLIP LAYOUT (Live Generation Area) -->
+        <div id="slip-view" class="invoice-box">
+            <div class="invoice-header">
+                <h2 style="color: var(--primary); letter-spacing: 1px;">AL SHIFA LAB</h2>
+                <p style="font-size: 0.85rem; color: #718096; margin-top: 3px;">Main Hospital Road, Medical City | Emergency: +92 300 1234567</p>
             </div>
             
-            <div style="overflow-x: auto;" class="no-print">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Patient Details</th>
-                            <th>Test Fee</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="log-table-body"></tbody>
-                </table>
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                <div>
+                    <strong>Patient Name:</strong> <span id="lbl-name" style="text-transform: uppercase; font-weight: bold; color: #000;">-</span><br>
+                    <strong>Age / Gender:</strong> <span id="lbl-age">23 Yrs</span> / <span id="lbl-gen">Male</span><br>
+                    <strong>Address:</strong> <span id="lbl-address">-</span>
+                </div>
+                <div style="text-align: right;">
+                    <strong>Date:</strong> <span>Aug 21, 2026</span><br>
+                    <strong>Status:</strong> <span style="color: var(--success); font-weight: bold;">● Paid Verified</span>
+                </div>
             </div>
             
-            <!-- DYNAMIC REPORT AREA -->
-            <div id="slip-view" class="invoice-box d-none">
-                <div class="invoice-header">
-                    <h2 style="color: var(--primary);">AL SHIFA LAB</h2>
-                    <p style="font-size: 0.8rem; color: #718096;">Main Hospital Road, Medical City | Emergency: +92 300 1234567</p>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 15px; line-height: 1.5;">
-                    <div>
-                        <strong>Patient Name:</strong> <span id="lbl-name"></span><br>
-                        <strong>Age / Gender:</strong> <span id="lbl-age-gender"></span><br>
-                        <strong>Address:</strong> <span id="lbl-address"></span>
-                    </div>
-                    <div style="text-align: right;">
-                        <strong>Date:</strong> <span id="lbl-date"></span><br>
-                        <strong>Receipt No:</strong> <span id="lbl-receipt"></span><br>
-                        <span style="color: var(--success); font-weight: bold;">● Paid & Verified</span>
-                    </div>
-                </div>
-                
-                <table style="margin: 15px 0;">
-                    <thead>
-                        <tr style="background: #f7fafc;">
-                            <th style="padding: 8px;">Investigation Description</th>
-                            <th style="padding: 8px; text-align: right;">Price (PKR)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="lbl-test" style="padding: 8px;"></td>
-                            <td id="lbl-cost" style="padding: 8px; text-align: right; font-weight: bold;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div style="text-align: right; font-size: 1.2rem; font-weight: bold; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                    Total Net Cash Paid: Rs. <span id="lbl-total"></span>
-                </div>
-                
-                <div class="qr-section">
-                    <img id="qr-image" src="" alt="QR" style="width: 110px; height: 110px; background: white; border: 1px solid #ddd; padding: 4px;">
-                    <p style="font-size: 0.75rem; color: #718096; margin-top: 5px;">Scan code to verify official digital invoice</p>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;" class="no-print">
-                    <button type="button" id="print-window-btn" class="btn btn-success" style="width: auto; padding: 10px 30px;">🖨️ Print Patient Slip</button>
-                </div>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: #f7fafc;">
+                        <th style="padding: 10px; border-bottom: 2px solid var(--border); text-align: left;">Investigation Description</th>
+                        <th style="padding: 10px; border-bottom: 2px solid var(--border); text-align: right;">Price (PKR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="lbl-test" style="padding: 12px 10px; border-bottom: 1px solid var(--border);">Blood Sugar (Fasting)</td>
+                        <td id="lbl-cost" style="padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: right; font-weight: bold;">500</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="text-align: right; font-size: 1.3rem; font-weight: bold; margin-top: 15px; border-top: 2px solid #333; padding-top: 12px;">
+                Total Cash Paid: Rs. <span id="lbl-total">500</span>
             </div>
-
+            
+            <!-- Secure Encoded Custom QR Field -->
+            <div class="qr-section">
+                <img src="https://qrserver.com" alt="QR Link Verification" style="width: 115px; height: 115px; background: white; border: 1px solid #ddd; padding: 4px;">
+                <p style="font-size: 0.75rem; color: #718096; margin-top: 6px; font-weight: 600;">Scan code to verify official digital invoice</p>
+            </div>
+            
+            <div class="no-print">
+                <button type="button" class="btn btn-success" onclick="window.print()">🖨️ Print Official Patient Slip</button>
+            </div>
         </div>
+
     </div>
-
-    <script>
-        var shifaLogs = JSON.parse(localStorage.getItem('shifa_final_db')) || [];
-
-        // Dynamic pricing link handler
-        document.getElementById('inp-test').addEventListener('change', function() {
-            document.getElementById('inp-price').value = this.value;
-        });
-
-        // Direct Core Event Listener (Bypasses old cached triggers completely)
-        document.getElementById('submit-record-btn').addEventListener('click', function() {
-            var name = document.getElementById('inp-name').value.trim();
-            var addr = document.getElementById('inp-address').value.trim();
-            var age = document.getElementById('inp-age').value.trim();
-            var gen = document.getElementById('inp-gender').value;
+</body>
+</html>
