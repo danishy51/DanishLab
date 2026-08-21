@@ -324,9 +324,10 @@
 
       document.getElementById('rTotal').innerText = total.toLocaleString();
 
-      // Update QR Code with dynamic API
-      const qrData = encodeURIComponent(`Danish Lab | Patient: ${name} | Total Paid: Rs. ${total}`);
-      document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+     // Dynamic Link for QR Code Scanning
+const receiptUrl = encodeURIComponent(`https://danishy51.github.io/?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}&age=${age}&gender=${gender}&doctor=${encodeURIComponent(doctor)}&total=${total}`);
+
+document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${receiptUrl}`;
     }
 
     // Set today's date automatically
