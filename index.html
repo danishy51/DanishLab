@@ -18,7 +18,6 @@
         body.theme-emerald { --primary-bg: #065f46; --primary-hover: #047857; }
         body.theme-midnight { --primary-bg: #0f172a; --primary-hover: #1e293b; }
         body.theme-purple { --primary-bg: #581c87; --primary-hover: #6b21a8; }
-        body.theme-crimson { --primary-bg: #991b1b; --primary-hover: #b91c1c; }
 
         body { background-color: #f3f4f6; color: var(--text-color); font-family: sans-serif; }
         .nav-header { background-color: var(--primary-bg); }
@@ -26,10 +25,10 @@
         .btn-primary-theme:hover { background-color: var(--primary-hover); }
 
         @media print {
-            body * { visibility: hidden; }
-            #receiptPrintArea, #receiptPrintArea *, #modalPrintArea, #modalPrintArea * { visibility: visible; }
-            #receiptPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
-            #modalPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
+            body * { visibility: hidden !important; }
+            #receiptModal, #receiptModal *, #reportModal, #reportModal * { visibility: visible !important; }
+            #receiptModal { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: white !important; z-index: 99999; display: flex !important; align-items: center; justify-content: center; }
+            #reportModal { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: white !important; z-index: 99999; display: flex !important; align-items: center; justify-content: center; }
             .no-print { display: none !important; }
         }
     </style>
@@ -56,81 +55,117 @@
                 </div>
                 <button type="submit" class="w-full py-3 bg-blue-900 text-white font-bold rounded-lg shadow hover:bg-blue-800 transition">Login to System</button>
             </form>
-            <div class="mt-4 text-xs text-center text-gray-400">
-                Defaults: admin/1234 | recept/1122 | doctor/3344
-            </div>
+            <div id="defaultCredsText" class="mt-4 text-xs text-center text-gray-400"></div>
         </div>
     </div>
 
     <!-- MAIN APP INTERFACE -->
     <div id="mainApp" class="hidden min-h-screen flex flex-col">
-        <!-- Top Navigation -->
         <header class="nav-header text-white shadow-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
                 <div class="flex items-center space-x-3">
                     <span class="text-2xl">🧬</span>
                     <h1 class="text-lg md:text-xl font-bold tracking-wide">Danish Lab — Cash Receipt Desk</h1>
                 </div>
-                <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1 md:gap-2">
-                    <!-- Dynamically populated based on User Permissions -->
-                </nav>
+                <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1 md:gap-2"></nav>
             </div>
         </header>
 
-        <!-- Main Content Body -->
         <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
 
-            <!-- 1. NEW PATIENT RECEIPT DESK -->
+            <!-- 1. NEW PATIENT RECEIPT DESK WITH LIVE PREVIEW SIDE-BY-SIDE -->
             <section id="tab-newPatient" class="tab-content space-y-6">
-                <div class="bg-white rounded-xl shadow-md p-6 max-w-4xl mx-auto border-t-4 border-blue-900">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus text-blue-900 mr-2"></i> New Patient Receipt Desk</h2>
-                    <form id="patientForm" onsubmit="savePatient(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Full Name</label>
-                                <input type="text" id="pName" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Left Column: Input Form -->
+                    <div class="lg:col-span-7 bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-900">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus text-blue-900 mr-2"></i> New Patient Receipt Desk</h2>
+                        <form id="patientForm" onsubmit="savePatient(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Full Name</label>
+                                    <input type="text" id="pName" oninput="updateLiveSlip()" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Complete Address</label>
+                                    <input type="text" id="pAddress" oninput="updateLiveSlip()" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Age (Years)</label>
+                                    <input type="number" id="pAge" oninput="updateLiveSlip()" required min="0" max="120" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
+                                    <select id="pGender" onchange="updateLiveSlip()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Referred By (Doctor)</label>
+                                    <input type="text" id="pDoctor" value="Self" oninput="updateLiveSlip()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
                             </div>
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Complete Address</label>
-                                <input type="text" id="pAddress" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Select Investigation(s) Required</label>
+                                <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border max-h-48 overflow-y-auto"></div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Age (Years)</label>
-                                <input type="number" id="pAge" required min="0" max="120" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200 items-center">
+                                <div>
+                                    <label class="block text-sm font-semibold text-blue-900 mb-1"><i class="fa-solid fa-tag mr-1"></i> Discount Amount (PKR)</label>
+                                    <input type="number" id="pDiscount" value="0" min="0" oninput="calculateTotal()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-600">Calculated Grand Total:</p>
+                                    <h3 id="displayGrandTotal" class="text-2xl font-black text-blue-900">Rs. 0</h3>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
-                                <select id="pGender" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
+
+                            <button type="submit" class="w-full py-3 btn-primary-theme text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
+                        </form>
+                    </div>
+
+                    <!-- Right Column: Live Live Slip Preview -->
+                    <div class="lg:col-span-5 bg-white rounded-xl shadow-md p-6 border sticky top-20">
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2"><i class="fa-solid fa-eye text-blue-900 mr-1"></i> Live Slip Preview</h3>
+                        <div class="border border-dashed border-gray-400 p-4 rounded-xl bg-white text-xs">
+                            <div class="text-center border-b pb-3 mb-3">
+                                <h2 class="text-lg font-black text-blue-900 tracking-wider">Danish Lab</h2>
+                                <p class="text-[10px] text-gray-500">Chowk Muneer Shaheed Road | +92 306 7488053</p>
+                                <h3 class="text-xs font-bold text-blue-800 mt-1 uppercase">CASH RECEIPT SLIP</h3>
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Referred By (Doctor)</label>
-                                <input type="text" id="pDoctor" value="Self" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <div class="grid grid-cols-2 mb-3 gap-1">
+                                <div><strong>Name:</strong> <span id="liveSlipName" class="text-gray-700">---</span></div>
+                                <div><strong>Date:</strong> <span id="liveSlipDate" class="text-gray-700">---</span></div>
+                                <div><strong>Age/Gen:</strong> <span id="liveSlipAgeGender" class="text-gray-700">---</span></div>
+                                <div><strong>Receipt:</strong> <span class="text-blue-900 font-bold">DL-Preview</span></div>
+                                <div class="col-span-2"><strong>Address:</strong> <span id="liveSlipAddress" class="text-gray-700">---</span></div>
+                                <div class="col-span-2"><strong>Ref By:</strong> <span id="liveSlipDoctor" class="text-gray-700">---</span></div>
+                            </div>
+                            <table class="w-full mb-3 border-t border-b text-xs">
+                                <thead>
+                                    <tr class="bg-gray-50 text-left">
+                                        <th class="py-1 px-1">Test Name</th>
+                                        <th class="py-1 px-1 text-right">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="liveSlipItemsTable">
+                                    <tr><td colspan="2" class="py-2 text-center text-gray-400">No tests selected</td></tr>
+                                </tbody>
+                            </table>
+                            <div id="liveSlipDiscountRow" class="flex justify-between mb-1 text-red-600 font-semibold hidden">
+                                <span>Discount:</span>
+                                <span id="liveSlipDiscountVal">Rs. 0</span>
+                            </div>
+                            <div class="text-center font-bold text-sm text-blue-900 border-t pt-2">
+                                Total: <span id="liveSlipTotalAmount">Rs. 0</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Select Investigation(s) Required</label>
-                            <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border"></div>
-                        </div>
-
-                        <!-- Discount Section -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200 items-center">
-                            <div>
-                                <label class="block text-sm font-semibold text-blue-900 mb-1"><i class="fa-solid fa-tag mr-1"></i> Discount Amount (PKR)</label>
-                                <input type="number" id="pDiscount" value="0" min="0" oninput="calculateTotal()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm text-gray-600">Calculated Grand Total:</p>
-                                <h3 id="displayGrandTotal" class="text-2xl font-black text-blue-900">Rs. 0</h3>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="w-full py-3 btn-primary-theme text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
-                    </form>
                 </div>
             </section>
 
@@ -140,12 +175,10 @@
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
                         <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-users text-blue-900 mr-2"></i> Patient List & History</h2>
                         <div class="flex flex-wrap items-center gap-2">
-                            <!-- Search Input -->
                             <div class="relative">
                                 <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                                 <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
                             </div>
-                            <!-- Date Filter -->
                             <div class="flex items-center space-x-1 bg-gray-50 p-1.5 rounded-lg border">
                                 <i class="fa-solid fa-calendar-days text-blue-900 text-sm ml-1"></i>
                                 <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-white border rounded px-2 py-1 text-xs outline-none">
@@ -194,7 +227,6 @@
                 <div class="bg-white rounded-xl shadow-md p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
                         <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-file-medical text-blue-900 mr-2"></i> Completed Reports List</h2>
-                        <!-- Report List Search Bar -->
                         <div class="relative">
                             <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
@@ -217,10 +249,11 @@
                 </div>
             </section>
 
-            <!-- 5. SETTINGS & TAB PERMISSIONS & THEMES -->
+            <!-- 5. SETTINGS & EDITABLE CREDENTIALS & PERMISSIONS -->
             <section id="tab-settings" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Manage Existing Tests & Ranges -->
+                    
+                    <!-- Manage Tests & Ranges -->
                     <div class="bg-white rounded-xl shadow-md p-6">
                         <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-sliders text-blue-900 mr-2"></i> Manage Tests & Normal Ranges</h2>
                         <form onsubmit="addNewTest(event)" class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg border">
@@ -256,40 +289,57 @@
                         </div>
                     </div>
 
-                    <!-- User Role & Tab Access Permissions Controller -->
+                    <!-- User Credentials & Rights Changer -->
                     <div class="space-y-6">
                         <div class="bg-white rounded-xl shadow-md p-6">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-shield text-blue-900 mr-2"></i> User Access & Tab Rights</h2>
-                            <p class="text-xs text-gray-500 mb-4">Configure which user role can access which tabs in the top navigation bar:</p>
-                            
-                            <div class="space-y-4 text-sm">
-                                <div class="bg-gray-50 p-3 rounded-lg border">
-                                    <h3 class="font-bold text-blue-900 mb-2">1. Receptionist (recept / 1122)</h3>
-                                    <div class="flex flex-wrap gap-4 text-xs">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-gear text-blue-900 mr-2"></i> User Credentials & Rights</h2>
+                            <form onsubmit="saveUserCredentials(event)" class="space-y-4 text-sm">
+                                <div class="bg-gray-50 p-3 rounded-lg border space-y-2">
+                                    <h3 class="font-bold text-blue-900">Receptionist Login Info</h3>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Username</label>
+                                            <input type="text" id="editReceptUser" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
+                                            <input type="text" id="editReceptPass" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-3 text-xs pt-2">
                                         <label><input type="checkbox" id="perm_recept_newPatient" checked disabled> New Patient</label>
-                                        <label><input type="checkbox" id="perm_recept_patientList" onchange="savePermissions()" checked> Patient List</label>
-                                        <label><input type="checkbox" id="perm_recept_testReport" onchange="savePermissions()"> Test Report</label>
-                                        <label><input type="checkbox" id="perm_recept_reportList" onchange="savePermissions()"> Report List</label>
-                                        <label><input type="checkbox" id="perm_recept_settings" onchange="savePermissions()"> Settings</label>
+                                        <label><input type="checkbox" id="perm_recept_patientList"> Patient List</label>
+                                        <label><input type="checkbox" id="perm_recept_testReport"> Test Report</label>
+                                        <label><input type="checkbox" id="perm_recept_reportList"> Report List</label>
                                     </div>
                                 </div>
 
-                                <div class="bg-gray-50 p-3 rounded-lg border">
-                                    <h3 class="font-bold text-blue-900 mb-2">2. Doctor / Lab Expert (doctor / 3344)</h3>
-                                    <div class="flex flex-wrap gap-4 text-xs">
-                                        <label><input type="checkbox" id="perm_doctor_newPatient" onchange="savePermissions()"> New Patient</label>
-                                        <label><input type="checkbox" id="perm_doctor_patientList" onchange="savePermissions()" checked> Patient List</label>
-                                        <label><input type="checkbox" id="perm_doctor_testReport" onchange="savePermissions()" checked> Test Report</label>
-                                        <label><input type="checkbox" id="perm_doctor_reportList" onchange="savePermissions()" checked> Report List</label>
-                                        <label><input type="checkbox" id="perm_doctor_settings" onchange="savePermissions()"> Settings</label>
+                                <div class="bg-gray-50 p-3 rounded-lg border space-y-2">
+                                    <h3 class="font-bold text-blue-900">Doctor / Expert Login Info</h3>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Username</label>
+                                            <input type="text" id="editDoctorUser" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
+                                            <input type="text" id="editDoctorPass" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-3 text-xs pt-2">
+                                        <label><input type="checkbox" id="perm_doctor_newPatient"> New Patient</label>
+                                        <label><input type="checkbox" id="perm_doctor_patientList"> Patient List</label>
+                                        <label><input type="checkbox" id="perm_doctor_testReport"> Test Report</label>
+                                        <label><input type="checkbox" id="perm_doctor_reportList"> Report List</label>
                                     </div>
                                 </div>
-                            </div>
+                                <button type="submit" class="w-full py-2 btn-primary-theme text-white font-bold rounded shadow text-sm">Save Login Info & Permissions</button>
+                            </form>
                         </div>
 
                         <!-- Theme Selector -->
                         <div class="bg-white rounded-xl shadow-md p-6">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-palette text-blue-900 mr-2"></i> Dashboard Theme Settings</h2>
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-palette text-blue-900 mr-2"></i> Dashboard Theme</h2>
                             <div class="grid grid-cols-2 gap-2">
                                 <button onclick="setTheme('theme-classic')" class="p-2 rounded bg-blue-900 text-white font-semibold text-xs shadow">Classic Blue</button>
                                 <button onclick="setTheme('theme-emerald')" class="p-2 rounded bg-emerald-700 text-white font-semibold text-xs shadow">Emerald Green</button>
@@ -298,6 +348,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </section>
 
@@ -355,7 +406,7 @@
     <div id="reportModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeReportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
-            <div id="modalPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
+            <div id="reportPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
                 <div class="text-center border-b pb-4 mb-4">
                     <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
                     <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
@@ -406,12 +457,22 @@
         let currentTheme = localStorage.getItem('danish_theme') || 'theme-classic';
         let currentUserRole = 'admin';
 
+        let credentials = JSON.parse(localStorage.getItem('danish_credentials')) || {
+            recept: { user: 'recept', pass: '1122' },
+            doctor: { user: 'doctor', pass: '3344' }
+        };
+
         let permissions = JSON.parse(localStorage.getItem('danish_permissions')) || {
-            recept: { newPatient: true, patientList: true, testReport: false, reportList: false, settings: false },
-            doctor: { newPatient: false, patientList: true, testReport: true, reportList: true, settings: false }
+            recept: { patientList: true, testReport: false, reportList: false },
+            doctor: { newPatient: false, patientList: true, testReport: true, reportList: true }
         };
 
         document.getElementById('appBody').className = currentTheme;
+        updateLoginHint();
+
+        function updateLoginHint() {
+            document.getElementById('defaultCredsText').innerText = `Defaults: admin/1234 | ${credentials.recept.user}/${credentials.recept.pass} | ${credentials.doctor.user}/${credentials.doctor.pass}`;
+        }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -420,9 +481,9 @@
             
             if(u === 'admin' && p === '1234') {
                 currentUserRole = 'admin';
-            } else if(u === 'recept' && p === '1122') {
+            } else if(u === credentials.recept.user && p === credentials.recept.pass) {
                 currentUserRole = 'recept';
-            } else if(u === 'doctor' && p === '3344') {
+            } else if(u === credentials.doctor.user && p === credentials.doctor.pass) {
                 currentUserRole = 'doctor';
             } else {
                 const err = document.getElementById('loginError');
@@ -441,13 +502,14 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').classList.add('hidden');
         }
 
         function initApp() {
             renderNavMenu();
             renderTestsCheckboxes();
+            updateLiveSlip();
             
-            // Default landing tab based on role
             if(currentUserRole === 'doctor') {
                 switchTab('patientList');
             } else {
@@ -469,8 +531,14 @@
 
             tabs.forEach(t => {
                 let hasAccess = true;
-                if(currentUserRole === 'recept') hasAccess = permissions.recept[t.id];
-                if(currentUserRole === 'doctor') hasAccess = permissions.doctor[t.id];
+                if(currentUserRole === 'recept') {
+                    if(t.id === 'newPatient') hasAccess = true;
+                    else hasAccess = permissions.recept[t.id] || false;
+                }
+                if(currentUserRole === 'doctor') {
+                    if(t.id === 'settings') hasAccess = false;
+                    else hasAccess = permissions.doctor[t.id] ?? true;
+                }
 
                 if(hasAccess) {
                     nav.innerHTML += `<button onclick="switchTab('${t.id}')" id="nav-${t.id}" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid ${t.icon} mr-1"></i> ${t.name}</button>`;
@@ -502,8 +570,8 @@
             tests.forEach(t => {
                 container.innerHTML += `
                     <label class="flex items-center space-x-2 text-sm cursor-pointer p-2 bg-white rounded border hover:bg-blue-50 transition">
-                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal()" class="test-checkbox rounded text-blue-900 focus:ring-blue-500">
-                        <span class="font-medium text-gray-800">${t.name} — Rs. ${t.price} <span class="text-xs text-gray-500">(Range: ${t.range})</span></span>
+                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-blue-900 focus:ring-blue-500">
+                        <span class="font-medium text-gray-800">${t.name} — Rs. ${t.price}</span>
                     </label>
                 `;
             });
@@ -521,6 +589,56 @@
 
             document.getElementById('displayGrandTotal').innerText = `Rs. ${grandTotal.toLocaleString()}`;
             return grandTotal;
+        }
+
+        // Live Slip Update on Typing/Selecting
+        function updateLiveSlip() {
+            const name = document.getElementById('pName').value.trim() || '---';
+            const address = document.getElementById('pAddress').value.trim() || '---';
+            const age = document.getElementById('pAge').value.trim() || '--';
+            const gender = document.getElementById('pGender').value;
+            const doctor = document.getElementById('pDoctor').value.trim() || 'Self';
+            const today = new Date().toISOString().split('T')[0];
+
+            document.getElementById('liveSlipName').innerText = name;
+            document.getElementById('liveSlipAddress').innerText = address;
+            document.getElementById('liveSlipAgeGender').innerText = `${age} Yrs / ${gender}`;
+            document.getElementById('liveSlipDoctor').innerText = doctor;
+            document.getElementById('liveSlipDate').innerText = today;
+
+            const tbody = document.getElementById('liveSlipItemsTable');
+            tbody.innerHTML = '';
+            let subtotal = 0;
+            let count = 0;
+
+            document.querySelectorAll('.test-checkbox:checked').forEach(cb => {
+                count++;
+                subtotal += parseFloat(cb.dataset.price);
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="py-1 px-1">${cb.dataset.name}</td>
+                        <td class="py-1 px-1 text-right">${parseFloat(cb.dataset.price).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            if(count === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-center text-gray-400">No tests selected</td></tr>`;
+            }
+
+            const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
+            let grandTotal = subtotal - discount;
+            if(grandTotal < 0) grandTotal = 0;
+
+            const discountRow = document.getElementById('liveSlipDiscountRow');
+            if(discount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('liveSlipDiscountVal').innerText = `Rs. ${discount.toLocaleString()}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
+            document.getElementById('liveSlipTotalAmount').innerText = `Rs. ${grandTotal.toLocaleString()}`;
         }
 
         function savePatient(e) {
@@ -556,12 +674,12 @@
             patients.push(newPatient);
             localStorage.setItem('danish_patients', JSON.stringify(patients));
 
-            // Automatically open Cash Receipt Modal for print/view
             showReceiptModal(newPatient);
 
             document.getElementById('patientForm').reset();
             document.getElementById('pDiscount').value = 0;
             calculateTotal();
+            updateLiveSlip();
         }
 
         function showReceiptModal(p) {
@@ -627,7 +745,7 @@
                 return;
             }
 
-            filtered.forEach((p, index) => {
+            filtered.forEach((p) => {
                 const realIndex = patients.indexOf(p);
                 const testNames = p.tests.map(t => t.name).join(', ');
                 tbody.innerHTML += `
@@ -797,37 +915,46 @@
             document.getElementById('reportModal').classList.add('hidden');
         }
 
-        // Settings & Permissions
+        // Settings & Editable Credentials
         function renderSettingsPage() {
             renderSettingsTests();
-            // Set checkboxes based on saved permissions
+            document.getElementById('editReceptUser').value = credentials.recept.user;
+            document.getElementById('editReceptPass').value = credentials.recept.pass;
+            document.getElementById('editDoctorUser').value = credentials.doctor.user;
+            document.getElementById('editDoctorPass').value = credentials.doctor.pass;
+
             document.getElementById('perm_recept_patientList').checked = permissions.recept.patientList;
             document.getElementById('perm_recept_testReport').checked = permissions.recept.testReport;
             document.getElementById('perm_recept_reportList').checked = permissions.recept.reportList;
-            document.getElementById('perm_recept_settings').checked = permissions.recept.settings;
 
             document.getElementById('perm_doctor_newPatient').checked = permissions.doctor.newPatient;
             document.getElementById('perm_doctor_patientList').checked = permissions.doctor.patientList;
             document.getElementById('perm_doctor_testReport').checked = permissions.doctor.testReport;
             document.getElementById('perm_doctor_reportList').checked = permissions.doctor.reportList;
-            document.getElementById('perm_doctor_settings').checked = permissions.doctor.settings;
         }
 
-        function savePermissions() {
+        function saveUserCredentials(e) {
+            e.preventDefault();
+            credentials.recept.user = document.getElementById('editReceptUser').value.trim();
+            credentials.recept.pass = document.getElementById('editReceptPass').value.trim();
+            credentials.doctor.user = document.getElementById('editDoctorUser').value.trim();
+            credentials.doctor.pass = document.getElementById('editDoctorPass').value.trim();
+
             permissions.recept.patientList = document.getElementById('perm_recept_patientList').checked;
             permissions.recept.testReport = document.getElementById('perm_recept_testReport').checked;
             permissions.recept.reportList = document.getElementById('perm_recept_reportList').checked;
-            permissions.recept.settings = document.getElementById('perm_recept_settings').checked;
 
             permissions.doctor.newPatient = document.getElementById('perm_doctor_newPatient').checked;
             permissions.doctor.patientList = document.getElementById('perm_doctor_patientList').checked;
             permissions.doctor.testReport = document.getElementById('perm_doctor_testReport').checked;
             permissions.doctor.reportList = document.getElementById('perm_doctor_reportList').checked;
-            permissions.doctor.settings = document.getElementById('perm_doctor_settings').checked;
 
+            localStorage.setItem('danish_credentials', JSON.stringify(credentials));
             localStorage.setItem('danish_permissions', JSON.stringify(permissions));
+            
+            updateLoginHint();
             renderNavMenu();
-            alert('Permissions updated successfully!');
+            alert('User credentials and permissions updated successfully!');
         }
 
         function addNewTest(e) {
