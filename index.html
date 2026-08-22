@@ -38,7 +38,7 @@
         }
     </style>
 </head>
-<body class="theme-clinical" id="appBody">
+<body class="theme-clinical flex flex-col min-h-screen" id="appBody">
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #065f46 100%);">
@@ -85,7 +85,7 @@
     </div>
 
     <!-- MAIN APP INTERFACE -->
-    <div id="mainApp" class="hidden min-h-screen flex flex-col">
+    <div id="mainApp" class="hidden flex-grow flex flex-col min-h-screen">
         <header class="nav-header text-white sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center space-x-3">
@@ -150,8 +150,8 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-sky-50/50 p-4 rounded-2xl border border-sky-100 items-center">
                                 <div>
-                                    <label class="block text-xs font-bold text-sky-900 uppercase mb-1"><i class="fa-solid fa-tag mr-1"></i> Discount (PKR)</label>
-                                    <input type="number" id="pDiscount" value="0" min="0" oninput="calculateTotal()" class="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none font-semibold">
+                                    <label class="block text-xs font-bold text-sky-900 uppercase mb-1"><i class="fa-solid fa-percent mr-1"></i> Discount (%)</label>
+                                    <input type="number" id="pDiscount" value="0" min="0" max="100" oninput="calculateTotal(); updateLiveSlip();" class="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none font-semibold">
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xs text-slate-500 font-bold uppercase">Grand Total:</p>
@@ -193,7 +193,7 @@
                             </table>
                             <div id="liveSlipDiscountRow" class="flex justify-between text-rose-600 font-bold hidden">
                                 <span>Discount:</span>
-                                <span id="liveSlipDiscountVal">Rs. 0</span>
+                                <span id="liveSlipDiscountVal">0%</span>
                             </div>
                             <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
                                 Total: <span id="liveSlipTotalAmount">Rs. 0</span>
@@ -352,13 +352,19 @@
                             </div>
                         </div>
 
-                        <!-- EXPORT JSON BACKUP SECTION -->
+                        <!-- EXPORT & RESTORE JSON BACKUP SECTION -->
                         <div class="pt-4 border-t border-slate-100">
-                            <h2 class="text-sm font-bold text-slate-900 mb-2"><i class="fa-solid fa-database text-sky-600 mr-2"></i> System Data Backup</h2>
-                            <p class="text-xs text-slate-500 mb-3">Download complete system backup (patients, reports, settings) as JSON file.</p>
-                            <button onclick="exportJSONBackup()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center">
-                                <i class="fa-solid fa-download mr-2"></i> Export Backup (JSON)
-                            </button>
+                            <h2 class="text-sm font-bold text-slate-900 mb-2"><i class="fa-solid fa-database text-sky-600 mr-2"></i> System Data Backup & Restore</h2>
+                            <p class="text-xs text-slate-500 mb-3">Export system backup or restore data from a previous JSON file.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button onclick="exportJSONBackup()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center">
+                                    <i class="fa-solid fa-download mr-2"></i> Export Backup (JSON)
+                                </button>
+                                <label class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center cursor-pointer text-center">
+                                    <i class="fa-solid fa-upload mr-2"></i> Restore Backup (JSON)
+                                    <input type="file" id="restoreBackupInput" accept=".json" onchange="restoreJSONBackup(event)" class="hidden">
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -422,6 +428,14 @@
                 </div>
             </section>
         </main>
+
+        <!-- FOOTER -->
+        <footer class="no-print mt-auto border-t border-slate-200 bg-white py-3 px-4 text-xs font-semibold text-slate-600">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+                <div>Email : danishy51@gmail.com</div>
+                <div>Contact/Whatsapp : 03067488053</div>
+            </div>
+        </footer>
     </div>
 
     <!-- CASH RECEIPT MODAL -->
@@ -454,7 +468,7 @@
                 </table>
                 <div id="modalSlipDiscountRow" class="flex justify-between text-xs text-rose-600 font-semibold hidden">
                     <span>Discount Applied:</span>
-                    <span id="modalSlipDiscountVal">Rs. 0</span>
+                    <span id="modalSlipDiscountVal">0%</span>
                 </div>
                 <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
                     Total Cash Paid: <span id="modalSlipTotalAmount">Rs. 0</span>
@@ -541,7 +555,7 @@
             doctor: { newPatient: false, patientList: true, testReport: true, reportList: true }
         };
 
-        document.getElementById('appBody').className = currentTheme;
+        document.getElementById('appBody').className = currentTheme + " flex flex-col min-h-screen";
 
         const urlParams = new URLSearchParams(window.location.search);
         const qrReceiptNo = urlParams.get('receipt');
@@ -710,11 +724,15 @@
             document.querySelectorAll('.test-checkbox:checked').forEach(cb => {
                 subtotal += parseFloat(cb.dataset.price);
             });
-            const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-            let grandTotal = subtotal - discount;
+            let discountPercent = parseFloat(document.getElementById('pDiscount').value) || 0;
+            if(discountPercent > 100) discountPercent = 100;
+            if(discountPercent < 0) discountPercent = 0;
+
+            const discountAmount = (subtotal * discountPercent) / 100;
+            let grandTotal = subtotal - discountAmount;
             if(grandTotal < 0) grandTotal = 0;
 
-            document.getElementById('displayGrandTotal').innerText = `Rs. ${grandTotal.toLocaleString()}`;
+            document.getElementById('displayGrandTotal').innerText = `Rs. ${Math.round(grandTotal).toLocaleString()}`;
             return grandTotal;
         }
 
@@ -752,19 +770,20 @@
                 tbody.innerHTML = `<tr><td colspan="2" class="py-3 text-center text-slate-400">No tests selected</td></tr>`;
             }
 
-            const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-            let grandTotal = subtotal - discount;
+            const discountPercent = parseFloat(document.getElementById('pDiscount').value) || 0;
+            const discountAmount = (subtotal * discountPercent) / 100;
+            let grandTotal = subtotal - discountAmount;
             if(grandTotal < 0) grandTotal = 0;
 
             const discountRow = document.getElementById('liveSlipDiscountRow');
-            if(discount > 0) {
+            if(discountPercent > 0) {
                 discountRow.classList.remove('hidden');
-                document.getElementById('liveSlipDiscountVal').innerText = `Rs. ${discount.toLocaleString()}`;
+                document.getElementById('liveSlipDiscountVal').innerText = `${discountPercent}% (Rs. ${Math.round(discountAmount).toLocaleString()})`;
             } else {
                 discountRow.classList.add('hidden');
             }
 
-            document.getElementById('liveSlipTotalAmount').innerText = `Rs. ${grandTotal.toLocaleString()}`;
+            document.getElementById('liveSlipTotalAmount').innerText = `Rs. ${Math.round(grandTotal).toLocaleString()}`;
         }
 
         function savePatient(e) {
@@ -780,8 +799,9 @@
             }
 
             const subtotal = selectedTests.reduce((sum, t) => sum + parseFloat(t.price), 0);
-            const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-            const grandTotal = subtotal - discount;
+            const discountPercent = parseFloat(document.getElementById('pDiscount').value) || 0;
+            const discountAmount = (subtotal * discountPercent) / 100;
+            const grandTotal = Math.round(subtotal - discountAmount);
 
             const newPatient = {
                 receiptNo: 'DL-' + (patients.length + 3204),
@@ -793,7 +813,8 @@
                 doctor: document.getElementById('pDoctor').value,
                 tests: selectedTests,
                 subtotal: subtotal,
-                discount: discount,
+                discount: discountPercent,
+                discountAmount: discountAmount,
                 grandTotal: grandTotal,
                 date: new Date().toISOString().split('T')[0]
             };
@@ -831,7 +852,7 @@
             const discountRow = document.getElementById('modalSlipDiscountRow');
             if(p.discount > 0) {
                 discountRow.classList.remove('hidden');
-                document.getElementById('modalSlipDiscountVal').innerText = `Rs. ${p.discount.toLocaleString()}`;
+                document.getElementById('modalSlipDiscountVal').innerText = `${p.discount}% (Rs. ${Math.round(p.discountAmount || 0).toLocaleString()})`;
             } else {
                 discountRow.classList.add('hidden');
             }
@@ -1183,11 +1204,11 @@
 
         function setTheme(themeClass) {
             currentTheme = themeClass;
-            document.getElementById('appBody').className = currentTheme;
+            document.getElementById('appBody').className = currentTheme + " flex flex-col min-h-screen";
             localStorage.setItem('danish_theme', currentTheme);
         }
 
-        /* NEW FUNCTIONS FOR EXPORT JSON & PDF */
+        /* EXPORT & RESTORE JSON BACKUP */
         function exportJSONBackup() {
             const data = {
                 tests: tests,
@@ -1205,6 +1226,46 @@
             a.download = `Danish_Lab_Backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        function restoreJSONBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (confirm("Are you sure you want to restore this backup? Existing data will be overwritten.")) {
+                        if (importedData.tests) {
+                            tests = importedData.tests;
+                            localStorage.setItem('danish_tests', JSON.stringify(tests));
+                        }
+                        if (importedData.patients) {
+                            patients = importedData.patients;
+                            localStorage.setItem('danish_patients', JSON.stringify(patients));
+                        }
+                        if (importedData.reports) {
+                            reports = importedData.reports;
+                            localStorage.setItem('danish_reports', JSON.stringify(reports));
+                        }
+                        if (importedData.credentials) {
+                            credentials = importedData.credentials;
+                            localStorage.setItem('danish_credentials', JSON.stringify(credentials));
+                        }
+                        if (importedData.permissions) {
+                            permissions = importedData.permissions;
+                            localStorage.setItem('danish_permissions', JSON.stringify(permissions));
+                        }
+
+                        alert("Backup restored successfully!");
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("Invalid JSON Backup File!");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function exportPatientListPDF() {
