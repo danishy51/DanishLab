@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danish Lab — Cash Receipt & Report Desk</title>
+    <title>Danish Lab — Cash Receipt & Report Management Desk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
-            --primary-bg: #1e3a8a;
-            --primary-hover: #1e40af;
+            --primary-bg: #0f172a;
+            --primary-hover: #1e293b;
+            --accent-color: #0284c7;
             --card-bg: #ffffff;
-            --text-color: #1f2937;
+            --text-color: #0f172a;
         }
-        body.theme-classic { --primary-bg: #1e3a8a; --primary-hover: #1e40af; }
-        body.theme-emerald { --primary-bg: #065f46; --primary-hover: #047857; }
-        body.theme-midnight { --primary-bg: #0f172a; --primary-hover: #1e293b; }
-        body.theme-purple { --primary-bg: #581c87; --primary-hover: #6b21a8; }
+        /* Premium Healthcare Themes */
+        body.theme-clinical { --primary-bg: #0f172a; --primary-hover: #1e293b; --accent-color: #0284c7; }
+        body.theme-emerald { --primary-bg: #064e3b; --primary-hover: #065f46; --accent-color: #059669; }
+        body.theme-royal { --primary-bg: #312e81; --primary-hover: #3730a3; --accent-color: #4f46e5; }
+        body.theme-darkmode { --primary-bg: #18181b; --primary-hover: #27272a; --accent-color: #38bdf8; }
 
-        body { background-color: #f3f4f6; color: var(--text-color); font-family: sans-serif; }
-        .nav-header { background-color: var(--primary-bg); }
-        .btn-primary-theme { background-color: var(--primary-bg); }
-        .btn-primary-theme:hover { background-color: var(--primary-hover); }
+        body { background-color: #f8fafc; color: var(--text-color); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .nav-header { background: linear-gradient(135deg, var(--primary-bg) 0%, var(--primary-hover) 100%); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .btn-primary-theme { background-color: var(--accent-color); transition: all 0.2s ease; }
+        .btn-primary-theme:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
         @media print {
             body * { visibility: hidden !important; }
@@ -36,175 +38,187 @@
         }
     </style>
 </head>
-<body class="theme-classic" id="appBody">
+<body class="theme-clinical" id="appBody">
 
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-700 to-blue-900 p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+    <!-- LOGIN SCREEN WITH PREMIUM BACKGROUND -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #065f46 100%);">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20">
             <div class="text-center mb-6">
-                <div class="inline-block p-3 bg-blue-50 rounded-full text-blue-700 text-3xl mb-2">🧬</div>
-                <h1 class="text-2xl font-bold text-gray-800">Danish Lab</h1>
-                <p class="text-sm text-gray-500">Cash Receipt & Report Management Desk</p>
+                <div class="inline-flex p-4 bg-gradient-to-tr from-sky-500 to-blue-600 rounded-2xl text-white text-3xl mb-3 shadow-lg"><i class="fa-solid fa-dna"></i></div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Danish Lab</h1>
+                <p class="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">Cash Receipt & Report Management Desk</p>
             </div>
-            <div id="loginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-lg text-center font-medium"></div>
+            <div id="loginError" class="hidden mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl text-center font-semibold border border-rose-200"></div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
-                    <input type="text" id="loginUser" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-user text-sm"></i></span>
+                        <input type="text" id="loginUser" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="loginPass" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-lock text-sm"></i></span>
+                        <input type="password" id="loginPass" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
+                    </div>
                 </div>
-                <button type="submit" class="w-full py-3 bg-blue-900 text-white font-bold rounded-lg shadow hover:bg-blue-800 transition">Login to System</button>
+                <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-xl shadow-slate-900/10 transition active:scale-[0.99]">Login to System</button>
             </form>
-            <div id="defaultCredsText" class="mt-4 text-xs text-center text-gray-400"></div>
+            <div id="defaultCredsText" class="mt-5 text-[11px] text-center text-slate-400 font-medium"></div>
         </div>
     </div>
 
-    <!-- DIGITAL SLIP VIEW (WHEN QR SCANNED ON PHONE) -->
-    <div id="qrDigitalView" class="hidden min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border-t-4 border-blue-900">
-            <div class="text-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
-                <p class="text-[11px] text-gray-500">Chowk Muneer Shaheed Road | +92 306 7488053</p>
-                <h3 class="text-xs font-bold text-emerald-700 mt-1 uppercase bg-emerald-50 py-1 rounded">OFFICIAL VERIFIED DIGITAL SLIP</h3>
+    <!-- DIGITAL SLIP VIEW (WHEN QR SCANNED) -->
+    <div id="qrDigitalView" class="hidden min-h-screen bg-slate-100 p-4 flex items-center justify-center">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border-t-8 border-sky-600">
+            <div class="text-center border-b border-slate-100 pb-4 mb-4">
+                <h2 class="text-xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
+                <p class="text-[11px] text-slate-500 font-medium">Chowk Muneer Shaheed Road | +92 306 7488053</p>
+                <div class="inline-block mt-2 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider border border-emerald-200">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Official Verified Digital Slip
+                </div>
             </div>
-            <div id="qrContentDetails" class="text-sm space-y-2 mb-4"></div>
-            <button onclick="closeQrView()" class="w-full py-2.5 bg-blue-900 text-white font-bold rounded-lg text-sm">Back to Dashboard / Login</button>
+            <div id="qrContentDetails" class="text-sm space-y-2 mb-6"></div>
+            <button onclick="closeQrView()" class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg">Back to Login / Portal</button>
         </div>
     </div>
 
     <!-- MAIN APP INTERFACE -->
     <div id="mainApp" class="hidden min-h-screen flex flex-col">
-        <header class="nav-header text-white shadow-md sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+        <header class="nav-header text-white sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center space-x-3">
-                    <span class="text-2xl">🧬</span>
-                    <h1 class="text-lg md:text-xl font-bold tracking-wide">Danish Lab — Cash Receipt Desk</h1>
+                    <div class="p-2 bg-white/10 rounded-xl"><i class="fa-solid fa-dna text-xl"></i></div>
+                    <div>
+                        <h1 class="text-base md:text-lg font-bold tracking-tight">Danish Lab</h1>
+                        <p class="text-[10px] text-white/70 tracking-wider uppercase font-medium">Cash Receipt & Report Desk</p>
+                    </div>
                 </div>
-                <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1 md:gap-2"></nav>
+                <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1.5 md:gap-2"></nav>
             </div>
         </header>
 
         <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
 
-            <!-- 1. NEW PATIENT RECEIPT DESK -->
+            <!-- 1. NEW PATIENT DESK -->
             <section id="tab-newPatient" class="tab-content space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    
-                    <div class="lg:col-span-7 bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-900">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus text-blue-900 mr-2"></i> New Patient Receipt Desk</h2>
+                    <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                            <span class="p-2 bg-sky-50 text-sky-600 rounded-xl mr-2 text-sm"><i class="fa-solid fa-user-plus"></i></span> 
+                            New Patient Receipt Desk
+                        </h2>
                         <form id="patientForm" onsubmit="savePatient(event)" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Patient Full Name</label>
-                                    <input type="text" id="pName" oninput="updateLiveSlip()" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Patient Full Name</label>
+                                    <input type="text" id="pName" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Complete Address</label>
-                                    <input type="text" id="pAddress" oninput="updateLiveSlip()" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Complete Address</label>
+                                    <input type="text" id="pAddress" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Age (Years)</label>
-                                    <input type="number" id="pAge" oninput="updateLiveSlip()" required min="0" max="120" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Age (Years)</label>
+                                    <input type="number" id="pAge" oninput="updateLiveSlip()" required min="0" max="120" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
-                                    <select id="pGender" onchange="updateLiveSlip()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Gender</label>
+                                    <select id="pGender" onchange="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Referred By (Doctor)</label>
-                                    <input type="text" id="pDoctor" value="Self" oninput="updateLiveSlip()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Referred By (Doctor)</label>
+                                    <input type="text" id="pDoctor" value="Self" oninput="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Select Investigation(s) Required</label>
-                                <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border max-h-48 overflow-y-auto"></div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Investigation(s) Required</label>
+                                <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 max-h-48 overflow-y-auto"></div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200 items-center">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-sky-50/50 p-4 rounded-2xl border border-sky-100 items-center">
                                 <div>
-                                    <label class="block text-sm font-semibold text-blue-900 mb-1"><i class="fa-solid fa-tag mr-1"></i> Discount Amount (PKR)</label>
-                                    <input type="number" id="pDiscount" value="0" min="0" oninput="calculateTotal()" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                    <label class="block text-xs font-bold text-sky-900 uppercase mb-1"><i class="fa-solid fa-tag mr-1"></i> Discount Amount (PKR)</label>
+                                    <input type="number" id="pDiscount" value="0" min="0" oninput="calculateTotal()" class="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none font-semibold">
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm text-gray-600">Calculated Grand Total:</p>
-                                    <h3 id="displayGrandTotal" class="text-2xl font-black text-blue-900">Rs. 0</h3>
+                                    <p class="text-xs text-slate-500 font-bold uppercase">Grand Total:</p>
+                                    <h3 id="displayGrandTotal" class="text-2xl font-black text-sky-900">Rs. 0</h3>
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-3 btn-primary-theme text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
+                            <button type="submit" class="w-full py-3.5 btn-primary-theme text-white font-bold rounded-xl shadow-lg shadow-sky-600/20"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
                         </form>
                     </div>
 
-                    <!-- Live Slip Preview -->
-                    <div class="lg:col-span-5 bg-white rounded-xl shadow-md p-6 border sticky top-20">
-                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2"><i class="fa-solid fa-eye text-blue-900 mr-1"></i> Live Slip Preview</h3>
-                        <div class="border border-dashed border-gray-400 p-4 rounded-xl bg-white text-xs">
-                            <div class="text-center border-b pb-3 mb-3">
-                                <h2 class="text-lg font-black text-blue-900 tracking-wider">Danish Lab</h2>
-                                <p class="text-[10px] text-gray-500">Chowk Muneer Shaheed Road | +92 306 7488053</p>
-                                <h3 class="text-xs font-bold text-blue-800 mt-1 uppercase">CASH RECEIPT SLIP</h3>
+                    <!-- Live Preview -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sticky top-20">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-eye text-sky-600 mr-1"></i> Live Slip Preview</h3>
+                        <div class="border border-dashed border-slate-300 p-4 rounded-2xl bg-white text-xs space-y-3">
+                            <div class="text-center border-b border-slate-100 pb-3">
+                                <h2 class="text-base font-black text-slate-900 tracking-wider">Danish Lab</h2>
+                                <p class="text-[10px] text-slate-500 font-medium">Chowk Muneer Shaheed Road | +92 306 7488053</p>
+                                <h3 class="text-[11px] font-bold text-sky-800 mt-1 uppercase tracking-wider bg-sky-50 py-1 rounded-md">Cash Receipt Slip</h3>
                             </div>
-                            <div class="grid grid-cols-2 mb-3 gap-1">
-                                <div><strong>Name:</strong> <span id="liveSlipName" class="text-gray-700">---</span></div>
-                                <div><strong>Date:</strong> <span id="liveSlipDate" class="text-gray-700">---</span></div>
-                                <div><strong>Age/Gen:</strong> <span id="liveSlipAgeGender" class="text-gray-700">---</span></div>
-                                <div><strong>Receipt:</strong> <span class="text-blue-900 font-bold">DL-Preview</span></div>
-                                <div class="col-span-2"><strong>Address:</strong> <span id="liveSlipAddress" class="text-gray-700">---</span></div>
-                                <div class="col-span-2"><strong>Ref By:</strong> <span id="liveSlipDoctor" class="text-gray-700">---</span></div>
+                            <div class="grid grid-cols-2 gap-1.5 text-slate-700">
+                                <div><strong>Name:</strong> <span id="liveSlipName" class="text-slate-900 font-medium">---</span></div>
+                                <div><strong>Date:</strong> <span id="liveSlipDate" class="text-slate-900 font-medium">---</span></div>
+                                <div><strong>Age/Gen:</strong> <span id="liveSlipAgeGender" class="text-slate-900 font-medium">---</span></div>
+                                <div><strong>Receipt:</strong> <span class="text-sky-700 font-bold">DL-Preview</span></div>
+                                <div class="col-span-2"><strong>Address:</strong> <span id="liveSlipAddress" class="text-slate-900 font-medium">---</span></div>
+                                <div class="col-span-2"><strong>Ref By:</strong> <span id="liveSlipDoctor" class="text-slate-900 font-medium">---</span></div>
                             </div>
-                            <table class="w-full mb-3 border-t border-b text-xs">
+                            <table class="w-full border-t border-b border-slate-100 text-xs">
                                 <thead>
-                                    <tr class="bg-gray-50 text-left">
-                                        <th class="py-1 px-1">Test Name</th>
-                                        <th class="py-1 px-1 text-right">Price</th>
+                                    <tr class="bg-slate-50 text-slate-500 text-left">
+                                        <th class="py-1.5 px-1">Test Name</th>
+                                        <th class="py-1.5 px-1 text-right">Price</th>
                                     </tr>
                                 </thead>
                                 <tbody id="liveSlipItemsTable">
-                                    <tr><td colspan="2" class="py-2 text-center text-gray-400">No tests selected</td></tr>
+                                    <tr><td colspan="2" class="py-3 text-center text-slate-400">No tests selected</td></tr>
                                 </tbody>
                             </table>
-                            <div id="liveSlipDiscountRow" class="flex justify-between mb-1 text-red-600 font-semibold hidden">
+                            <div id="liveSlipDiscountRow" class="flex justify-between text-rose-600 font-bold hidden">
                                 <span>Discount:</span>
                                 <span id="liveSlipDiscountVal">Rs. 0</span>
                             </div>
-                            <div class="text-center font-bold text-sm text-blue-900 border-t pt-2">
+                            <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
                                 Total: <span id="liveSlipTotalAmount">Rs. 0</span>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
             <!-- 2. PATIENT LIST -->
             <section id="tab-patientList" class="tab-content hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
-                        <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-users text-blue-900 mr-2"></i> Patient List & History</h2>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
+                        <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-users text-sky-600 mr-2"></i> Patient List & History</h2>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="relative">
-                                <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                                <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-sky-500">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                             </div>
-                            <div class="flex items-center space-x-1 bg-gray-50 p-1.5 rounded-lg border">
-                                <i class="fa-solid fa-calendar-days text-blue-900 text-sm ml-1"></i>
-                                <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-white border rounded px-2 py-1 text-xs outline-none">
-                                <button onclick="clearDateFilter()" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-xs rounded font-medium">Reset</button>
+                            <div class="flex items-center space-x-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                                <i class="fa-solid fa-calendar-days text-sky-600 text-xs ml-2"></i>
+                                <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-transparent border-none text-xs outline-none px-1">
+                                <button onclick="clearDateFilter()" class="px-2.5 py-1 bg-white hover:bg-slate-200 text-xs rounded-lg font-bold shadow-sm">Reset</button>
                             </div>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-100 text-gray-700 border-b">
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-100">
                                     <th class="p-3">Receipt No</th>
                                     <th class="p-3">Patient Name</th>
                                     <th class="p-3">Age/Gender</th>
@@ -222,35 +236,34 @@
 
             <!-- 3. TEST REPORT DESK -->
             <section id="tab-testReport" class="tab-content hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-md p-6 max-w-4xl mx-auto border-t-4 border-blue-900">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-flask text-blue-900 mr-2"></i> Add Patient Test Report</h2>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 max-w-4xl mx-auto">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4"><i class="fa-solid fa-flask text-sky-600 mr-2"></i> Add Patient Test Report</h2>
                     <div class="flex gap-2 mb-6">
-                        <input type="text" id="searchReportInput" placeholder="Search Patient by Receipt No or Name (e.g., DL-3204)" class="flex-grow px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button onclick="searchPatientForReport()" class="px-6 py-2 btn-primary-theme text-white font-semibold rounded-lg shadow">Search</button>
+                        <input type="text" id="searchReportInput" placeholder="Search Patient by Receipt No or Name (e.g., DL-3204)" class="flex-grow px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm">
+                        <button onclick="searchPatientForReport()" class="px-6 py-2.5 btn-primary-theme text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md">Search</button>
                     </div>
-
                     <div id="reportFormContainer" class="hidden space-y-4">
-                        <div id="patientReportInfo" class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm"></div>
+                        <div id="patientReportInfo" class="bg-sky-50/50 p-4 rounded-xl border border-sky-100 text-xs space-y-1"></div>
                         <div id="testInputsContainer" class="space-y-4"></div>
-                        <button onclick="saveTestReport()" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Test Report</button>
+                        <button onclick="saveTestReport()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Complete Test Report</button>
                     </div>
                 </div>
             </section>
 
             <!-- 4. REPORT LIST -->
             <section id="tab-reportList" class="tab-content hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
-                        <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-file-medical text-blue-900 mr-2"></i> Completed Reports List</h2>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
+                        <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-medical text-sky-600 mr-2"></i> Completed Reports List</h2>
                         <div class="relative">
-                            <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                            <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-sky-500">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-100 text-gray-700 border-b">
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-100">
                                     <th class="p-3">Receipt No</th>
                                     <th class="p-3">Patient Name</th>
                                     <th class="p-3">Report Date</th>
@@ -267,30 +280,29 @@
             <!-- 5. SETTINGS -->
             <section id="tab-settings" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <div class="bg-white rounded-xl shadow-md p-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-sliders text-blue-900 mr-2"></i> Manage Tests & Normal Ranges</h2>
-                        <form onsubmit="addNewTest(event)" class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg border">
-                            <h3 class="text-sm font-bold text-gray-700">Add New Test</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-sliders text-sky-600 mr-2"></i> Manage Tests & Normal Ranges</h2>
+                        <form onsubmit="addNewTest(event)" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase">Add New Investigation Test</h3>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Test Name</label>
-                                <input type="text" id="newTestName" required class="w-full px-3 py-1.5 border rounded text-sm outline-none">
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Test Name</label>
+                                <input type="text" id="newTestName" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Price (PKR)</label>
-                                    <input type="number" id="newTestPrice" required min="0" class="w-full px-3 py-1.5 border rounded text-sm outline-none">
+                                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Price (PKR)</label>
+                                    <input type="number" id="newTestPrice" required min="0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Normal Range</label>
-                                    <input type="text" id="newTestRange" required placeholder="e.g. 13-17 g/dL" class="w-full px-3 py-1.5 border rounded text-sm outline-none">
+                                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Normal Range</label>
+                                    <input type="text" id="newTestRange" required placeholder="e.g. 13-17 g/dL" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none">
                                 </div>
                             </div>
-                            <button type="submit" class="w-full py-2 btn-primary-theme text-white text-sm font-bold rounded shadow">Add Test</button>
+                            <button type="submit" class="w-full py-2.5 btn-primary-theme text-white text-xs font-bold rounded-xl shadow">Add Test</button>
                         </form>
                         <div class="overflow-x-auto max-h-48 overflow-y-auto">
                             <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-gray-100 sticky top-0">
+                                <thead class="bg-slate-50 sticky top-0 text-slate-500">
                                     <tr>
                                         <th class="p-2">Test Name</th>
                                         <th class="p-2">Price</th>
@@ -304,22 +316,22 @@
                     </div>
 
                     <div class="space-y-6">
-                        <div class="bg-white rounded-xl shadow-md p-6">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-gear text-blue-900 mr-2"></i> User Credentials & Rights</h2>
-                            <form onsubmit="saveUserCredentials(event)" class="space-y-4 text-sm">
-                                <div class="bg-gray-50 p-3 rounded-lg border space-y-2">
-                                    <h3 class="font-bold text-blue-900">Receptionist Login Info</h3>
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-user-gear text-sky-600 mr-2"></i> User Credentials & Rights</h2>
+                            <form onsubmit="saveUserCredentials(event)" class="space-y-4 text-xs">
+                                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 space-y-2">
+                                    <h3 class="font-bold text-sky-900">Receptionist Login Info</h3>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Username</label>
-                                            <input type="text" id="editReceptUser" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Username</label>
+                                            <input type="text" id="editReceptUser" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
-                                            <input type="text" id="editReceptPass" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Password</label>
+                                            <input type="text" id="editReceptPass" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
                                         </div>
                                     </div>
-                                    <div class="flex flex-wrap gap-3 text-xs pt-2">
+                                    <div class="flex flex-wrap gap-3 pt-1 text-slate-600">
                                         <label><input type="checkbox" id="perm_recept_newPatient" checked disabled> New Patient</label>
                                         <label><input type="checkbox" id="perm_recept_patientList"> Patient List</label>
                                         <label><input type="checkbox" id="perm_recept_testReport"> Test Report</label>
@@ -327,129 +339,128 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-gray-50 p-3 rounded-lg border space-y-2">
-                                    <h3 class="font-bold text-blue-900">Doctor / Expert Login Info</h3>
+                                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 space-y-2">
+                                    <h3 class="font-bold text-sky-900">Doctor / Expert Login Info</h3>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Username</label>
-                                            <input type="text" id="editDoctorUser" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Username</label>
+                                            <input type="text" id="editDoctorUser" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
-                                            <input type="text" id="editDoctorPass" required class="w-full px-2 py-1 border rounded text-xs bg-white">
+                                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Password</label>
+                                            <input type="text" id="editDoctorPass" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
                                         </div>
                                     </div>
-                                    <div class="flex flex-wrap gap-3 text-xs pt-2">
+                                    <div class="flex flex-wrap gap-3 pt-1 text-slate-600">
                                         <label><input type="checkbox" id="perm_doctor_newPatient"> New Patient</label>
                                         <label><input type="checkbox" id="perm_doctor_patientList"> Patient List</label>
                                         <label><input type="checkbox" id="perm_doctor_testReport"> Test Report</label>
                                         <label><input type="checkbox" id="perm_doctor_reportList"> Report List</label>
                                     </div>
                                 </div>
-                                <button type="submit" class="w-full py-2 btn-primary-theme text-white font-bold rounded shadow text-sm">Save Login Info & Permissions</button>
+                                <button type="submit" class="w-full py-2.5 btn-primary-theme text-white font-bold rounded-xl shadow text-xs uppercase tracking-wider">Save Login Info & Permissions</button>
                             </form>
                         </div>
 
-                        <div class="bg-white rounded-xl shadow-md p-6">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-palette text-blue-900 mr-2"></i> Dashboard Theme</h2>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="setTheme('theme-classic')" class="p-2 rounded bg-blue-900 text-white font-semibold text-xs shadow">Classic Blue</button>
-                                <button onclick="setTheme('theme-emerald')" class="p-2 rounded bg-emerald-700 text-white font-semibold text-xs shadow">Emerald Green</button>
-                                <button onclick="setTheme('theme-midnight')" class="p-2 rounded bg-slate-900 text-white font-semibold text-xs shadow">Midnight Slate</button>
-                                <button onclick="setTheme('theme-purple')" class="p-2 rounded bg-purple-800 text-white font-semibold text-xs shadow">Royal Purple</button>
+                        <!-- PREMIUM THEME SELECTOR -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-palette text-sky-600 mr-2"></i> Premium UI Themes</h2>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button onclick="setTheme('theme-clinical')" class="p-3 rounded-xl bg-slate-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Clinical Dark Blue</button>
+                                <button onclick="setTheme('theme-emerald')" class="p-3 rounded-xl bg-emerald-800 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Emerald Healthcare</button>
+                                <button onclick="setTheme('theme-royal')" class="p-3 rounded-xl bg-indigo-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Royal Indigo</button>
+                                <button onclick="setTheme('theme-darkmode')" class="p-3 rounded-xl bg-zinc-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Minimal Zinc</button>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
-
         </main>
     </div>
 
     <!-- CASH RECEIPT MODAL -->
-    <div id="receiptModal" class="fixed inset-0 bg-black/60 hidden items-start justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 relative my-8">
-            <button onclick="closeReceiptModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
-            <div id="receiptPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
-                <div class="text-center border-b pb-4 mb-4">
-                    <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
-                    <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
-                    <h3 class="text-sm font-bold text-blue-800 mt-1 uppercase tracking-wide">CASH RECEIPT SLIP</h3>
+    <div id="receiptModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-start justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 relative my-8">
+            <button onclick="closeReceiptModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold no-print">&times;</button>
+            <div id="receiptPrintArea" class="border border-dashed border-slate-300 p-6 rounded-2xl bg-white space-y-4">
+                <div class="text-center border-b border-slate-100 pb-4">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
+                    <p class="text-xs text-slate-500 font-medium">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
+                    <h3 class="text-xs font-bold text-sky-800 mt-1 uppercase tracking-widest bg-sky-50 py-1 rounded-lg">Cash Receipt Slip</h3>
                 </div>
-                <div class="grid grid-cols-2 text-sm mb-4 gap-2">
-                    <div><strong>Patient Name:</strong> <span id="modalSlipName">---</span></div>
-                    <div><strong>Date:</strong> <span id="modalSlipDate">---</span></div>
-                    <div><strong>Age / Gender:</strong> <span id="modalSlipAgeGender">---</span></div>
-                    <div><strong>Receipt No:</strong> <span id="modalSlipReceiptNo">---</span></div>
-                    <div><strong>Address:</strong> <span id="modalSlipAddress">---</span></div>
+                <div class="grid grid-cols-2 text-xs gap-2 text-slate-700">
+                    <div><strong>Patient Name:</strong> <span id="modalSlipName" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Date:</strong> <span id="modalSlipDate" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Age / Gender:</strong> <span id="modalSlipAgeGender" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="modalSlipReceiptNo" class="text-sky-700 font-bold">---</span></div>
+                    <div><strong>Address:</strong> <span id="modalSlipAddress" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Paid Verified</span></div>
-                    <div class="col-span-2"><strong>Ref By:</strong> <span id="modalSlipDoctor">---</span></div>
+                    <div class="col-span-2"><strong>Ref By:</strong> <span id="modalSlipDoctor" class="text-slate-900 font-semibold">---</span></div>
                 </div>
-                <table class="w-full text-sm mb-4 border-t border-b">
+                <table class="w-full text-xs border-t border-b border-slate-100">
                     <thead>
-                        <tr class="border-b bg-gray-50 text-left">
+                        <tr class="border-b bg-slate-50 text-slate-600 text-left">
                             <th class="py-2 px-2">Investigation Description</th>
                             <th class="py-2 px-2 text-right">Price (PKR)</th>
                         </tr>
                     </thead>
                     <tbody id="modalSlipItemsTable"></tbody>
                 </table>
-                <div id="modalSlipDiscountRow" class="flex justify-between text-sm mb-2 text-red-600 font-semibold hidden">
+                <div id="modalSlipDiscountRow" class="flex justify-between text-xs text-rose-600 font-semibold hidden">
                     <span>Discount Applied:</span>
                     <span id="modalSlipDiscountVal">Rs. 0</span>
                 </div>
-                <div class="text-center font-bold text-base text-blue-900 border-t pt-2 mb-4">
+                <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
                     Total Cash Paid: <span id="modalSlipTotalAmount">Rs. 0</span>
                 </div>
-                <div class="flex justify-center mb-2">
-                    <div id="modalReceiptQrcode" class="p-2 bg-white border rounded"></div>
+                <div class="flex justify-center pt-2">
+                    <div id="modalReceiptQrcode" class="p-2 bg-white border border-slate-200 rounded-xl shadow-sm"></div>
                 </div>
-                <div class="text-center text-[10px] text-gray-400">Scan code to verify official digital lab receipt</div>
+                <div class="text-center text-[10px] text-slate-400 font-medium">Scan code to verify official digital lab receipt</div>
             </div>
             <div class="mt-6 flex gap-3 no-print">
-                <button onclick="printReceipt()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow"><i class="fa-solid fa-print mr-2"></i> Print Receipt</button>
-                <button onclick="closeReceiptModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold rounded-lg">Close</button>
+                <button onclick="printReceipt()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 text-xs uppercase tracking-wider"><i class="fa-solid fa-print mr-2"></i> Print Receipt</button>
+                <button onclick="closeReceiptModal()" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs uppercase tracking-wider">Close</button>
             </div>
         </div>
     </div>
 
     <!-- TEST REPORT MODAL -->
-    <div id="reportModal" class="fixed inset-0 bg-black/60 hidden items-start justify-center z-50 p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative my-8">
-            <button onclick="closeReportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
-            <div id="reportPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
-                <div class="text-center border-b pb-4 mb-4">
-                    <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
-                    <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
-                    <h3 class="text-sm font-bold text-blue-800 mt-2 uppercase tracking-wide">OFFICIAL TEST REPORT</h3>
+    <div id="reportModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-start justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 relative my-8">
+            <button onclick="closeReportModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold no-print">&times;</button>
+            <div id="reportPrintArea" class="border border-dashed border-slate-300 p-6 rounded-2xl bg-white space-y-4">
+                <div class="text-center border-b border-slate-100 pb-4">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
+                    <p class="text-xs text-slate-500 font-medium">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
+                    <h3 class="text-xs font-bold text-sky-800 mt-2 uppercase tracking-widest bg-sky-50 py-1 rounded-lg">Official Test Report</h3>
                 </div>
-                <div class="grid grid-cols-2 text-sm mb-4 gap-2">
-                    <div><strong>Patient Name:</strong> <span id="rModalPatientName">---</span></div>
-                    <div><strong>Report Date:</strong> <span id="rModalReportDate">---</span></div>
-                    <div><strong>Age / Gender:</strong> <span id="rModalAgeGender">---</span></div>
-                    <div><strong>Receipt No:</strong> <span id="rModalReceiptNo">---</span></div>
-                    <div><strong>Address:</strong> <span id="rModalAddress">---</span></div>
+                <div class="grid grid-cols-2 text-xs gap-2 text-slate-700">
+                    <div><strong>Patient Name:</strong> <span id="rModalPatientName" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Report Date:</strong> <span id="rModalReportDate" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Age / Gender:</strong> <span id="rModalAgeGender" class="text-slate-900 font-semibold">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="rModalReceiptNo" class="text-sky-700 font-bold">---</span></div>
+                    <div><strong>Address:</strong> <span id="rModalAddress" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Verified Report</span></div>
-                    <div class="col-span-2"><strong>Ref By:</strong> <span id="rModalRefBy">---</span></div>
+                    <div class="col-span-2"><strong>Ref By:</strong> <span id="rModalRefBy" class="text-slate-900 font-semibold">---</span></div>
                 </div>
-                <table class="w-full text-sm mb-6 border-t border-b">
+                <table class="w-full text-xs border-t border-b border-slate-100 mb-4">
                     <thead>
-                        <tr class="border-b bg-gray-50 text-left">
+                        <tr class="border-b bg-slate-50 text-slate-600 text-left">
                             <th class="py-2 px-2">Investigation Performed & Normal Range</th>
                             <th class="py-2 px-2 text-right">Observed Result</th>
                         </tr>
                     </thead>
                     <tbody id="rModalTestResultsTable"></tbody>
                 </table>
-                <div class="flex justify-center mb-2">
-                    <div id="rModalQrcode" class="p-2 bg-white border rounded"></div>
+                <div class="flex justify-center pt-2">
+                    <div id="rModalQrcode" class="p-2 bg-white border border-slate-200 rounded-xl shadow-sm"></div>
                 </div>
-                <div class="text-center text-[10px] text-gray-400">Scan code to verify official digital lab report</div>
+                <div class="text-center text-[10px] text-slate-400 font-medium">Scan code to verify official digital lab report</div>
             </div>
             <div class="mt-6 flex gap-3 no-print">
-                <button onclick="printReport()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow"><i class="fa-solid fa-print mr-2">* Print Report Slip</i></button>
-                <button onclick="closeReportModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold rounded-lg">Close</button>
+                <button onclick="printReport()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 text-xs uppercase tracking-wider"><i class="fa-solid fa-print mr-2"></i> Print Report Slip</button>
+                <button onclick="closeReportModal()" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs uppercase tracking-wider">Close</button>
             </div>
         </div>
     </div>
@@ -466,7 +477,7 @@
         let tests = JSON.parse(localStorage.getItem('danish_tests')) || defaultTests;
         let patients = JSON.parse(localStorage.getItem('danish_patients')) || [];
         let reports = JSON.parse(localStorage.getItem('danish_reports')) || [];
-        let currentTheme = localStorage.getItem('danish_theme') || 'theme-classic';
+        let currentTheme = localStorage.getItem('danish_theme') || 'theme-clinical';
         let currentUserRole = sessionStorage.getItem('danish_active_role');
 
         let credentials = JSON.parse(localStorage.getItem('danish_credentials')) || {
@@ -482,12 +493,11 @@
         document.getElementById('appBody').className = currentTheme;
         updateLoginHint();
 
-        // Check URL parameters for QR scan view ONLY IF NO ACTIVE SESSION OR EXPLICIT QR
         const urlParams = new URLSearchParams(window.location.search);
         const qrReceiptNo = urlParams.get('receipt');
 
         window.addEventListener('DOMContentLoaded', () => {
-            if(qrReceiptNo && !currentUserRole) {
+            if(qrReceiptNo) {
                 showQrDigitalSlip(qrReceiptNo);
             } else if(currentUserRole) {
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -505,27 +515,27 @@
             const container = document.getElementById('qrContentDetails');
 
             if(!patient) {
-                container.innerHTML = `<div class="text-center text-red-600 font-semibold py-6">Receipt not found or invalid QR code!</div>`;
+                container.innerHTML = `<div class="text-center text-rose-600 font-bold py-6">Receipt not found or invalid QR code!</div>`;
                 return;
             }
 
-            let testsHtml = patient.tests.map(t => `<li class="flex justify-between border-b py-1 text-xs"><span>${t.name}</span><span class="font-bold">Rs. ${t.price}</span></li>`).join('');
+            let testsHtml = patient.tests.map(t => `<li class="flex justify-between border-b border-slate-100 py-1.5 text-xs"><span class="text-slate-700">${t.name}</span><span class="font-bold text-slate-900">Rs. ${t.price}</span></li>`).join('');
 
             container.innerHTML = `
-                <div class="bg-gray-50 p-3 rounded-lg border space-y-1 text-xs">
-                    <p><strong>Receipt No:</strong> <span class="text-blue-900 font-bold">${patient.receiptNo}</span></p>
-                    <p><strong>Patient Name:</strong> ${patient.name}</p>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-1.5 text-xs text-slate-700">
+                    <p><strong>Receipt No:</strong> <span class="text-sky-700 font-bold">${patient.receiptNo}</span></p>
+                    <p><strong>Patient Name:</strong> <span class="text-slate-900 font-semibold">${patient.name}</span></p>
                     <p><strong>Age / Gender:</strong> ${patient.age} Yrs / ${patient.gender}</p>
                     <p><strong>Address:</strong> ${patient.address}</p>
                     <p><strong>Ref By:</strong> ${patient.doctor}</p>
                     <p><strong>Date:</strong> ${patient.date}</p>
                     <p><strong>Status:</strong> <span class="text-emerald-600 font-bold">Paid Verified</span></p>
                 </div>
-                <div class="mt-3">
-                    <p class="font-bold text-xs text-gray-700 mb-1">Investigations:</p>
+                <div class="mt-4">
+                    <p class="font-bold text-xs text-slate-700 uppercase tracking-wider mb-2">Investigations Performed:</p>
                     <ul class="space-y-1">${testsHtml}</ul>
                 </div>
-                <div class="mt-3 pt-2 border-t flex justify-between font-bold text-sm text-blue-900">
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between font-black text-sm text-sky-900">
                     <span>Total Paid:</span>
                     <span>Rs. ${patient.grandTotal.toLocaleString()}</span>
                 </div>
@@ -609,22 +619,22 @@
                 }
 
                 if(hasAccess) {
-                    nav.innerHTML += `<button onclick="switchTab('${t.id}')" id="nav-${t.id}" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid ${t.icon} mr-1"></i> ${t.name}</button>`;
+                    nav.innerHTML += `<button onclick="switchTab('${t.id}')" id="nav-${t.id}" class="px-3 py-2 rounded-xl text-xs font-semibold hover:bg-white/10 transition flex items-center"><i class="fa-solid ${t.icon} mr-1.5"></i> ${t.name}</button>`;
                 }
             });
 
-            nav.innerHTML += `<button onclick="handleLogout()" class="px-3 py-1.5 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 transition ml-2"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>`;
+            nav.innerHTML += `<button onclick="handleLogout()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-rose-600/80 hover:bg-rose-600 text-white transition ml-2"><i class="fa-solid fa-right-from-bracket mr-1.5"></i> Logout</button>`;
         }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('header nav button').forEach(el => el.classList.remove('bg-white/30', 'font-bold'));
+            document.querySelectorAll('header nav button').forEach(el => el.classList.remove('bg-white/20', 'font-bold'));
             
             const targetTab = document.getElementById(`tab-${tabId}`);
             if(targetTab) targetTab.classList.remove('hidden');
             
             const activeBtn = document.getElementById(`nav-${tabId}`);
-            if(activeBtn) activeBtn.classList.add('bg-white/30', 'font-bold');
+            if(activeBtn) activeBtn.classList.add('bg-white/20', 'font-bold');
 
             if(tabId === 'patientList') renderPatientList();
             if(tabId === 'reportList') renderReportList();
@@ -637,9 +647,9 @@
             container.innerHTML = '';
             tests.forEach(t => {
                 container.innerHTML += `
-                    <label class="flex items-center space-x-2 text-sm cursor-pointer p-2 bg-white rounded border hover:bg-blue-50 transition">
-                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-blue-900 focus:ring-blue-500">
-                        <span class="font-medium text-gray-800">${t.name} — Rs. ${t.price}</span>
+                    <label class="flex items-center space-x-2.5 text-xs cursor-pointer p-2.5 bg-white rounded-xl border border-slate-200/60 hover:border-sky-300 transition">
+                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-sky-600 focus:ring-sky-500">
+                        <span class="font-bold text-slate-800">${t.name} — <span class="text-sky-700 font-semibold">Rs. ${t.price}</span></span>
                     </label>
                 `;
             });
@@ -682,15 +692,15 @@
                 count++;
                 subtotal += parseFloat(cb.dataset.price);
                 tbody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="py-1 px-1">${cb.dataset.name}</td>
-                        <td class="py-1 px-1 text-right">${parseFloat(cb.dataset.price).toLocaleString()}</td>
+                    <tr class="border-b border-slate-50">
+                        <td class="py-1 px-1 text-slate-700">${cb.dataset.name}</td>
+                        <td class="py-1 px-1 text-right font-bold text-slate-900">${parseFloat(cb.dataset.price).toLocaleString()}</td>
                     </tr>
                 `;
             });
 
             if(count === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="py-2 text-center text-gray-400">No tests selected</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" class="py-3 text-center text-slate-400">No tests selected</td></tr>`;
             }
 
             const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
@@ -761,9 +771,9 @@
             tbody.innerHTML = '';
             p.tests.forEach(t => {
                 tbody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="py-1 px-2">${t.name}</td>
-                        <td class="py-1 px-2 text-right">${parseFloat(t.price).toLocaleString()}</td>
+                    <tr class="border-b border-slate-50">
+                        <td class="py-1.5 px-2 text-slate-700">${t.name}</td>
+                        <td class="py-1.5 px-2 text-right font-bold text-slate-900">${parseFloat(t.price).toLocaleString()}</td>
                     </tr>
                 `;
             });
@@ -821,7 +831,7 @@
             });
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">No patient records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">No patient records found.</td></tr>`;
                 return;
             }
 
@@ -829,16 +839,16 @@
                 const realIndex = patients.indexOf(p);
                 const testNames = p.tests.map(t => t.name).join(', ');
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3 font-semibold text-blue-900">${p.receiptNo}</td>
-                        <td class="p-3 font-medium">${p.name}</td>
-                        <td class="p-3">${p.age} Yrs / ${p.gender}</td>
-                        <td class="p-3 text-xs text-gray-600 max-w-xs truncate">${testNames}</td>
-                        <td class="p-3 font-bold text-emerald-700">Rs. ${p.grandTotal.toLocaleString()}</td>
-                        <td class="p-3 text-xs text-gray-500">${p.date}</td>
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/80">
+                        <td class="p-3 font-bold text-sky-700">${p.receiptNo}</td>
+                        <td class="p-3 font-semibold text-slate-900">${p.name}</td>
+                        <td class="p-3 text-slate-600">${p.age} Yrs / ${p.gender}</td>
+                        <td class="p-3 text-xs text-slate-500 max-w-xs truncate">${testNames}</td>
+                        <td class="p-3 font-bold text-emerald-600">Rs. ${p.grandTotal.toLocaleString()}</td>
+                        <td class="p-3 text-xs text-slate-400 font-medium">${p.date}</td>
                         <td class="p-3 text-center space-x-3">
-                            <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-blue-600 hover:text-blue-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deletePatient(${realIndex})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-sky-600 hover:text-sky-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deletePatient(${realIndex})" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -875,18 +885,18 @@
             container.classList.remove('hidden');
 
             document.getElementById('patientReportInfo').innerHTML = `
-                <strong>${found.name}</strong><br>
-                Receipt #: ${found.receiptNo} | Age/Gender: ${found.age} Yrs / ${found.gender} | Doctor: ${found.doctor}
+                <strong>Patient Name:</strong> ${found.name}<br>
+                <strong>Receipt #:</strong> ${found.receiptNo} | <strong>Age/Gender:</strong> ${found.age} Yrs / ${found.gender} | <strong>Doctor:</strong> ${found.doctor}
             `;
 
             const testInputs = document.getElementById('testInputsContainer');
-            testInputs.innerHTML = '<h3 class="text-sm font-bold text-gray-700">Enter Investigation Results & Observations</h3>';
+            testInputs.innerHTML = '<h3 class="text-xs font-bold text-slate-700 uppercase">Enter Investigation Results & Observations</h3>';
 
             found.tests.forEach((t, i) => {
                 testInputs.innerHTML += `
-                    <div class="bg-gray-50 p-4 rounded-lg border space-y-1">
-                        <label class="block text-sm font-bold text-blue-900">${t.name} <span class="text-xs font-normal text-gray-600">(Normal Range: ${t.range})</span></label>
-                        <textarea id="res_${i}" rows="2" placeholder="Enter test result (e.g., 14.2 g/dL)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"></textarea>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-800">${t.name} <span class="text-[11px] font-normal text-slate-500">(Normal Range: ${t.range})</span></label>
+                        <textarea id="res_${i}" rows="2" placeholder="Enter test result (e.g., 14.2 g/dL)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none text-xs"></textarea>
                     </div>
                 `;
             });
@@ -928,21 +938,21 @@
             const filtered = reports.filter(r => r.name.toLowerCase().includes(searchTxt) || r.receiptNo.toLowerCase().includes(searchTxt));
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">No completed reports found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No completed reports found.</td></tr>`;
                 return;
             }
 
             filtered.forEach((r) => {
                 const realIndex = reports.indexOf(r);
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3 font-semibold text-blue-900">${r.receiptNo}</td>
-                        <td class="p-3 font-medium">${r.name}</td>
-                        <td class="p-3 text-xs text-gray-500">${r.date}</td>
-                        <td class="p-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full font-semibold">• Verified</span></td>
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/80">
+                        <td class="p-3 font-bold text-sky-700">${r.receiptNo}</td>
+                        <td class="p-3 font-semibold text-slate-900">${r.name}</td>
+                        <td class="p-3 text-xs text-slate-400 font-medium">${r.date}</td>
+                        <td class="p-3"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] rounded-full font-bold border border-emerald-200">• Verified</span></td>
                         <td class="p-3 text-center space-x-3">
-                            <button onclick="printReportModal(${realIndex})" class="text-blue-600 hover:text-blue-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deleteReport(${realIndex})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="printReportModal(${realIndex})" class="text-sky-600 hover:text-sky-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deleteReport(${realIndex})" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -970,12 +980,12 @@
             tbody.innerHTML = '';
             r.results.forEach(res => {
                 tbody.innerHTML += `
-                    <tr class="border-b">
+                    <tr class="border-b border-slate-50">
                         <td class="py-2 px-2">
-                            <div class="font-bold text-gray-900">${res.name}</div>
-                            <div class="text-xs text-gray-500">Range: ${res.range}</div>
+                            <div class="font-bold text-slate-900">${res.name}</div>
+                            <div class="text-[11px] text-slate-400">Range: ${res.range}</div>
                         </td>
-                        <td class="py-2 px-2 text-right font-bold text-blue-900">${res.value}</td>
+                        <td class="py-2 px-2 text-right font-bold text-sky-800">${res.value}</td>
                     </tr>
                 `;
             });
@@ -1058,17 +1068,12 @@
             tests.push(newT);
             localStorage.setItem('danish_tests', JSON.stringify(tests));
 
-            dateReset();
-            renderSettingsTests();
-            renderTestsCheckboxes();
-            alert('New test and range added successfully!');
-        }
-
-        function dateReset() {
-            document.getElementById('newTestName'.replace('Name','')).value = '';
             document.getElementById('newTestName').value = '';
             document.getElementById('newTestPrice').value = '';
             document.getElementById('newTestRange').value = '';
+            renderSettingsTests();
+            renderTestsCheckboxes();
+            alert('New test and range added successfully!');
         }
 
         function renderSettingsTests() {
@@ -1078,12 +1083,12 @@
             tests.forEach((t) => {
                 const realIndex = tests.indexOf(t);
                 tbody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-2 font-medium">${t.name}</td>
-                        <td class="p-2">Rs. ${t.price}</td>
-                        <td class="p-2 text-xs text-gray-500">${t.range}</td>
+                    <tr class="border-b border-slate-50">
+                        <td class="p-2 font-bold text-slate-800">${t.name}</td>
+                        <td class="p-2 font-semibold text-sky-700">Rs. ${t.price}</td>
+                        <td class="p-2 text-[11px] text-slate-500">${t.range}</td>
                         <td class="p-2 text-center">
-                            <button onclick="deleteTest(${realIndex})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteTest(${realIndex})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
