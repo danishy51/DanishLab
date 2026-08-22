@@ -27,8 +27,9 @@
 
         @media print {
             body * { visibility: hidden; }
-            #printableSlip, #printableSlip * { visibility: visible; }
-            #printableSlip { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15px; border: none !important; box-shadow: none !important; background: #fff !important; }
+            #receiptPrintArea, #receiptPrintArea *, #modalPrintArea, #modalPrintArea * { visibility: visible; }
+            #receiptPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
+            #modalPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; border: none !important; box-shadow: none !important; background: #fff !important; }
             .no-print { display: none !important; }
         }
     </style>
@@ -68,15 +69,10 @@
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
                 <div class="flex items-center space-x-3">
                     <span class="text-2xl">🧬</span>
-                    <h1 class="text-lg md:text-xl font-bold tracking-wide">Danish Lab — Cash Receipt & Report Desk</h1>
+                    <h1 class="text-lg md:text-xl font-bold tracking-wide">Danish Lab — Cash Receipt Desk</h1>
                 </div>
-                <nav class="flex flex-wrap items-center gap-1 md:gap-2">
-                    <button onclick="switchTab('newPatient')" id="nav-newPatient" class="px-3 py-1.5 rounded-md text-sm font-medium bg-white/20 hover:bg-white/30 transition"><i class="fa-solid fa-user-plus mr-1"></i> New Patient</button>
-                    <button onclick="switchTab('patientList')" id="nav-patientList" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid fa-users mr-1"></i> Patient List</button>
-                    <button onclick="switchTab('testReport')" id="nav-testReport" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid fa-flask mr-1"></i> Test Report</button>
-                    <button onclick="switchTab('reportList')" id="nav-reportList" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid fa-file-medical mr-1"></i> Report List</button>
-                    <button onclick="switchTab('settings')" id="nav-settings" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid fa-gear mr-1"></i> Settings</button>
-                    <button onclick="handleLogout()" class="px-3 py-1.5 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 transition ml-2"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
+                <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1 md:gap-2">
+                    <!-- Dynamically populated based on User Permissions -->
                 </nav>
             </div>
         </header>
@@ -118,9 +114,7 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Select Investigation(s) Required</label>
-                            <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border">
-                                <!-- Dynamically loaded tests with prices and normal ranges -->
-                            </div>
+                            <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border"></div>
                         </div>
 
                         <!-- Discount Section -->
@@ -135,47 +129,8 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-3 btn-primary-theme text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Generate Receipt</button>
+                        <button type="submit" class="w-full py-3 btn-primary-theme text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
                     </form>
-                </div>
-
-                <!-- Live Printable Receipt Slip Preview -->
-                <div id="receiptSlipPreview" class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto border border-dashed border-blue-400">
-                    <div class="text-center border-b pb-4 mb-4">
-                        <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
-                        <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
-                    </div>
-                    <div class="grid grid-cols-2 text-sm mb-4 gap-2">
-                        <div><strong>Patient Name:</strong> <span id="slipName">---</span></div>
-                        <div><strong>Date:</strong> <span id="slipDate">---</span></div>
-                        <div><strong>Age / Gender:</strong> <span id="slipAgeGender">---</span></div>
-                        <div><strong>Receipt No:</strong> <span id="slipReceiptNo">---</span></div>
-                        <div><strong>Address:</strong> <span id="slipAddress">---</span></div>
-                        <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Paid Verified</span></div>
-                        <div class="col-span-2"><strong>Ref By:</strong> <span id="slipDoctor">---</span></div>
-                    </div>
-                    <table class="w-full text-sm mb-4 border-t border-b">
-                        <thead>
-                            <tr class="border-b bg-gray-50 text-left">
-                                <th class="py-2 px-2">Investigation Description</th>
-                                <th class="py-2 px-2 text-right">Price (PKR)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="slipItemsTable">
-                            <!-- Items inserted here -->
-                        </tbody>
-                    </table>
-                    <div id="slipDiscountRow" class="flex justify-between text-sm mb-2 text-red-600 font-semibold hidden">
-                        <span>Discount Applied:</span>
-                        <span id="slipDiscountVal">Rs. 0</span>
-                    </div>
-                    <div class="text-center font-bold text-lg text-blue-900 border-t pt-2 mb-4">
-                        Total Cash Paid: <span id="slipTotalAmount">Rs. 0</span>
-                    </div>
-                    <div class="flex justify-center mb-2">
-                        <div id="qrcode" class="p-2 bg-white border rounded"></div>
-                    </div>
-                    <div class="text-center text-[10px] text-gray-400">Scan code to verify official digital lab receipt</div>
                 </div>
             </section>
 
@@ -184,14 +139,18 @@
                 <div class="bg-white rounded-xl shadow-md p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
                         <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-users text-blue-900 mr-2"></i> Patient List & History</h2>
-                        <!-- Calendar / Date Filter Icon -->
-                        <div class="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg border">
-                            <i class="fa-solid fa-calendar-days text-blue-900 text-lg"></i>
-                            <div class="flex flex-col text-xs">
-                                <span class="font-semibold text-gray-600">Filter Date / Year</span>
-                                <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-white border rounded px-2 py-1 text-xs outline-none">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
                             </div>
-                            <button onclick="clearDateFilter()" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-xs rounded font-medium">Reset</button>
+                            <!-- Date Filter -->
+                            <div class="flex items-center space-x-1 bg-gray-50 p-1.5 rounded-lg border">
+                                <i class="fa-solid fa-calendar-days text-blue-900 text-sm ml-1"></i>
+                                <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-white border rounded px-2 py-1 text-xs outline-none">
+                                <button onclick="clearDateFilter()" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-xs rounded font-medium">Reset</button>
+                            </div>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -207,9 +166,7 @@
                                     <th class="p-3 text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="patientTableBody">
-                                <!-- Data rows -->
-                            </tbody>
+                            <tbody id="patientTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -225,12 +182,8 @@
                     </div>
 
                     <div id="reportFormContainer" class="hidden space-y-4">
-                        <div id="patientReportInfo" class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm">
-                            <!-- Patient info summary -->
-                        </div>
-                        <div id="testInputsContainer" class="space-y-4">
-                            <!-- Dynamically generated test input fields with normal ranges -->
-                        </div>
+                        <div id="patientReportInfo" class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm"></div>
+                        <div id="testInputsContainer" class="space-y-4"></div>
                         <button onclick="saveTestReport()" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-lg shadow transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Test Report</button>
                     </div>
                 </div>
@@ -239,7 +192,14 @@
             <!-- 4. REPORT LIST & SLIP PRINTER -->
             <section id="tab-reportList" class="tab-content hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-3"><i class="fa-solid fa-file-medical text-blue-900 mr-2"></i> Completed Reports List</h2>
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
+                        <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-file-medical text-blue-900 mr-2"></i> Completed Reports List</h2>
+                        <!-- Report List Search Bar -->
+                        <div class="relative">
+                            <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3 py-1.5 pl-8 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left border-collapse">
                             <thead>
@@ -251,15 +211,13 @@
                                     <th class="p-3 text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="reportTableBody">
-                                <!-- Data rows -->
-                            </tbody>
+                            <tbody id="reportTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- 5. SETTINGS & TEST MANAGEMENT & THEMES -->
+            <!-- 5. SETTINGS & TAB PERMISSIONS & THEMES -->
             <section id="tab-settings" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Manage Existing Tests & Ranges -->
@@ -283,8 +241,7 @@
                             </div>
                             <button type="submit" class="w-full py-2 btn-primary-theme text-white text-sm font-bold rounded shadow">Add Test</button>
                         </form>
-
-                        <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                        <div class="overflow-x-auto max-h-48 overflow-y-auto">
                             <table class="w-full text-xs text-left border-collapse">
                                 <thead class="bg-gray-100 sticky top-0">
                                     <tr>
@@ -294,24 +251,50 @@
                                         <th class="p-2 text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="settingsTestsTable">
-                                    <!-- Test list rows -->
-                                </tbody>
+                                <tbody id="settingsTestsTable"></tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Theme Selector & Credentials -->
+                    <!-- User Role & Tab Access Permissions Controller -->
                     <div class="space-y-6">
                         <div class="bg-white rounded-xl shadow-md p-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-shield text-blue-900 mr-2"></i> User Access & Tab Rights</h2>
+                            <p class="text-xs text-gray-500 mb-4">Configure which user role can access which tabs in the top navigation bar:</p>
+                            
+                            <div class="space-y-4 text-sm">
+                                <div class="bg-gray-50 p-3 rounded-lg border">
+                                    <h3 class="font-bold text-blue-900 mb-2">1. Receptionist (recept / 1122)</h3>
+                                    <div class="flex flex-wrap gap-4 text-xs">
+                                        <label><input type="checkbox" id="perm_recept_newPatient" checked disabled> New Patient</label>
+                                        <label><input type="checkbox" id="perm_recept_patientList" onchange="savePermissions()" checked> Patient List</label>
+                                        <label><input type="checkbox" id="perm_recept_testReport" onchange="savePermissions()"> Test Report</label>
+                                        <label><input type="checkbox" id="perm_recept_reportList" onchange="savePermissions()"> Report List</label>
+                                        <label><input type="checkbox" id="perm_recept_settings" onchange="savePermissions()"> Settings</label>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-3 rounded-lg border">
+                                    <h3 class="font-bold text-blue-900 mb-2">2. Doctor / Lab Expert (doctor / 3344)</h3>
+                                    <div class="flex flex-wrap gap-4 text-xs">
+                                        <label><input type="checkbox" id="perm_doctor_newPatient" onchange="savePermissions()"> New Patient</label>
+                                        <label><input type="checkbox" id="perm_doctor_patientList" onchange="savePermissions()" checked> Patient List</label>
+                                        <label><input type="checkbox" id="perm_doctor_testReport" onchange="savePermissions()" checked> Test Report</label>
+                                        <label><input type="checkbox" id="perm_doctor_reportList" onchange="savePermissions()" checked> Report List</label>
+                                        <label><input type="checkbox" id="perm_doctor_settings" onchange="savePermissions()"> Settings</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme Selector -->
+                        <div class="bg-white rounded-xl shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-palette text-blue-900 mr-2"></i> Dashboard Theme Settings</h2>
-                            <p class="text-sm text-gray-600 mb-3">Choose a beautiful theme for your lab dashboard:</p>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button onclick="setTheme('theme-classic')" class="p-3 rounded-lg border-2 border-blue-900 bg-blue-900 text-white font-semibold text-sm shadow hover:opacity-90">Classic Blue</button>
-                                <button onclick="setTheme('theme-emerald')" class="p-3 rounded-lg border-2 border-emerald-700 bg-emerald-700 text-white font-semibold text-sm shadow hover:opacity-90">Emerald Green</button>
-                                <button onclick="setTheme('theme-midnight')" class="p-3 rounded-lg border-2 border-slate-900 bg-slate-900 text-white font-semibold text-sm shadow hover:opacity-90">Midnight Slate</button>
-                                <button onclick="setTheme('theme-purple')" class="p-3 rounded-lg border-2 border-purple-800 bg-purple-800 text-white font-semibold text-sm shadow hover:opacity-90">Royal Purple</button>
-                                <button onclick="setTheme('theme-crimson')" class="p-3 rounded-lg border-2 border-red-800 bg-red-800 text-white font-semibold text-sm shadow hover:opacity-90 col-span-2">Crimson Red</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="setTheme('theme-classic')" class="p-2 rounded bg-blue-900 text-white font-semibold text-xs shadow">Classic Blue</button>
+                                <button onclick="setTheme('theme-emerald')" class="p-2 rounded bg-emerald-700 text-white font-semibold text-xs shadow">Emerald Green</button>
+                                <button onclick="setTheme('theme-midnight')" class="p-2 rounded bg-slate-900 text-white font-semibold text-xs shadow">Midnight Slate</button>
+                                <button onclick="setTheme('theme-purple')" class="p-2 rounded bg-purple-800 text-white font-semibold text-xs shadow">Royal Purple</button>
                             </div>
                         </div>
                     </div>
@@ -321,24 +304,71 @@
         </main>
     </div>
 
-    <!-- MODAL FOR PRINTABLE SLIP / REPORT SLIP -->
-    <div id="printModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <!-- MODAL FOR CASH RECEIPT SLIP PRINTING -->
+    <div id="receiptModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeReceiptModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
+            <div id="receiptPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
+                <div class="text-center border-b pb-4 mb-4">
+                    <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
+                    <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
+                    <h3 class="text-sm font-bold text-blue-800 mt-1 uppercase tracking-wide">CASH RECEIPT SLIP</h3>
+                </div>
+                <div class="grid grid-cols-2 text-sm mb-4 gap-2">
+                    <div><strong>Patient Name:</strong> <span id="modalSlipName">---</span></div>
+                    <div><strong>Date:</strong> <span id="modalSlipDate">---</span></div>
+                    <div><strong>Age / Gender:</strong> <span id="modalSlipAgeGender">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="modalSlipReceiptNo">---</span></div>
+                    <div><strong>Address:</strong> <span id="modalSlipAddress">---</span></div>
+                    <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Paid Verified</span></div>
+                    <div class="col-span-2"><strong>Ref By:</strong> <span id="modalSlipDoctor">---</span></div>
+                </div>
+                <table class="w-full text-sm mb-4 border-t border-b">
+                    <thead>
+                        <tr class="border-b bg-gray-50 text-left">
+                            <th class="py-2 px-2">Investigation Description</th>
+                            <th class="py-2 px-2 text-right">Price (PKR)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalSlipItemsTable"></tbody>
+                </table>
+                <div id="modalSlipDiscountRow" class="flex justify-between text-sm mb-2 text-red-600 font-semibold hidden">
+                    <span>Discount Applied:</span>
+                    <span id="modalSlipDiscountVal">Rs. 0</span>
+                </div>
+                <div class="text-center font-bold text-base text-blue-900 border-t pt-2 mb-4">
+                    Total Cash Paid: <span id="modalSlipTotalAmount">Rs. 0</span>
+                </div>
+                <div class="flex justify-center mb-2">
+                    <div id="modalReceiptQrcode" class="p-2 bg-white border rounded"></div>
+                </div>
+                <div class="text-center text-[10px] text-gray-400">Scan code to verify official digital lab receipt</div>
+            </div>
+            <div class="mt-6 flex gap-3 no-print">
+                <button onclick="window.print()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow"><i class="fa-solid fa-print mr-2"></i> Print Receipt</button>
+                <button onclick="closeReceiptModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold rounded-lg">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FOR TEST REPORT SLIP PRINTING -->
+    <div id="reportModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closePrintModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
-            <div id="printableSlip" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
+            <button onclick="closeReportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold no-print">&times;</button>
+            <div id="modalPrintArea" class="border border-dashed border-gray-400 p-6 rounded-xl bg-white">
                 <div class="text-center border-b pb-4 mb-4">
                     <h2 class="text-2xl font-black text-blue-900 tracking-wider">Danish Lab</h2>
                     <p class="text-xs text-gray-500">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
                     <h3 class="text-sm font-bold text-blue-800 mt-2 uppercase tracking-wide">OFFICIAL TEST REPORT</h3>
                 </div>
                 <div class="grid grid-cols-2 text-sm mb-4 gap-2">
-                    <div><strong>Patient Name:</strong> <span id="modalPatientName">---</span></div>
-                    <div><strong>Report Date:</strong> <span id="modalReportDate">---</span></div>
-                    <div><strong>Age / Gender:</strong> <span id="modalAgeGender">---</span></div>
-                    <div><strong>Receipt No:</strong> <span id="modalReceiptNo">---</span></div>
-                    <div><strong>Address:</strong> <span id="modalAddress">---</span></div>
+                    <div><strong>Patient Name:</strong> <span id="rModalPatientName">---</span></div>
+                    <div><strong>Report Date:</strong> <span id="rModalReportDate">---</span></div>
+                    <div><strong>Age / Gender:</strong> <span id="rModalAgeGender">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="rModalReceiptNo">---</span></div>
+                    <div><strong>Address:</strong> <span id="rModalAddress">---</span></div>
                     <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Verified Report</span></div>
-                    <div class="col-span-2"><strong>Ref By:</strong> <span id="modalRefBy">---</span></div>
+                    <div class="col-span-2"><strong>Ref By:</strong> <span id="rModalRefBy">---</span></div>
                 </div>
                 <table class="w-full text-sm mb-6 border-t border-b">
                     <thead>
@@ -347,25 +377,22 @@
                             <th class="py-2 px-2 text-right">Observed Result</th>
                         </tr>
                     </thead>
-                    <tbody id="modalTestResultsTable">
-                        <!-- Filled dynamically -->
-                    </tbody>
+                    <tbody id="rModalTestResultsTable"></tbody>
                 </table>
                 <div class="flex justify-center mb-2">
-                    <div id="modalQrcode" class="p-2 bg-white border rounded"></div>
+                    <div id="rModalQrcode" class="p-2 bg-white border rounded"></div>
                 </div>
                 <div class="text-center text-[10px] text-gray-400">Scan code to verify official digital lab report</div>
             </div>
             <div class="mt-6 flex gap-3 no-print">
                 <button onclick="window.print()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow"><i class="fa-solid fa-print mr-2"></i> Print Report Slip</button>
-                <button onclick="closePrintModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold rounded-lg">Close</button>
+                <button onclick="closeReportModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold rounded-lg">Close</button>
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Initial Default Data
         const defaultTests = [
             { id: 't1', name: 'Complete Blood Count (CBC)', price: 1200, range: 'Hb: 13-17 g/dL, WBC: 4-11k' },
             { id: 't2', name: 'Liver Function Test (LFT)', price: 2500, range: 'Bilirubin: 0.2-1.2 mg/dL' },
@@ -377,24 +404,36 @@
         let patients = JSON.parse(localStorage.getItem('danish_patients')) || [];
         let reports = JSON.parse(localStorage.getItem('danish_reports')) || [];
         let currentTheme = localStorage.getItem('danish_theme') || 'theme-classic';
+        let currentUserRole = 'admin';
 
-        // Apply theme on load
+        let permissions = JSON.parse(localStorage.getItem('danish_permissions')) || {
+            recept: { newPatient: true, patientList: true, testReport: false, reportList: false, settings: false },
+            doctor: { newPatient: false, patientList: true, testReport: true, reportList: true, settings: false }
+        };
+
         document.getElementById('appBody').className = currentTheme;
 
-        // Login Handler
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
-            if((u === 'admin' && p === '1234') || (u === 'recept' && p === '1122') || (u === 'doctor' && p === '3344')) {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                initApp();
+            
+            if(u === 'admin' && p === '1234') {
+                currentUserRole = 'admin';
+            } else if(u === 'recept' && p === '1122') {
+                currentUserRole = 'recept';
+            } else if(u === 'doctor' && p === '3344') {
+                currentUserRole = 'doctor';
             } else {
                 const err = document.getElementById('loginError');
                 err.innerText = 'Invalid Username or Password!';
                 err.classList.remove('hidden');
+                return;
             }
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            initApp();
         }
 
         function handleLogout() {
@@ -404,35 +443,66 @@
             document.getElementById('loginPass').value = '';
         }
 
+        function initApp() {
+            renderNavMenu();
+            renderTestsCheckboxes();
+            
+            // Default landing tab based on role
+            if(currentUserRole === 'doctor') {
+                switchTab('patientList');
+            } else {
+                switchTab('newPatient');
+            }
+        }
+
+        function renderNavMenu() {
+            const nav = document.getElementById('navMenuContainer');
+            nav.innerHTML = '';
+
+            const tabs = [
+                { id: 'newPatient', name: 'New Patient', icon: 'fa-user-plus' },
+                { id: 'patientList', name: 'Patient List', icon: 'fa-users' },
+                { id: 'testReport', name: 'Test Report', icon: 'fa-flask' },
+                { id: 'reportList', name: 'Report List', icon: 'fa-file-medical' },
+                { id: 'settings', name: 'Settings', icon: 'fa-gear' }
+            ];
+
+            tabs.forEach(t => {
+                let hasAccess = true;
+                if(currentUserRole === 'recept') hasAccess = permissions.recept[t.id];
+                if(currentUserRole === 'doctor') hasAccess = permissions.doctor[t.id];
+
+                if(hasAccess) {
+                    nav.innerHTML += `<button onclick="switchTab('${t.id}')" id="nav-${t.id}" class="px-3 py-1.5 rounded-md text-sm font-medium hover:bg-white/20 transition"><i class="fa-solid ${t.icon} mr-1"></i> ${t.name}</button>`;
+                }
+            });
+
+            nav.innerHTML += `<button onclick="handleLogout()" class="px-3 py-1.5 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 transition ml-2"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>`;
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('header nav button').forEach(el => el.classList.remove('bg-white/30', 'font-bold'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if(targetTab) targetTab.classList.remove('hidden');
+            
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if(activeBtn) activeBtn.classList.add('bg-white/30', 'font-bold');
 
             if(tabId === 'patientList') renderPatientList();
             if(tabId === 'reportList') renderReportList();
-            if(tabId === 'settings') renderSettingsTests();
-        }
-
-        function initApp() {
-            renderTestsCheckboxes();
-            updateLiveSlip();
-            document.getElementById('pName').addEventListener('input', updateLiveSlip);
-            document.getElementById('pAddress').addEventListener('input', updateLiveSlip);
-            document.getElementById('pAge').addEventListener('input', updateLiveSlip);
-            document.getElementById('pGender').addEventListener('change', updateLiveSlip);
-            document.getElementById('pDoctor').addEventListener('input', updateLiveSlip);
+            if(tabId === 'settings') renderSettingsPage();
         }
 
         function renderTestsCheckboxes() {
             const container = document.getElementById('testsCheckboxContainer');
+            if(!container) return;
             container.innerHTML = '';
             tests.forEach(t => {
                 container.innerHTML += `
                     <label class="flex items-center space-x-2 text-sm cursor-pointer p-2 bg-white rounded border hover:bg-blue-50 transition">
-                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-blue-900 focus:ring-blue-500">
+                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal()" class="test-checkbox rounded text-blue-900 focus:ring-blue-500">
                         <span class="font-medium text-gray-800">${t.name} — Rs. ${t.price} <span class="text-xs text-gray-500">(Range: ${t.range})</span></span>
                     </label>
                 `;
@@ -451,56 +521,6 @@
 
             document.getElementById('displayGrandTotal').innerText = `Rs. ${grandTotal.toLocaleString()}`;
             return grandTotal;
-        }
-
-        function updateLiveSlip() {
-            const name = document.getElementById('pName').value || '---';
-            const address = document.getElementById('pAddress').value || '---';
-            const age = document.getElementById('pAge').value || '0';
-            const gender = document.getElementById('pGender').value;
-            const doctor = document.getElementById('pDoctor').value || 'Self';
-            const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-
-            document.getElementById('slipName').innerText = name;
-            document.getElementById('slipAddress').innerText = address;
-            document.getElementById('slipAgeGender').innerText = `${age} Yrs / ${gender}`;
-            document.getElementById('slipDoctor').innerText = doctor;
-            document.getElementById('slipDate').innerText = new Date().toLocaleDateString();
-            document.getElementById('slipReceiptNo').innerText = 'DL-' + (patients.length + 3204);
-
-            const tbody = document.getElementById('slipItemsTable');
-            tbody.innerHTML = '';
-            let subtotal = 0;
-
-            document.querySelectorAll('.test-checkbox:checked').forEach(cb => {
-                subtotal += parseFloat(cb.dataset.price);
-                tbody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="py-1 px-2">${cb.dataset.name}</td>
-                        <td class="py-1 px-2 text-right">${parseFloat(cb.dataset.price).toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-
-            const discountRow = document.getElementById('slipDiscountRow');
-            if(discount > 0) {
-                discountRow.classList.remove('hidden');
-                document.getElementById('slipDiscountVal').innerText = `Rs. ${discount.toLocaleString()}`;
-            } else {
-                discountRow.classList.add('hidden');
-            }
-
-            let grand = subtotal - discount;
-            if(grand < 0) grand = 0;
-            document.getElementById('slipTotalAmount').innerText = `Rs. ${grand.toLocaleString()}`;
-
-            // QR Code
-            document.getElementById('qrcode').innerHTML = '';
-            new QRCode(document.getElementById('qrcode'), {
-                text: `Danish Lab Receipt: DL-${patients.length + 3204} - ${name} - Amount: ${grand}`,
-                width: 70,
-                height: 70
-            });
         }
 
         function savePatient(e) {
@@ -535,23 +555,71 @@
 
             patients.push(newPatient);
             localStorage.setItem('danish_patients', JSON.stringify(patients));
-            alert('Patient receipt saved successfully! Receipt No: ' + newPatient.receiptNo);
-            
+
+            // Automatically open Cash Receipt Modal for print/view
+            showReceiptModal(newPatient);
+
             document.getElementById('patientForm').reset();
             document.getElementById('pDiscount').value = 0;
             calculateTotal();
-            updateLiveSlip();
+        }
+
+        function showReceiptModal(p) {
+            document.getElementById('modalSlipName').innerText = p.name;
+            document.getElementById('modalSlipAddress').innerText = p.address;
+            document.getElementById('modalSlipAgeGender').innerText = `${p.age} Yrs / ${p.gender}`;
+            document.getElementById('modalSlipDoctor').innerText = p.doctor;
+            document.getElementById('modalSlipDate').innerText = p.date;
+            document.getElementById('modalSlipReceiptNo').innerText = p.receiptNo;
+
+            const tbody = document.getElementById('modalSlipItemsTable');
+            tbody.innerHTML = '';
+            p.tests.forEach(t => {
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="py-1 px-2">${t.name}</td>
+                        <td class="py-1 px-2 text-right">${parseFloat(t.price).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            const discountRow = document.getElementById('modalSlipDiscountRow');
+            if(p.discount > 0) {
+                discountRow.classList.remove('hidden');
+                document.getElementById('modalSlipDiscountVal').innerText = `Rs. ${p.discount.toLocaleString()}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+
+            document.getElementById('modalSlipTotalAmount').innerText = `Rs. ${p.grandTotal.toLocaleString()}`;
+
+            document.getElementById('modalReceiptQrcode').innerHTML = '';
+            new QRCode(document.getElementById('modalReceiptQrcode'), {
+                text: `Danish Lab Receipt: ${p.receiptNo} - ${p.name} - Amount: ${p.grandTotal}`,
+                width: 70,
+                height: 70
+            });
+
+            document.getElementById('receiptModal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').classList.add('hidden');
             switchTab('patientList');
         }
 
         function renderPatientList() {
             const tbody = document.getElementById('patientTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
-            const filterVal = document.getElementById('filterDate').value;
+            
+            const filterDate = document.getElementById('filterDate').value;
+            const searchTxt = document.getElementById('patientSearchInput').value.toLowerCase();
 
             const filtered = patients.filter(p => {
-                if(!filterVal) return true;
-                return p.date === filterVal;
+                const matchesDate = filterDate ? p.date === filterDate : true;
+                const matchesSearch = p.name.toLowerCase().includes(searchTxt) || p.receiptNo.toLowerCase().includes(searchTxt);
+                return matchesDate && matchesSearch;
             });
 
             if(filtered.length === 0) {
@@ -560,6 +628,7 @@
             }
 
             filtered.forEach((p, index) => {
+                const realIndex = patients.indexOf(p);
                 const testNames = p.tests.map(t => t.name).join(', ');
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-gray-50">
@@ -569,8 +638,9 @@
                         <td class="p-3 text-xs text-gray-600 max-w-xs truncate">${testNames}</td>
                         <td class="p-3 font-bold text-emerald-700">Rs. ${p.grandTotal.toLocaleString()}</td>
                         <td class="p-3 text-xs text-gray-500">${p.date}</td>
-                        <td class="p-3 text-center space-x-2">
-                            <button onclick="deletePatient(${index})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-blue-600 hover:text-blue-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deletePatient(${realIndex})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -579,6 +649,7 @@
 
         function clearDateFilter() {
             document.getElementById('filterDate').value = '';
+            document.getElementById('patientSearchInput').value = '';
             renderPatientList();
         }
 
@@ -618,7 +689,7 @@
                 testInputs.innerHTML += `
                     <div class="bg-gray-50 p-4 rounded-lg border space-y-1">
                         <label class="block text-sm font-bold text-blue-900">${t.name} <span class="text-xs font-normal text-gray-600">(Normal Range: ${t.range})</span></label>
-                        <textarea id="res_${i}" rows="2" placeholder="... ٹیسٹ کا رزلٹ درج کریں (e.g. 14.2 g/dL)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"></textarea>
+                        <textarea id="res_${i}" rows="2" placeholder="Enter test result (e.g., 14.2 g/dL)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"></textarea>
                     </div>
                 `;
             });
@@ -653,22 +724,28 @@
 
         function renderReportList() {
             const tbody = document.getElementById('reportTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
-            if(reports.length === 0) {
+
+            const searchTxt = document.getElementById('reportSearchInput') ? document.getElementById('reportSearchInput').value.toLowerCase() : '';
+            const filtered = reports.filter(r => r.name.toLowerCase().includes(searchTxt) || r.receiptNo.toLowerCase().includes(searchTxt));
+
+            if(filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">No completed reports found.</td></tr>`;
                 return;
             }
 
-            reports.forEach((r, index) => {
+            filtered.forEach((r) => {
+                const realIndex = reports.indexOf(r);
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-gray-50">
                         <td class="p-3 font-semibold text-blue-900">${r.receiptNo}</td>
                         <td class="p-3 font-medium">${r.name}</td>
                         <td class="p-3 text-xs text-gray-500">${r.date}</td>
                         <td class="p-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full font-semibold">• Verified</span></td>
-                        <td class="p-3 text-center space-x-2">
-                            <button onclick="printReportModal(${index})" class="text-blue-600 hover:text-blue-800" title="View & Print Slip"><i class="fa-solid fa-print"></i></button>
-                            <button onclick="deleteReport(${index})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick="printReportModal(${realIndex})" class="text-blue-600 hover:text-blue-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deleteReport(${realIndex})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -685,14 +762,14 @@
 
         function printReportModal(index) {
             const r = reports[index];
-            document.getElementById('modalPatientName').innerText = r.name;
-            document.getElementById('modalReportDate').innerText = r.date;
-            document.getElementById('modalAgeGender').innerText = `${r.age} Yrs / ${r.gender}`;
-            document.getElementById('modalReceiptNo').innerText = r.receiptNo;
-            document.getElementById('modalAddress').innerText = r.address;
-            document.getElementById('modalRefBy').innerText = r.doctor;
+            document.getElementById('rModalPatientName').innerText = r.name;
+            document.getElementById('rModalReportDate').innerText = r.date;
+            document.getElementById('rModalAgeGender').innerText = `${r.age} Yrs / ${r.gender}`;
+            document.getElementById('rModalReceiptNo').innerText = r.receiptNo;
+            document.getElementById('rModalAddress').innerText = r.address;
+            document.getElementById('rModalRefBy').innerText = r.doctor;
 
-            const tbody = document.getElementById('modalTestResultsTable');
+            const tbody = document.getElementById('rModalTestResultsTable');
             tbody.innerHTML = '';
             r.results.forEach(res => {
                 tbody.innerHTML += `
@@ -706,21 +783,53 @@
                 `;
             });
 
-            document.getElementById('modalQrcode').innerHTML = '';
-            new QRCode(document.getElementById('modalQrcode'), {
+            document.getElementById('rModalQrcode').innerHTML = '';
+            new QRCode(document.getElementById('rModalQrcode'), {
                 text: `Danish Lab Verified Report: ${r.receiptNo} - ${r.name}`,
                 width: 70,
                 height: 70
             });
 
-            document.getElementById('printModal').classList.remove('hidden');
+            document.getElementById('reportModal').classList.remove('hidden');
         }
 
-        function closePrintModal() {
-            document.getElementById('printModal').classList.add('hidden');
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
         }
 
-        // Settings & Test Management
+        // Settings & Permissions
+        function renderSettingsPage() {
+            renderSettingsTests();
+            // Set checkboxes based on saved permissions
+            document.getElementById('perm_recept_patientList').checked = permissions.recept.patientList;
+            document.getElementById('perm_recept_testReport').checked = permissions.recept.testReport;
+            document.getElementById('perm_recept_reportList').checked = permissions.recept.reportList;
+            document.getElementById('perm_recept_settings').checked = permissions.recept.settings;
+
+            document.getElementById('perm_doctor_newPatient').checked = permissions.doctor.newPatient;
+            document.getElementById('perm_doctor_patientList').checked = permissions.doctor.patientList;
+            document.getElementById('perm_doctor_testReport').checked = permissions.doctor.testReport;
+            document.getElementById('perm_doctor_reportList').checked = permissions.doctor.reportList;
+            document.getElementById('perm_doctor_settings').checked = permissions.doctor.settings;
+        }
+
+        function savePermissions() {
+            permissions.recept.patientList = document.getElementById('perm_recept_patientList').checked;
+            permissions.recept.testReport = document.getElementById('perm_recept_testReport').checked;
+            permissions.recept.reportList = document.getElementById('perm_recept_reportList').checked;
+            permissions.recept.settings = document.getElementById('perm_recept_settings').checked;
+
+            permissions.doctor.newPatient = document.getElementById('perm_doctor_newPatient').checked;
+            permissions.doctor.patientList = document.getElementById('perm_doctor_patientList').checked;
+            permissions.doctor.testReport = document.getElementById('perm_doctor_testReport').checked;
+            permissions.doctor.reportList = document.getElementById('perm_doctor_reportList').checked;
+            permissions.doctor.settings = document.getElementById('perm_doctor_settings').checked;
+
+            localStorage.setItem('danish_permissions', JSON.stringify(permissions));
+            renderNavMenu();
+            alert('Permissions updated successfully!');
+        }
+
         function addNewTest(e) {
             e.preventDefault();
             const name = document.getElementById('newTestName').value;
@@ -742,15 +851,17 @@
 
         function renderSettingsTests() {
             const tbody = document.getElementById('settingsTestsTable');
+            if(!tbody) return;
             tbody.innerHTML = '';
-            tests.forEach((t, index) => {
+            tests.forEach((t) => {
+                const realIndex = tests.indexOf(t);
                 tbody.innerHTML += `
                     <tr class="border-b">
                         <td class="p-2 font-medium">${t.name}</td>
                         <td class="p-2">Rs. ${t.price}</td>
                         <td class="p-2 text-xs text-gray-500">${t.range}</td>
                         <td class="p-2 text-center">
-                            <button onclick="deleteTest(${index})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteTest(${realIndex})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -766,7 +877,6 @@
             }
         }
 
-        // Theme Switcher
         function setTheme(themeClass) {
             currentTheme = themeClass;
             document.getElementById('appBody').className = currentTheme;
