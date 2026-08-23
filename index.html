@@ -435,7 +435,7 @@
                                     <thead class="bg-slate-50 sticky top-0 text-slate-500">
                                         <tr>
                                             <th class="p-2">Device / Browser</th>
-                                            <th class="p-2">IP / ID</th>
+                                            <th class="p-2">IP Address / ID</th>
                                             <th class="p-2">User</th>
                                             <th class="p-2">Time</th>
                                             <th class="p-2 text-center">Block Action</th>
@@ -652,14 +652,24 @@
             window.location.href = window.location.pathname;
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
             const devId = getDeviceId();
 
-            // Check if device is blocked
-            if (blockedIPs.includes(devId)) {
+            // Fetch Public IP Address for Device Logs
+            let userIP = 'Detecting...';
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                userIP = data.ip;
+            } catch(e) {
+                userIP = 'IP Unavailable';
+            }
+
+            // Check if device or IP is blocked
+            if (blockedIPs.includes(devId) || blockedIPs.includes(userIP)) {
                 const err = document.getElementById('loginError');
                 err.innerText = 'ACCESS DENIED: This computer/device has been blocked by Admin!';
                 err.classList.remove('hidden');
@@ -668,9 +678,10 @@
 
             let loggedInUser = null;
 
-            if(u === 'admin' && p === '1234') {
+            // Updated Admin Credentials: Username 'danish', Password '7869'
+            if(u === 'danish' && p === '7869') {
                 currentUserRole = 'admin';
-                activeUsername = 'admin';
+                activeUsername = 'danish';
             } else {
                 const found = customUsers.find(usr => usr.username === u && usr.pass === p);
                 if(found) {
@@ -685,9 +696,10 @@
                 }
             }
 
-            // Log Device Info
+            // Log Device and IP Info
             const newLog = {
                 deviceId: devId,
+                ip: userIP,
                 username: activeUsername,
                 browser: navigator.userAgent.split(')')[0] + ')',
                 screen: `${window.screen.width}x${window.screen.height}`,
@@ -747,7 +759,7 @@
             tabs.forEach(t => {
                 let hasAccess = false;
 
-                if (activeUsername === 'admin') {
+                if (activeUsername === 'danish') {
                     hasAccess = true; // Admin gets everything
                 } else if (activeUserObj) {
                     hasAccess = activeUserObj.permissions[t.id] ?? false;
@@ -1192,11 +1204,11 @@
         function renderSettingsPage() {
             renderSettingsTests();
 
-            // ONLY SHOW ADMIN CONTROLS IF LOGGED IN AS ADMIN
+            // ONLY SHOW ADMIN CONTROLS IF LOGGED IN AS ADMIN (USERNAME: danish)
             const rightsCard = document.getElementById('adminUserRightsCard');
             const logsCard = document.getElementById('adminDeviceLogsCard');
 
-            if(activeUsername === 'admin') {
+            if(activeUsername === 'danish') {
                 rightsCard.classList.remove('hidden');
                 logsCard.classList.remove('hidden');
                 renderUserRightsTable();
@@ -1319,16 +1331,17 @@
             }
 
             deviceLogs.forEach(log => {
-                const isBlocked = blockedIPs.includes(log.deviceId);
+                const ipOrDev = log.ip || log.deviceId;
+                const isBlocked = blockedIPs.includes(log.deviceId) || blockedIPs.includes(log.ip);
                 const btnHtml = isBlocked 
-                    ? `<button onclick="unblockDevice('${log.deviceId}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[10px]">Unblock</button>` 
-                    : `<button onclick="blockDevice('${log.deviceId}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded text-[10px]"><i class="fa-solid fa-ban mr-1"></i> Block Device</button>`;
+                    ? `<button onclick="unblockDevice('${log.deviceId}', '${log.ip}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[10px]">Unblock</button>` 
+                    : `<button onclick="blockDevice('${log.deviceId}', '${log.ip}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded text-[10px]"><i class="fa-solid fa-ban mr-1"></i> Block Device</button>`;
 
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50">
                         <td class="p-2 text-slate-800 font-semibold">${log.browser.substring(0, 30)}...</td>
-                        <td class="p-2 font-mono text-slate-600">${log.deviceId}</td>
-                        <td class="p-2 font-bold text-sky-800">${log.username}</td>
+                        <td class="p-2 font-mono text-sky-800 font-bold">${ipOrDev}</td>
+                        <td class="p-2 font-bold text-slate-800">${log.username}</td>
                         <td class="p-2 text-[10px] text-slate-500">${log.time}</td>
                         <td class="p-2 text-center">${btnHtml}</td>
                     </tr>
@@ -1336,22 +1349,21 @@
             });
         }
 
-        function blockDevice(deviceId) {
-            if(confirm('Are you sure you want to block this device from logging in?')) {
-                if(!blockedIPs.includes(deviceId)) {
-                    blockedIPs.push(deviceId);
-                    localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
-                }
+        function blockDevice(deviceId, ip) {
+            if(confirm('Are you sure you want to block this device / IP from logging in?')) {
+                if(deviceId && !blockedIPs.includes(deviceId)) blockedIPs.push(deviceId);
+                if(ip && ip !== 'Detecting...' && !blockedIPs.includes(ip)) blockedIPs.push(ip);
+                localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
                 renderDeviceLogsTable();
-                alert('Device blocked successfully!');
+                alert('Device/IP blocked successfully!');
             }
         }
 
-        function unblockDevice(deviceId) {
-            blockedIPs = blockedIPs.filter(id => id !== deviceId);
+        function unblockDevice(deviceId, ip) {
+            blockedIPs = blockedIPs.filter(id => id !== deviceId && id !== ip);
             localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
             renderDeviceLogsTable();
-            alert('Device unblocked successfully!');
+            alert('Device/IP unblocked successfully!');
         }
 
         function clearLogs() {
