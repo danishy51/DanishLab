@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- FIREBASE SDKs (v10.8.0 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --primary-bg: #0f172a;
@@ -561,8 +566,26 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT & FIREBASE LOGIC -->
     <script>
+        // -----------------------------------------------------------------
+        // 1. FIREBASE INITIALIZATION
+        // -----------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "danish-lab.firebaseapp.com",
+            projectId: "danish-lab",
+            storageBucket: "danish-lab.firebasestorage.app",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // -----------------------------------------------------------------
+        // 2. SYSTEM STATE VARIABLES
+        // -----------------------------------------------------------------
         const defaultTests = [
             { id: 't1', name: 'Complete Blood Count (CBC)', price: 1200, range: 'Hb: 13-17 g/dL, WBC: 4-11k' },
             { id: 't2', name: 'Liver Function Test (LFT)', price: 2500, range: 'Bilirubin: 0.2-1.2 mg/dL' },
@@ -571,13 +594,12 @@
         ];
 
         let tests = JSON.parse(localStorage.getItem('danish_tests')) || defaultTests;
-        let patients = JSON.parse(localStorage.getItem('danish_patients')) || [];
-        let reports = JSON.parse(localStorage.getItem('danish_reports')) || [];
+        let patients = [];
+        let reports = [];
         let currentTheme = localStorage.getItem('danish_theme') || 'theme-clinical';
         let currentUserRole = sessionStorage.getItem('danish_active_role');
         let activeUsername = sessionStorage.getItem('danish_active_username') || '';
 
-        // SYSTEM USERS DATABASE
         let defaultUsers = [
             { id: 'u1', username: 'recept', pass: '1122', permissions: { newPatient: true, patientList: true, testReport: false, reportList: false, finance: false, settings: false } },
             { id: 'u2', username: 'doctor', pass: '3344', permissions: { newPatient: false, patientList: true, testReport: true, reportList: true, finance: false, settings: false } }
@@ -592,7 +614,30 @@
         const urlParams = new URLSearchParams(window.location.search);
         const qrReceiptNo = urlParams.get('receipt');
 
-        // Helper to get Device details
+        // -----------------------------------------------------------------
+        // 3. REALTIME SYNC WITH FIREBASE FIRESTORE
+        // -----------------------------------------------------------------
+        function syncFirebaseData() {
+            // Patients Realtime Sync
+            db.collection("patients").onSnapshot((snapshot) => {
+                patients = [];
+                snapshot.forEach((doc) => {
+                    patients.push({ docId: doc.id, ...doc.data() });
+                });
+                renderPatientList();
+                renderFinancePage();
+            });
+
+            // Reports Realtime Sync
+            db.collection("reports").onSnapshot((snapshot) => {
+                reports = [];
+                snapshot.forEach((doc) => {
+                    reports.push({ docId: doc.id, ...doc.data() });
+                });
+                renderReportList();
+            });
+        }
+
         function getDeviceId() {
             let id = localStorage.getItem('danish_device_token');
             if(!id) {
@@ -603,6 +648,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            syncFirebaseData();
             if(qrReceiptNo) {
                 showQrDigitalSlip(qrReceiptNo);
             } else if(currentUserRole) {
@@ -612,19 +658,20 @@
             }
         });
 
-        function showQrDigitalSlip(receiptNo) {
+        async function showQrDigitalSlip(receiptNo) {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('qrDigitalView').classList.remove('hidden');
 
-            const patient = patients.find(p => p.receiptNo === receiptNo);
+            const snapshot = await db.collection("patients").where("receiptNo", "==", receiptNo).get();
             const container = document.getElementById('qrContentDetails');
 
-            if(!patient) {
+            if(snapshot.empty) {
                 container.innerHTML = `<div class="text-center text-rose-600 font-bold py-6">Receipt not found or invalid QR code!</div>`;
                 return;
             }
 
+            const patient = snapshot.docs[0].data();
             let testsHtml = patient.tests.map(t => `<li class="flex justify-between border-b border-slate-100 py-1.5 text-xs"><span class="text-slate-700">${t.name}</span><span class="font-bold text-slate-900">Rs. ${t.price}</span></li>`).join('');
 
             container.innerHTML = `
@@ -658,7 +705,6 @@
             const p = document.getElementById('loginPass').value.trim();
             const devId = getDeviceId();
 
-            // Fetch Public IP Address for Device Logs
             let userIP = 'Detecting...';
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
@@ -668,7 +714,6 @@
                 userIP = 'IP Unavailable';
             }
 
-            // Check if device or IP is blocked
             if (blockedIPs.includes(devId) || blockedIPs.includes(userIP)) {
                 const err = document.getElementById('loginError');
                 err.innerText = 'ACCESS DENIED: This computer/device has been blocked by Admin!';
@@ -676,9 +721,6 @@
                 return;
             }
 
-            let loggedInUser = null;
-
-            // Updated Admin Credentials: Username 'danish', Password '7869'
             if(u === 'danish' && p === '7869') {
                 currentUserRole = 'admin';
                 activeUsername = 'danish';
@@ -687,7 +729,6 @@
                 if(found) {
                     currentUserRole = 'user';
                     activeUsername = found.username;
-                    loggedInUser = found;
                 } else {
                     const err = document.getElementById('loginError');
                     err.innerText = 'Invalid Username or Password!';
@@ -696,7 +737,6 @@
                 }
             }
 
-            // Log Device and IP Info
             const newLog = {
                 deviceId: devId,
                 ip: userIP,
@@ -733,7 +773,6 @@
             renderTestsCheckboxes();
             updateLiveSlip();
             
-            // Default View Navigation
             if(activeUsername === 'doctor') {
                 switchTab('patientList');
             } else {
@@ -760,7 +799,7 @@
                 let hasAccess = false;
 
                 if (activeUsername === 'danish') {
-                    hasAccess = true; // Admin gets everything
+                    hasAccess = true;
                 } else if (activeUserObj) {
                     hasAccess = activeUserObj.permissions[t.id] ?? false;
                 }
@@ -871,7 +910,8 @@
             document.getElementById('liveSlipTotalAmount').innerText = `Rs. ${Math.round(grandTotal).toLocaleString()}`;
         }
 
-        function savePatient(e) {
+        // SAVE PATIENT TO FIREBASE FIRESTORE
+        async function savePatient(e) {
             e.preventDefault();
             const selectedTests = [];
             document.querySelectorAll('.test-checkbox:checked').forEach(cb => {
@@ -901,18 +941,22 @@
                 discount: discountPercent,
                 discountAmount: discountAmount,
                 grandTotal: grandTotal,
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            patients.push(newPatient);
-            localStorage.setItem('danish_patients', JSON.stringify(patients));
+            try {
+                const docRef = await db.collection("patients").add(newPatient);
+                newPatient.docId = docRef.id;
+                showReceiptModal(newPatient);
 
-            showReceiptModal(newPatient);
-
-            document.getElementById('patientForm').reset();
-            document.getElementById('pDiscount').value = 0;
-            calculateTotal();
-            updateLiveSlip();
+                document.getElementById('patientForm').reset();
+                document.getElementById('pDiscount').value = 0;
+                calculateTotal();
+                updateLiveSlip();
+            } catch (err) {
+                alert("Firebase Error: " + err.message);
+            }
         }
 
         function showReceiptModal(p) {
@@ -998,7 +1042,6 @@
             }
 
             filtered.forEach((p) => {
-                const realIndex = patients.indexOf(p);
                 const testNames = p.tests.map(t => t.name).join(', ');
                 const hasReport = reports.some(r => r.receiptNo === p.receiptNo);
                 const statusBadge = hasReport ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">Report Ready</span>' : '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-[10px] font-bold">Pending</span>';
@@ -1013,7 +1056,7 @@
                         <td class="p-3">${statusBadge}</td>
                         <td class="p-3 text-center space-x-3 no-print">
                             <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-sky-600 hover:text-sky-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deletePatient(${realIndex})" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deletePatient('${p.docId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -1026,11 +1069,13 @@
             renderPatientList();
         }
 
-        function deletePatient(index) {
+        async function deletePatient(docId) {
             if(confirm('Are you sure you want to delete this patient record?')) {
-                patients.splice(index, 1);
-                localStorage.setItem('danish_patients', JSON.stringify(patients));
-                renderPatientList();
+                try {
+                    await db.collection("patients").doc(docId).delete();
+                } catch(e) {
+                    alert("Error deleting record: " + e.message);
+                }
             }
         }
 
@@ -1067,7 +1112,8 @@
             });
         }
 
-        function saveTestReport() {
+        // SAVE REPORT TO FIREBASE FIRESTORE
+        async function saveTestReport() {
             if(!currentReportPatient) return;
             let results = [];
             currentReportPatient.tests.forEach((t, i) => {
@@ -1083,15 +1129,19 @@
                 address: currentReportPatient.address,
                 doctor: currentReportPatient.doctor,
                 results: results,
-                date: new Date().toLocaleDateString()
+                date: new Date().toLocaleDateString(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            reports.push(newReport);
-            localStorage.setItem('danish_reports', JSON.stringify(reports));
-            alert('Test Report saved successfully!');
-            document.getElementById('reportFormContainer').classList.add('hidden');
-            document.getElementById('searchReportInput').value = '';
-            switchTab('reportList');
+            try {
+                await db.collection("reports").add(newReport);
+                alert('Test Report saved to Firebase successfully!');
+                document.getElementById('reportFormContainer').classList.add('hidden');
+                document.getElementById('searchReportInput').value = '';
+                switchTab('reportList');
+            } catch(e) {
+                alert("Firebase Error: " + e.message);
+            }
         }
 
         function renderReportList() {
@@ -1107,8 +1157,7 @@
                 return;
             }
 
-            filtered.forEach((r) => {
-                const realIndex = reports.indexOf(r);
+            filtered.forEach((r, idx) => {
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50/80">
                         <td class="p-3 font-bold text-sky-700">${r.receiptNo}</td>
@@ -1116,19 +1165,21 @@
                         <td class="p-3 text-xs text-slate-400 font-medium">${r.date}</td>
                         <td class="p-3"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] rounded-full font-bold border border-emerald-200">• Verified</span></td>
                         <td class="p-3 text-center space-x-3 no-print">
-                            <button onclick="printReportModal(${realIndex})" class="text-sky-600 hover:text-sky-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deleteReport(${realIndex})" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="printReportModal(${idx})" class="text-sky-600 hover:text-sky-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deleteReport('${r.docId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function deleteReport(index) {
+        async function deleteReport(docId) {
             if(confirm('Are you sure you want to delete this report?')) {
-                reports.splice(index, 1);
-                localStorage.setItem('danish_reports', JSON.stringify(reports));
-                renderReportList();
+                try {
+                    await db.collection("reports").doc(docId).delete();
+                } catch(e) {
+                    alert("Error deleting report: " + e.message);
+                }
             }
         }
 
@@ -1204,7 +1255,6 @@
         function renderSettingsPage() {
             renderSettingsTests();
 
-            // ONLY SHOW ADMIN CONTROLS IF LOGGED IN AS ADMIN (USERNAME: danish)
             const rightsCard = document.getElementById('adminUserRightsCard');
             const logsCard = document.getElementById('adminDeviceLogsCard');
 
@@ -1219,7 +1269,6 @@
             }
         }
 
-        /* ADMIN USER RIGHTS MANAGEMENT FUNCTIONS */
         function renderUserRightsTable() {
             const tbody = document.getElementById('userRightsTableBody');
             if(!tbody) return;
@@ -1319,7 +1368,6 @@
             }
         }
 
-        /* LOGIN DEVICE LOGS & SUSPICIOUS BLOCK FUNCTIONS */
         function renderDeviceLogsTable() {
             const tbody = document.getElementById('deviceLogsTableBody');
             if(!tbody) return;
@@ -1426,7 +1474,6 @@
             localStorage.setItem('danish_theme', currentTheme);
         }
 
-        /* EXPORT & RESTORE JSON BACKUP */
         function exportJSONBackup() {
             const data = {
                 tests: tests,
@@ -1460,27 +1507,6 @@
                             tests = importedData.tests;
                             localStorage.setItem('danish_tests', JSON.stringify(tests));
                         }
-                        if (importedData.patients) {
-                            patients = importedData.patients;
-                            localStorage.setItem('danish_patients', JSON.stringify(patients));
-                        }
-                        if (importedData.reports) {
-                            reports = importedData.reports;
-                            localStorage.setItem('danish_reports', JSON.stringify(reports));
-                        }
-                        if (importedData.customUsers) {
-                            customUsers = importedData.customUsers;
-                            localStorage.setItem('danish_custom_users', JSON.stringify(customUsers));
-                        }
-                        if (importedData.deviceLogs) {
-                            deviceLogs = importedData.deviceLogs;
-                            localStorage.setItem('danish_device_logs', JSON.stringify(deviceLogs));
-                        }
-                        if (importedData.blockedIPs) {
-                            blockedIPs = importedData.blockedIPs;
-                            localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
-                        }
-
                         alert("Backup restored successfully!");
                         location.reload();
                     }
