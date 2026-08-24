@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS for Export to Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <!-- FIREBASE SDKs (v10.8.0 Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -165,7 +167,6 @@
         </div>
     </div>
 
-
     <!-- DIGITAL SLIP VIEW -->
     <div id="qrDigitalView" class="hidden min-h-screen bg-slate-100 p-4 flex items-center justify-center">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border-t-8 border-emerald-600">
@@ -304,10 +305,13 @@
             <section id="tab-patientList" class="tab-content hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
-                        <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-users text-emerald-600 mr-2"></i> Patient List & History</h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-lg font-bold text-slate-900 mr-2"><i class="fa-solid fa-users text-emerald-600 mr-2"></i> Patient List & History</h2>
                             <button onclick="exportPatientListPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
                                 <i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF
+                            </button>
+                            <button onclick="exportPatientListExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
+                                <i class="fa-solid fa-file-excel mr-1.5"></i> Export Excel
                             </button>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -361,10 +365,13 @@
             <section id="tab-reportList" class="tab-content hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
-                        <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-medical text-emerald-600 mr-2"></i> Completed Reports List</h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-lg font-bold text-slate-900 mr-2"><i class="fa-solid fa-file-medical text-emerald-600 mr-2"></i> Completed Reports List</h2>
                             <button onclick="exportReportListPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
                                 <i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF
+                            </button>
+                            <button onclick="exportReportListExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
+                                <i class="fa-solid fa-file-excel mr-1.5"></i> Export Excel
                             </button>
                         </div>
                         <div class="relative">
@@ -392,20 +399,59 @@
             <!-- 5. FINANCIAL ANALYTICS -->
             <section id="tab-finance" class="tab-content hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
-                    <h2 class="text-lg font-bold text-slate-900 mb-6 border-b border-slate-100 pb-3"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i> Daily & Monthly Earnings Desk</h2>
+                    <div class="flex flex-wrap justify-between items-center mb-6 border-b border-slate-100 pb-4 gap-4">
+                        <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i> Financial Reports & Date-Range Desk</h2>
+                        
+                        <!-- Date Range & Export Control Buttons -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex items-center space-x-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                                <i class="fa-solid fa-calendar text-emerald-600 text-xs ml-1"></i>
+                                <span class="text-[11px] font-bold text-slate-500">From:</span>
+                                <input type="date" id="financeFromDate" onchange="renderFinancePage()" class="bg-transparent border-none text-xs outline-none px-1">
+                                <span class="text-[11px] font-bold text-slate-500">To:</span>
+                                <input type="date" id="financeToDate" onchange="renderFinancePage()" class="bg-transparent border-none text-xs outline-none px-1">
+                                <button onclick="clearFinanceDateFilter()" class="px-2 py-1 bg-white hover:bg-slate-200 text-xs rounded-lg font-bold shadow-sm">Reset</button>
+                            </div>
+                            <button onclick="exportFinancePDF()" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
+                                <i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF
+                            </button>
+                            <button onclick="exportFinanceExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
+                                <i class="fa-solid fa-file-excel mr-1.5"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
-                            <p class="text-xs font-bold text-emerald-800 uppercase">Today Total Earnings</p>
+                            <p class="text-xs font-bold text-emerald-800 uppercase" id="labelFinanceTotal">Filtered Period Collection</p>
                             <h3 id="statToday" class="text-3xl font-black text-emerald-900 mt-2">Rs. 0</h3>
                         </div>
                         <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
-                            <p class="text-xs font-bold text-emerald-800 uppercase">Total Patients Today</p>
+                            <p class="text-xs font-bold text-emerald-800 uppercase" id="labelFinancePatients">Filtered Total Patients</p>
                             <h3 id="statPatientsToday" class="text-3xl font-black text-emerald-900 mt-2">0</h3>
                         </div>
                         <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100">
                             <p class="text-xs font-bold text-indigo-800 uppercase">All Time Overall Collection</p>
                             <h3 id="statAllTime" class="text-3xl font-black text-indigo-900 mt-2">Rs. 0</h3>
                         </div>
+                    </div>
+
+                    <!-- Financial Detailed Table -->
+                    <div id="financeExportArea" class="overflow-x-auto pt-2">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-list-check mr-1 text-emerald-600"></i> Financial Transaction Details</h3>
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-100">
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Receipt No</th>
+                                    <th class="p-3">Patient Name</th>
+                                    <th class="p-3">Subtotal</th>
+                                    <th class="p-3">Discount</th>
+                                    <th class="p-3">Net Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="financeTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -620,7 +666,6 @@
 
     <!-- HIDDEN THERMAL PRINT TEMPLATE (58/80mm printer) — filled by JS just before printing -->
     <div id="thermalReceiptArea">
-        <!-- Change width below to 58mm if using a 58mm thermal printer -->
         <div style="width:76mm; padding:2mm 3mm;">
             <div style="text-align:center;">
                 <h2 style="font-size:15px; font-weight:900; margin:0; letter-spacing:1px;">DANISH LAB</h2>
@@ -723,10 +768,6 @@
             { name: 'Blood Glucose Fasting', price: 500, range: '70 - 110 mg/dL' }
         ];
 
-        // NOTE: tests, users, device logs & blocked devices now live in Firestore
-        // (collections: tests / users / deviceLogs / blockedDevices) so every device/browser
-        // stays in sync automatically in real time. Only theme + this device's own token
-        // stay in localStorage since those are per-device display settings, not shared data.
         let tests = [];
         let patients = [];
         let reports = [];
@@ -745,7 +786,6 @@
         let usersSeeded = false;
         let testsSeeded = false;
 
-        // Simple SHA-256 hashing (Web Crypto) so passwords are never stored/shown in plain text
         async function sha256(text) {
             const enc = new TextEncoder().encode(text);
             const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
@@ -763,7 +803,6 @@
         // 3. REALTIME SYNC WITH FIREBASE FIRESTORE
         // -----------------------------------------------------------------
         function syncFirebaseData() {
-            // Patients Realtime Sync
             db.collection("patients").onSnapshot((snapshot) => {
                 patients = [];
                 snapshot.forEach((doc) => {
@@ -773,7 +812,6 @@
                 renderFinancePage();
             });
 
-            // Reports Realtime Sync
             db.collection("reports").onSnapshot((snapshot) => {
                 reports = [];
                 snapshot.forEach((doc) => {
@@ -782,14 +820,13 @@
                 renderReportList();
             });
 
-            // Tests (Investigations) Realtime Sync — same list on every device
             db.collection("tests").onSnapshot(async (snapshot) => {
                 if (snapshot.empty && !testsSeeded) {
                     testsSeeded = true;
                     for (const t of defaultTestsSeed) {
                         await db.collection("tests").add(t);
                     }
-                    return; // onSnapshot will fire again with the seeded data
+                    return;
                 }
                 tests = [];
                 snapshot.forEach((doc) => {
@@ -799,7 +836,6 @@
                 renderSettingsTests();
             });
 
-            // Users (login accounts + permissions) Realtime Sync
             db.collection("users").onSnapshot(async (snapshot) => {
                 if (snapshot.empty && !usersSeeded) {
                     usersSeeded = true;
@@ -817,7 +853,6 @@
                 renderUserRightsTable();
             });
 
-            // Device Login Logs Realtime Sync (latest 50)
             db.collection("deviceLogs").orderBy("createdAt", "desc").limit(50).onSnapshot((snapshot) => {
                 deviceLogs = [];
                 snapshot.forEach((doc) => {
@@ -826,7 +861,6 @@
                 renderDeviceLogsTable();
             });
 
-            // Blocked Devices/IPs Realtime Sync
             db.collection("blockedDevices").onSnapshot((snapshot) => {
                 blockedIPs = [];
                 snapshot.forEach((doc) => {
@@ -963,7 +997,7 @@
             };
             try {
                 await db.collection("deviceLogs").add(newLog);
-            } catch(e) { /* non-blocking: login still proceeds even if log write fails */ }
+            } catch(e) {}
 
             sessionStorage.setItem('danish_active_role', currentUserRole);
             sessionStorage.setItem('danish_active_username', activeUsername);
@@ -1125,7 +1159,6 @@
             document.getElementById('liveSlipTotalAmount').innerText = `Rs. ${Math.round(grandTotal).toLocaleString()}`;
         }
 
-        // SAVE PATIENT TO FIREBASE FIRESTORE
         async function savePatient(e) {
             e.preventDefault();
             const selectedTests = [];
@@ -1175,7 +1208,7 @@
         }
 
         function showReceiptModal(p) {
-            window.currentReceiptPatient = p; // used by printReceipt() for the thermal slip
+            window.currentReceiptPatient = p;
             document.getElementById('modalSlipName').innerText = p.name;
             document.getElementById('modalSlipAddress').innerText = p.address;
             document.getElementById('modalSlipAgeGender').innerText = `${p.age} Yrs / ${p.gender}`;
@@ -1265,10 +1298,9 @@
             thermalQrDiv.innerHTML = '';
             new QRCode(thermalQrDiv, { text: qrTargetUrl, width: 80, height: 80, correctLevel: QRCode.CorrectLevel.M });
 
-            // Set an 80mm roll page size only for this print job, then remove it
             const pageStyle = document.createElement('style');
             pageStyle.id = 'thermalPageStyle';
-            pageStyle.innerHTML = '@page { size: 80mm auto; margin: 2mm; }'; // change 80mm to 58mm for a 58mm printer
+            pageStyle.innerHTML = '@page { size: 80mm auto; margin: 2mm; }';
             document.head.appendChild(pageStyle);
 
             document.body.classList.add('printing-receipt');
@@ -1277,19 +1309,23 @@
             document.head.removeChild(pageStyle);
         }
 
+        function getFilteredPatientsList() {
+            const filterDate = document.getElementById('filterDate').value;
+            const searchTxt = document.getElementById('patientSearchInput').value.toLowerCase();
+
+            return patients.filter(p => {
+                const matchesDate = filterDate ? p.date === filterDate : true;
+                const matchesSearch = p.name.toLowerCase().includes(searchTxt) || p.receiptNo.toLowerCase().includes(searchTxt);
+                return matchesDate && matchesSearch;
+            });
+        }
+
         function renderPatientList() {
             const tbody = document.getElementById('patientTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
             
-            const filterDate = document.getElementById('filterDate').value;
-            const searchTxt = document.getElementById('patientSearchInput').value.toLowerCase();
-
-            const filtered = patients.filter(p => {
-                const matchesDate = filterDate ? p.date === filterDate : true;
-                const matchesSearch = p.name.toLowerCase().includes(searchTxt) || p.receiptNo.toLowerCase().includes(searchTxt);
-                return matchesDate && matchesSearch;
-            });
+            const filtered = getFilteredPatientsList();
 
             if(filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">No patient records found.</td></tr>`;
@@ -1367,7 +1403,6 @@
             });
         }
 
-        // SAVE REPORT TO FIREBASE FIRESTORE
         async function saveTestReport() {
             if(!currentReportPatient) return;
             let results = [];
@@ -1384,7 +1419,7 @@
                 address: currentReportPatient.address,
                 doctor: currentReportPatient.doctor,
                 results: results,
-                date: new Date().toLocaleDateString(),
+                date: new Date().toISOString().split('T')[0],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -1399,13 +1434,17 @@
             }
         }
 
+        function getFilteredReportsList() {
+            const searchTxt = document.getElementById('reportSearchInput') ? document.getElementById('reportSearchInput').value.toLowerCase() : '';
+            return reports.filter(r => r.name.toLowerCase().includes(searchTxt) || r.receiptNo.toLowerCase().includes(searchTxt));
+        }
+
         function renderReportList() {
             const tbody = document.getElementById('reportTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
 
-            const searchTxt = document.getElementById('reportSearchInput') ? document.getElementById('reportSearchInput').value.toLowerCase() : '';
-            const filtered = reports.filter(r => r.name.toLowerCase().includes(searchTxt) || r.receiptNo.toLowerCase().includes(searchTxt));
+            const filtered = getFilteredReportsList();
 
             if(filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No completed reports found.</td></tr>`;
@@ -1488,23 +1527,171 @@
             document.body.classList.remove('printing-report');
         }
 
+        function getFilteredFinancePatients() {
+            const fromDate = document.getElementById('financeFromDate').value;
+            const toDate = document.getElementById('financeToDate').value;
+
+            return patients.filter(p => {
+                if(fromDate && p.date < fromDate) return false;
+                if(toDate && p.date > toDate) return false;
+                return true;
+            });
+        }
+
+        function clearFinanceDateFilter() {
+            document.getElementById('financeFromDate').value = '';
+            document.getElementById('financeToDate').value = '';
+            renderFinancePage();
+        }
+
         function renderFinancePage() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            let todayTotal = 0;
-            let todayCount = 0;
+            const filtered = getFilteredFinancePatients();
+            const fromDate = document.getElementById('financeFromDate').value;
+            const toDate = document.getElementById('financeToDate').value;
+
+            let filteredTotal = 0;
+            let filteredCount = filtered.length;
             let allTimeTotal = 0;
 
             patients.forEach(p => {
-                allTimeTotal += p.grandTotal;
-                if(p.date === todayStr) {
-                    todayTotal += p.grandTotal;
-                    todayCount++;
-                }
+                allTimeTotal += (p.grandTotal || 0);
             });
 
-            document.getElementById('statToday').innerText = `Rs. ${todayTotal.toLocaleString()}`;
-            document.getElementById('statPatientsToday').innerText = todayCount;
+            filtered.forEach(p => {
+                filteredTotal += (p.grandTotal || 0);
+            });
+
+            if(fromDate || toDate) {
+                document.getElementById('labelFinanceTotal').innerText = `Filtered Range Earnings`;
+                document.getElementById('labelFinancePatients').innerText = `Filtered Range Patients`;
+            } else {
+                document.getElementById('labelFinanceTotal').innerText = `All Patient Earnings`;
+                document.getElementById('labelFinancePatients').innerText = `Total Patients Recorded`;
+            }
+
+            document.getElementById('statToday').innerText = `Rs. ${filteredTotal.toLocaleString()}`;
+            document.getElementById('statPatientsToday').innerText = filteredCount;
             document.getElementById('statAllTime').innerText = `Rs. ${allTimeTotal.toLocaleString()}`;
+
+            const tbody = document.getElementById('financeTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No financial records found in selected date range.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/80 text-xs">
+                        <td class="p-3 font-semibold text-slate-700">${p.date}</td>
+                        <td class="p-3 font-bold text-emerald-700">${p.receiptNo}</td>
+                        <td class="p-3 font-semibold text-slate-900">${p.name}</td>
+                        <td class="p-3 text-slate-600">Rs. ${(p.subtotal || p.grandTotal).toLocaleString()}</td>
+                        <td class="p-3 text-rose-600 font-semibold">${p.discount || 0}%</td>
+                        <td class="p-3 font-bold text-emerald-700">Rs. ${p.grandTotal.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function exportFinancePDF() {
+            const element = document.getElementById('financeExportArea');
+            const fromDate = document.getElementById('financeFromDate').value || 'Start';
+            const toDate = document.getElementById('financeToDate').value || 'End';
+            const opt = {
+                margin:       0.3,
+                filename:     `Danish_Lab_Finance_${fromDate}_to_${toDate}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function exportFinanceExcel() {
+            const filtered = getFilteredFinancePatients();
+            if(filtered.length === 0) {
+                alert('No data available to export in selected date range!');
+                return;
+            }
+
+            const excelData = filtered.map(p => ({
+                "Date": p.date,
+                "Receipt No": p.receiptNo,
+                "Patient Name": p.name,
+                "Phone": p.phone || '',
+                "Age": p.age,
+                "Gender": p.gender,
+                "Doctor": p.doctor,
+                "Subtotal (PKR)": p.subtotal || p.grandTotal,
+                "Discount (%)": p.discount || 0,
+                "Net Total (PKR)": p.grandTotal
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Finance Report");
+
+            const fromDate = document.getElementById('financeFromDate').value || 'Start';
+            const toDate = document.getElementById('financeToDate').value || 'End';
+            XLSX.writeFile(workbook, `Danish_Lab_Finance_${fromDate}_to_${toDate}.xlsx`);
+        }
+
+        function exportPatientListExcel() {
+            const filtered = getFilteredPatientsList();
+            if(filtered.length === 0) {
+                alert('No patient data to export!');
+                return;
+            }
+
+            const excelData = filtered.map(p => ({
+                "Receipt No": p.receiptNo,
+                "Patient Name": p.name,
+                "Phone": p.phone || '',
+                "Address": p.address,
+                "Age": p.age,
+                "Gender": p.gender,
+                "Referred By": p.doctor,
+                "Tests": p.tests.map(t => t.name).join(', '),
+                "Subtotal": p.subtotal || p.grandTotal,
+                "Discount (%)": p.discount || 0,
+                "Grand Total (PKR)": p.grandTotal,
+                "Date": p.date
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Patient List");
+            XLSX.writeFile(workbook, `Danish_Lab_Patients_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function exportReportListExcel() {
+            const filtered = getFilteredReportsList();
+            if(filtered.length === 0) {
+                alert('No reports data to export!');
+                return;
+            }
+
+            const excelData = filtered.map(r => {
+                const resultsSummary = r.results ? r.results.map(res => `${res.name}: ${res.value}`).join(' | ') : '';
+                return {
+                    "Receipt No": r.receiptNo,
+                    "Patient Name": r.name,
+                    "Age": r.age,
+                    "Gender": r.gender,
+                    "Address": r.address,
+                    "Referred By": r.doctor,
+                    "Test Results Summary": resultsSummary,
+                    "Report Date": r.date
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Reports List");
+            XLSX.writeFile(workbook, `Danish_Lab_Reports_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
         function renderSettingsPage() {
@@ -1570,7 +1757,6 @@
             try {
                 if(editId) {
                     const updateData = { username, permissions: perms };
-                    // Leave password box empty while editing to keep the current password unchanged
                     if(passInput) updateData.passHash = await sha256(passInput);
                     await db.collection("users").doc(editId).update(updateData);
                 } else {
