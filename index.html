@@ -33,14 +33,21 @@
 
         @media print {
             body * { visibility: hidden !important; }
-            body.printing-receipt #receiptModal, body.printing-receipt #receiptModal * { visibility: visible !important; }
-            body.printing-receipt #receiptModal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; z-index: 99999; display: block !important; }
-            
+
+            /* THERMAL CASH RECEIPT PRINT (58/80mm roll) — only #thermalReceiptArea prints */
+            body.printing-receipt #thermalReceiptArea, body.printing-receipt #thermalReceiptArea * { visibility: visible !important; }
+            body.printing-receipt #thermalReceiptArea { display: block !important; position: absolute; left: 0; top: 0; background: white !important; z-index: 99999; }
+
             body.printing-report #reportModal, body.printing-report #reportModal * { visibility: visible !important; }
             body.printing-report #reportModal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; z-index: 99999; display: block !important; }
             
             .no-print { display: none !important; }
         }
+
+        /* Thermal receipt base styling (screen-hidden, only used for printing) */
+        #thermalReceiptArea { display: none; }
+        #thermalReceiptArea, #thermalReceiptArea * { font-family: 'Courier New', Courier, monospace; color: #000; }
+        .thermal-dashed { border-top: 1px dashed #000; }
     </style>
 </head>
 <body class="theme-clinical flex flex-col min-h-screen" id="appBody">
@@ -522,6 +529,39 @@
         </div>
     </div>
 
+    <!-- HIDDEN THERMAL PRINT TEMPLATE (58/80mm printer) — filled by JS just before printing -->
+    <div id="thermalReceiptArea">
+        <!-- Change width below to 58mm if using a 58mm thermal printer -->
+        <div style="width:76mm; padding:2mm 3mm;">
+            <div style="text-align:center;">
+                <h2 style="font-size:15px; font-weight:900; margin:0; letter-spacing:1px;">DANISH LAB</h2>
+                <p style="font-size:9px; margin:1px 0;">Chowk Muneer Shaheed Road</p>
+                <p style="font-size:9px; margin:1px 0;">Contact/WhatsApp: 03067488053</p>
+                <p style="font-size:10px; font-weight:900; margin:3px 0; padding:2px 0; border-top:1px dashed #000; border-bottom:1px dashed #000;">CASH RECEIPT SLIP</p>
+            </div>
+            <div style="font-size:10px; margin-top:2mm; line-height:1.5;">
+                <div>Receipt#: <b id="thermalReceiptNo"></b></div>
+                <div>Name: <b id="thermalName"></b></div>
+                <div>Age/Gender: <span id="thermalAgeGender"></span></div>
+                <div>Address: <span id="thermalAddress"></span></div>
+                <div>Ref By: <span id="thermalDoctor"></span></div>
+                <div>Date: <span id="thermalDate"></span></div>
+            </div>
+            <table style="width:100%; font-size:10px; margin-top:2mm; border-top:1px dashed #000; padding-top:2mm; border-collapse:collapse;">
+                <tbody id="thermalItemsTable"></tbody>
+            </table>
+            <div id="thermalDiscountRow" style="display:none; justify-content:space-between; font-size:10px; border-top:1px dashed #000; margin-top:2mm; padding-top:2mm;">
+                <span>Discount:</span><span id="thermalDiscountVal"></span>
+            </div>
+            <div style="border-top:1px dashed #000; margin-top:2mm; padding-top:2mm; font-size:13px; font-weight:900; text-align:center;">
+                TOTAL: Rs. <span id="thermalTotal"></span>
+            </div>
+            <div style="text-align:center; margin-top:3mm;" id="thermalQrcode"></div>
+            <p style="text-align:center; font-size:8px; margin-top:1.5mm;">Scan QR to view live invoice on mobile</p>
+            <p style="text-align:center; font-size:9px; margin-top:2mm; font-weight:700;">*** Thank You — Get Well Soon ***</p>
+        </div>
+    </div>
+
     <!-- TEST REPORT MODAL -->
     <div id="reportModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-start justify-center z-50 p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 relative my-8">
@@ -587,28 +627,43 @@
         // -----------------------------------------------------------------
         // 2. SYSTEM STATE VARIABLES
         // -----------------------------------------------------------------
-        const defaultTests = [
-            { id: 't1', name: 'Complete Blood Count (CBC)', price: 1200, range: 'Hb: 13-17 g/dL, WBC: 4-11k' },
-            { id: 't2', name: 'Liver Function Test (LFT)', price: 2500, range: 'Bilirubin: 0.2-1.2 mg/dL' },
-            { id: 't3', name: 'Urine Routine Examination', price: 600, range: 'Yellow, Clear, Sugar/Protein: Nil' },
-            { id: 't4', name: 'Blood Glucose Fasting', price: 500, range: '70 - 110 mg/dL' }
+        const defaultTestsSeed = [
+            { name: 'Complete Blood Count (CBC)', price: 1200, range: 'Hb: 13-17 g/dL, WBC: 4-11k' },
+            { name: 'Liver Function Test (LFT)', price: 2500, range: 'Bilirubin: 0.2-1.2 mg/dL' },
+            { name: 'Urine Routine Examination', price: 600, range: 'Yellow, Clear, Sugar/Protein: Nil' },
+            { name: 'Blood Glucose Fasting', price: 500, range: '70 - 110 mg/dL' }
         ];
 
-        let tests = JSON.parse(localStorage.getItem('danish_tests')) || defaultTests;
+        // NOTE: tests, users, device logs & blocked devices now live in Firestore
+        // (collections: tests / users / deviceLogs / blockedDevices) so every device/browser
+        // stays in sync automatically in real time. Only theme + this device's own token
+        // stay in localStorage since those are per-device display settings, not shared data.
+        let tests = [];
         let patients = [];
         let reports = [];
         let currentTheme = localStorage.getItem('danish_theme') || 'theme-clinical';
         let currentUserRole = sessionStorage.getItem('danish_active_role');
         let activeUsername = sessionStorage.getItem('danish_active_username') || '';
 
-        let defaultUsers = [
-            { id: 'u1', username: 'recept', pass: '1122', permissions: { newPatient: true, patientList: true, testReport: false, reportList: false, finance: false, settings: false } },
-            { id: 'u2', username: 'doctor', pass: '3344', permissions: { newPatient: false, patientList: true, testReport: true, reportList: true, finance: false, settings: false } }
+        const defaultUsersSeedList = [
+            { username: 'recept', pass: '1122', permissions: { newPatient: true, patientList: true, testReport: false, reportList: false, finance: false, settings: false } },
+            { username: 'doctor', pass: '3344', permissions: { newPatient: false, patientList: true, testReport: true, reportList: true, finance: false, settings: false } }
         ];
 
-        let customUsers = JSON.parse(localStorage.getItem('danish_custom_users')) || defaultUsers;
-        let deviceLogs = JSON.parse(localStorage.getItem('danish_device_logs')) || [];
-        let blockedIPs = JSON.parse(localStorage.getItem('danish_blocked_ips')) || [];
+        let customUsers = [];
+        let deviceLogs = [];
+        let blockedIPs = [];
+        let usersSeeded = false;
+        let testsSeeded = false;
+
+        // Simple SHA-256 hashing (Web Crypto) so passwords are never stored/shown in plain text
+        async function sha256(text) {
+            const enc = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        const ADMIN_USERNAME = 'danish';
+        const ADMIN_PASS_HASH = '5d89b32e6ec57490fc79bed47bfc75e24663ad1fb04eccbcca6118f0dd8e9068'; // sha256("7869")
 
         document.getElementById('appBody').className = currentTheme + " flex flex-col min-h-screen";
 
@@ -636,6 +691,59 @@
                     reports.push({ docId: doc.id, ...doc.data() });
                 });
                 renderReportList();
+            });
+
+            // Tests (Investigations) Realtime Sync — same list on every device
+            db.collection("tests").onSnapshot(async (snapshot) => {
+                if (snapshot.empty && !testsSeeded) {
+                    testsSeeded = true;
+                    for (const t of defaultTestsSeed) {
+                        await db.collection("tests").add(t);
+                    }
+                    return; // onSnapshot will fire again with the seeded data
+                }
+                tests = [];
+                snapshot.forEach((doc) => {
+                    tests.push({ docId: doc.id, id: doc.id, ...doc.data() });
+                });
+                renderTestsCheckboxes();
+                renderSettingsTests();
+            });
+
+            // Users (login accounts + permissions) Realtime Sync
+            db.collection("users").onSnapshot(async (snapshot) => {
+                if (snapshot.empty && !usersSeeded) {
+                    usersSeeded = true;
+                    for (const u of defaultUsersSeedList) {
+                        const passHash = await sha256(u.pass);
+                        await db.collection("users").add({ username: u.username, passHash, permissions: u.permissions });
+                    }
+                    return;
+                }
+                customUsers = [];
+                snapshot.forEach((doc) => {
+                    customUsers.push({ docId: doc.id, id: doc.id, ...doc.data() });
+                });
+                renderNavMenu();
+                renderUserRightsTable();
+            });
+
+            // Device Login Logs Realtime Sync (latest 50)
+            db.collection("deviceLogs").orderBy("createdAt", "desc").limit(50).onSnapshot((snapshot) => {
+                deviceLogs = [];
+                snapshot.forEach((doc) => {
+                    deviceLogs.push({ docId: doc.id, ...doc.data() });
+                });
+                renderDeviceLogsTable();
+            });
+
+            // Blocked Devices/IPs Realtime Sync
+            db.collection("blockedDevices").onSnapshot((snapshot) => {
+                blockedIPs = [];
+                snapshot.forEach((doc) => {
+                    blockedIPs.push(doc.id);
+                });
+                renderDeviceLogsTable();
             });
         }
 
@@ -722,11 +830,13 @@
                 return;
             }
 
-            if(u === 'danish' && p === '7869') {
+            const enteredHash = await sha256(p);
+
+            if (u === ADMIN_USERNAME && enteredHash === ADMIN_PASS_HASH) {
                 currentUserRole = 'admin';
                 activeUsername = 'danish';
             } else {
-                const found = customUsers.find(usr => usr.username === u && usr.pass === p);
+                const found = customUsers.find(usr => usr.username === u && usr.passHash === enteredHash);
                 if(found) {
                     currentUserRole = 'user';
                     activeUsername = found.username;
@@ -745,11 +855,12 @@
                 browser: navigator.userAgent.split(')')[0] + ')',
                 screen: `${window.screen.width}x${window.screen.height}`,
                 time: new Date().toLocaleString(),
-                status: 'Active'
+                status: 'Active',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-            deviceLogs.unshift(newLog);
-            if(deviceLogs.length > 50) deviceLogs.pop();
-            localStorage.setItem('danish_device_logs', JSON.stringify(deviceLogs));
+            try {
+                await db.collection("deviceLogs").add(newLog);
+            } catch(e) { /* non-blocking: login still proceeds even if log write fails */ }
 
             sessionStorage.setItem('danish_active_role', currentUserRole);
             sessionStorage.setItem('danish_active_username', activeUsername);
@@ -961,6 +1072,7 @@
         }
 
         function showReceiptModal(p) {
+            window.currentReceiptPatient = p; // used by printReceipt() for the thermal slip
             document.getElementById('modalSlipName').innerText = p.name;
             document.getElementById('modalSlipAddress').innerText = p.address;
             document.getElementById('modalSlipAgeGender').innerText = `${p.age} Yrs / ${p.gender}`;
@@ -1018,9 +1130,48 @@
         }
 
         function printReceipt() {
+            const p = window.currentReceiptPatient;
+            if(!p) { alert('No receipt loaded to print.'); return; }
+
+            document.getElementById('thermalReceiptNo').innerText = p.receiptNo;
+            document.getElementById('thermalName').innerText = p.name;
+            document.getElementById('thermalAgeGender').innerText = `${p.age} Yrs / ${p.gender}`;
+            document.getElementById('thermalAddress').innerText = p.address;
+            document.getElementById('thermalDoctor').innerText = p.doctor;
+            document.getElementById('thermalDate').innerText = p.date;
+
+            const tItems = document.getElementById('thermalItemsTable');
+            tItems.innerHTML = '';
+            p.tests.forEach(t => {
+                tItems.innerHTML += `<tr><td style="padding:1px 0;">${t.name}</td><td style="text-align:right; font-weight:700; white-space:nowrap;">${parseFloat(t.price).toLocaleString()}</td></tr>`;
+            });
+
+            const discountRow = document.getElementById('thermalDiscountRow');
+            if(p.discount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('thermalDiscountVal').innerText = `${p.discount}% (Rs. ${Math.round(p.discountAmount || 0).toLocaleString()})`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            document.getElementById('thermalTotal').innerText = p.grandTotal.toLocaleString();
+
+            const currentUrl = window.location.href.split('?')[0];
+            const qrTargetUrl = `${currentUrl}?receipt=${p.receiptNo}`;
+            const thermalQrDiv = document.getElementById('thermalQrcode');
+            thermalQrDiv.innerHTML = '';
+            new QRCode(thermalQrDiv, { text: qrTargetUrl, width: 80, height: 80, correctLevel: QRCode.CorrectLevel.M });
+
+            // Set an 80mm roll page size only for this print job, then remove it
+            const pageStyle = document.createElement('style');
+            pageStyle.id = 'thermalPageStyle';
+            pageStyle.innerHTML = '@page { size: 80mm auto; margin: 2mm; }'; // change 80mm to 58mm for a 58mm printer
+            document.head.appendChild(pageStyle);
+
             document.body.classList.add('printing-receipt');
             window.print();
             document.body.classList.remove('printing-receipt');
+            document.head.removeChild(pageStyle);
         }
 
         function renderPatientList() {
@@ -1275,7 +1426,7 @@
             if(!tbody) return;
             tbody.innerHTML = '';
 
-            customUsers.forEach((u, index) => {
+            customUsers.forEach((u) => {
                 const perms = [];
                 if(u.permissions.newPatient) perms.push('NewPat');
                 if(u.permissions.patientList) perms.push('PatList');
@@ -1287,22 +1438,22 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100">
                         <td class="p-2 font-bold text-slate-800">${u.username}</td>
-                        <td class="p-2 text-slate-600">${u.pass}</td>
+                        <td class="p-2 text-slate-400 tracking-widest">••••••••</td>
                         <td class="p-2 text-[10px] text-sky-700 font-medium">${perms.join(', ')}</td>
                         <td class="p-2 text-center space-x-2">
-                            <button onclick="editUser('${u.id}')" class="text-sky-600 hover:text-sky-800"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteUser(${index})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editUser('${u.docId}')" class="text-sky-600 hover:text-sky-800"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteUser('${u.docId}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function saveCustomUser(e) {
+        async function saveCustomUser(e) {
             e.preventDefault();
             const editId = document.getElementById('editUserId').value;
             const username = document.getElementById('customUsername').value.trim();
-            const pass = document.getElementById('customPassword').value.trim();
+            const passInput = document.getElementById('customPassword').value.trim();
 
             const perms = {
                 newPatient: document.getElementById('perm_newPatient').checked,
@@ -1313,35 +1464,31 @@
                 settings: document.getElementById('perm_settings').checked
             };
 
-            if(editId) {
-                const uObj = customUsers.find(u => u.id === editId);
-                if(uObj) {
-                    uObj.username = username;
-                    uObj.pass = pass;
-                    uObj.permissions = perms;
+            try {
+                if(editId) {
+                    const updateData = { username, permissions: perms };
+                    // Leave password box empty while editing to keep the current password unchanged
+                    if(passInput) updateData.passHash = await sha256(passInput);
+                    await db.collection("users").doc(editId).update(updateData);
+                } else {
+                    if(!passInput) { alert('Please set a password for the new user.'); return; }
+                    const passHash = await sha256(passInput);
+                    await db.collection("users").add({ username, passHash, permissions: perms });
                 }
-            } else {
-                customUsers.push({
-                    id: 'usr_' + Date.now(),
-                    username: username,
-                    pass: pass,
-                    permissions: perms
-                });
+                resetUserForm();
+                alert('User credentials & permissions updated successfully!');
+            } catch(err) {
+                alert('Firebase Error: ' + err.message);
             }
-
-            localStorage.setItem('danish_custom_users', JSON.stringify(customUsers));
-            resetUserForm();
-            renderUserRightsTable();
-            renderNavMenu();
-            alert('User credentials & permissions updated successfully!');
         }
 
-        function editUser(id) {
-            const u = customUsers.find(user => user.id === id);
+        function editUser(docId) {
+            const u = customUsers.find(user => user.docId === docId);
             if(!u) return;
-            document.getElementById('editUserId').value = u.id;
+            document.getElementById('editUserId').value = u.docId;
             document.getElementById('customUsername').value = u.username;
-            document.getElementById('customPassword').value = u.pass;
+            document.getElementById('customPassword').value = '';
+            document.getElementById('customPassword').placeholder = 'Leave blank to keep current password';
 
             document.getElementById('perm_newPatient').checked = u.permissions.newPatient || false;
             document.getElementById('perm_patientList').checked = u.permissions.patientList || false;
@@ -1357,15 +1504,17 @@
             document.getElementById('editUserId').value = '';
             document.getElementById('customUsername').value = '';
             document.getElementById('customPassword').value = '';
+            document.getElementById('customPassword').placeholder = '';
             document.getElementById('userFormTitle').innerText = 'Create New User Account';
         }
 
-        function deleteUser(index) {
+        async function deleteUser(docId) {
             if(confirm('Are you sure you want to delete this user?')) {
-                customUsers.splice(index, 1);
-                localStorage.setItem('danish_custom_users', JSON.stringify(customUsers));
-                renderUserRightsTable();
-                renderNavMenu();
+                try {
+                    await db.collection("users").doc(docId).delete();
+                } catch(err) {
+                    alert('Firebase Error: ' + err.message);
+                }
             }
         }
 
@@ -1398,47 +1547,60 @@
             });
         }
 
-        function blockDevice(deviceId, ip) {
+        async function blockDevice(deviceId, ip) {
             if(confirm('Are you sure you want to block this device / IP from logging in?')) {
-                if(deviceId && !blockedIPs.includes(deviceId)) blockedIPs.push(deviceId);
-                if(ip && ip !== 'Detecting...' && !blockedIPs.includes(ip)) blockedIPs.push(ip);
-                localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
-                renderDeviceLogsTable();
-                alert('Device/IP blocked successfully!');
+                try {
+                    const batch = db.batch();
+                    if(deviceId) batch.set(db.collection("blockedDevices").doc(deviceId), { type: 'device', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    if(ip && ip !== 'Detecting...') batch.set(db.collection("blockedDevices").doc(ip), { type: 'ip', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    await batch.commit();
+                    alert('Device/IP blocked successfully!');
+                } catch(err) {
+                    alert('Firebase Error: ' + err.message);
+                }
             }
         }
 
-        function unblockDevice(deviceId, ip) {
-            blockedIPs = blockedIPs.filter(id => id !== deviceId && id !== ip);
-            localStorage.setItem('danish_blocked_ips', JSON.stringify(blockedIPs));
-            renderDeviceLogsTable();
-            alert('Device/IP unblocked successfully!');
+        async function unblockDevice(deviceId, ip) {
+            try {
+                const batch = db.batch();
+                if(deviceId) batch.delete(db.collection("blockedDevices").doc(deviceId));
+                if(ip) batch.delete(db.collection("blockedDevices").doc(ip));
+                await batch.commit();
+                alert('Device/IP unblocked successfully!');
+            } catch(err) {
+                alert('Firebase Error: ' + err.message);
+            }
         }
 
-        function clearLogs() {
+        async function clearLogs() {
             if(confirm('Clear device login logs history?')) {
-                deviceLogs = [];
-                localStorage.setItem('danish_device_logs', JSON.stringify(deviceLogs));
-                renderDeviceLogsTable();
+                try {
+                    const snapshot = await db.collection("deviceLogs").get();
+                    const batch = db.batch();
+                    snapshot.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+                } catch(err) {
+                    alert('Firebase Error: ' + err.message);
+                }
             }
         }
 
-        function addNewTest(e) {
+        async function addNewTest(e) {
             e.preventDefault();
             const name = document.getElementById('newTestName').value;
             const price = parseFloat(document.getElementById('newTestPrice').value);
             const range = document.getElementById('newTestRange').value;
 
-            const newT = { id: 't_' + Date.now(), name, price, range };
-            tests.push(newT);
-            localStorage.setItem('danish_tests', JSON.stringify(tests));
-
-            document.getElementById('newTestName').value = '';
-            document.getElementById('newTestPrice').value = '';
-            document.getElementById('newTestRange').value = '';
-            renderSettingsTests();
-            renderTestsCheckboxes();
-            alert('New test and range added successfully!');
+            try {
+                await db.collection("tests").add({ name, price, range });
+                document.getElementById('newTestName').value = '';
+                document.getElementById('newTestPrice').value = '';
+                document.getElementById('newTestRange').value = '';
+                alert('New test and range added successfully!');
+            } catch(err) {
+                alert('Firebase Error: ' + err.message);
+            }
         }
 
         function renderSettingsTests() {
@@ -1446,26 +1608,26 @@
             if(!tbody) return;
             tbody.innerHTML = '';
             tests.forEach((t) => {
-                const realIndex = tests.indexOf(t);
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50">
                         <td class="p-2 font-bold text-slate-800">${t.name}</td>
                         <td class="p-2 font-semibold text-sky-700">Rs. ${t.price}</td>
                         <td class="p-2 text-[11px] text-slate-500">${t.range}</td>
                         <td class="p-2 text-center">
-                            <button onclick="deleteTest(${realIndex})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteTest('${t.docId}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function deleteTest(index) {
+        async function deleteTest(docId) {
             if(confirm('Are you sure you want to delete this test?')) {
-                tests.splice(index, 1);
-                localStorage.setItem('danish_tests', JSON.stringify(tests));
-                renderSettingsTests();
-                renderTestsCheckboxes();
+                try {
+                    await db.collection("tests").doc(docId).delete();
+                } catch(err) {
+                    alert('Firebase Error: ' + err.message);
+                }
             }
         }
 
@@ -1500,16 +1662,19 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    if (confirm("Are you sure you want to restore this backup? Existing data will be overwritten.")) {
-                        if (importedData.tests) {
-                            tests = importedData.tests;
-                            localStorage.setItem('danish_tests', JSON.stringify(tests));
+                    if (confirm("Are you sure you want to restore this backup? This will ADD the backed-up tests to Firebase (existing tests are kept).")) {
+                        if (importedData.tests && importedData.tests.length) {
+                            const batch = db.batch();
+                            importedData.tests.forEach(t => {
+                                const ref = db.collection("tests").doc();
+                                batch.set(ref, { name: t.name, price: t.price, range: t.range });
+                            });
+                            await batch.commit();
                         }
                         alert("Backup restored successfully!");
-                        location.reload();
                     }
                 } catch (err) {
                     alert("Invalid JSON Backup File!");
