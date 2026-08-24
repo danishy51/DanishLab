@@ -13,23 +13,30 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #0f172a;
-            --primary-hover: #1e293b;
-            --accent-color: #0284c7;
+            --primary-bg: #123529;
+            --primary-hover: #1f5c48;
+            --accent-color: #2f9e77;
+            --gold-color: #d3a53d;
             --card-bg: #ffffff;
-            --text-color: #0f172a;
+            --text-color: #123529;
         }
-        body.theme-clinical { --primary-bg: #0f172a; --primary-hover: #1e293b; --accent-color: #0284c7; }
-        body.theme-emerald { --primary-bg: #064e3b; --primary-hover: #065f46; --accent-color: #059669; }
-        body.theme-royal { --primary-bg: #312e81; --primary-hover: #3730a3; --accent-color: #4f46e5; }
-        body.theme-darkmode { --primary-bg: #18181b; --primary-hover: #27272a; --accent-color: #38bdf8; }
+        /* Signature default: Emerald & Gold premium clinical theme (Danish Lab identity) */
+        body.theme-clinical { --primary-bg: #123529; --primary-hover: #1f5c48; --accent-color: #2f9e77; --gold-color: #d3a53d; }
+        body.theme-emerald { --primary-bg: #064e3b; --primary-hover: #065f46; --accent-color: #059669; --gold-color: #d3a53d; }
+        body.theme-royal { --primary-bg: #312e81; --primary-hover: #3730a3; --accent-color: #4f46e5; --gold-color: #d3a53d; }
+        body.theme-darkmode { --primary-bg: #18181b; --primary-hover: #27272a; --accent-color: #38bdf8; --gold-color: #d3a53d; }
 
         body { background-color: #f8fafc; color: var(--text-color); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .font-display { font-family: 'Poppins', 'Inter', sans-serif; }
         .nav-header { background: linear-gradient(135deg, var(--primary-bg) 0%, var(--primary-hover) 100%); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .btn-primary-theme { background-color: var(--accent-color); transition: all 0.2s ease; }
         .btn-primary-theme:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .text-accent-theme { color: var(--accent-color); }
+        .border-accent-theme { border-color: var(--accent-color); }
+        .gold-underline { background: linear-gradient(90deg, var(--gold-color), transparent); height: 3px; }
 
         @media print {
             body * { visibility: hidden !important; }
@@ -53,37 +60,115 @@
 <body class="theme-clinical flex flex-col min-h-screen" id="appBody">
 
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #065f46 100%);">
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20">
-            <div class="text-center mb-6">
-                <div class="inline-flex p-4 bg-gradient-to-tr from-sky-500 to-blue-600 rounded-2xl text-white text-3xl mb-3 shadow-lg"><i class="fa-solid fa-dna"></i></div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Danish Lab</h1>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-widest mt-1">Cash Receipt & Report Management System</p>
+    <div id="loginScreen" class="min-h-screen flex bg-white">
+        <!-- Left: Illustration panel -->
+        <div class="hidden lg:flex lg:w-3/5 relative overflow-hidden items-center justify-center p-12" style="background: radial-gradient(circle at 20% 20%, #f0faf5 0%, #ffffff 60%);">
+            <div class="absolute top-10 left-10 flex items-center gap-3">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg" style="background: linear-gradient(135deg, var(--primary-bg), var(--accent-color));"><i class="fa-solid fa-flask-vial"></i></div>
+                <div>
+                    <h2 class="font-display font-extrabold text-lg tracking-tight" style="color: var(--primary-bg);">DANISH LAB</h2>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-0.5">Diagnostic & Research Center</p>
+                </div>
             </div>
-            <div id="loginError" class="hidden mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl text-center font-semibold border border-rose-200"></div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-user text-sm"></i></span>
-                        <input type="text" id="loginUser" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
-                    </div>
+
+            <svg viewBox="0 0 600 560" class="w-full max-w-lg" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="300" cy="280" r="230" fill="#eafaf1"/>
+                <circle cx="470" cy="130" r="55" fill="#fbf1dc"/>
+                <circle cx="90" cy="420" r="40" fill="#fbf1dc"/>
+
+                <!-- decorative arcs -->
+                <path d="M 60 300 A 240 240 0 0 1 300 60" fill="none" stroke="var(--gold-color)" stroke-width="6" stroke-linecap="round" opacity="0.55"/>
+                <path d="M 540 260 A 240 240 0 0 1 380 490" fill="none" stroke="var(--accent-color)" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+
+                <!-- central report card -->
+                <rect x="185" y="120" width="230" height="300" rx="22" fill="#ffffff" stroke="#dcece3" stroke-width="2"/>
+                <circle cx="300" cy="205" r="46" fill="#f0faf5" stroke="var(--accent-color)" stroke-width="3"/>
+                <rect x="292" y="181" width="16" height="48" rx="4" fill="var(--primary-bg)"/>
+                <rect x="276" y="197" width="48" height="16" rx="4" fill="var(--primary-bg)"/>
+                <rect x="212" y="270" width="176" height="10" rx="5" fill="#dcece3"/>
+                <rect x="212" y="292" width="140" height="10" rx="5" fill="#dcece3"/>
+                <rect x="212" y="314" width="160" height="10" rx="5" fill="#dcece3"/>
+                <rect x="212" y="345" width="80" height="26" rx="8" fill="#fbf1dc"/>
+                <rect x="302" y="345" width="86" height="26" rx="8" fill="#eafaf1"/>
+
+                <!-- DNA helix accent -->
+                <g transform="translate(455,300)" opacity="0.9">
+                    <path d="M0,0 C 20,20 -20,40 0,60 C 20,80 -20,100 0,120" fill="none" stroke="var(--accent-color)" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M0,0 C -20,20 20,40 0,60 C -20,80 20,100 0,120" fill="none" stroke="var(--gold-color)" stroke-width="5" stroke-linecap="round"/>
+                    <circle cx="0" cy="10" r="4" fill="var(--primary-bg)"/>
+                    <circle cx="0" cy="50" r="4" fill="var(--primary-bg)"/>
+                    <circle cx="0" cy="90" r="4" fill="var(--primary-bg)"/>
+                </g>
+
+                <!-- bar chart accent -->
+                <g transform="translate(70,340)">
+                    <rect x="0" y="60" width="18" height="50" rx="4" fill="var(--accent-color)" opacity="0.85"/>
+                    <rect x="26" y="35" width="18" height="75" rx="4" fill="var(--gold-color)" opacity="0.85"/>
+                    <rect x="52" y="10" width="18" height="100" rx="4" fill="var(--primary-bg)" opacity="0.85"/>
+                </g>
+
+                <!-- lab technologist silhouette -->
+                <g transform="translate(150,330)">
+                    <circle cx="0" cy="0" r="24" fill="#2b3a37"/>
+                    <path d="M -38 130 C -38 70 -24 45 0 45 C 24 45 38 70 38 130 Z" fill="#ffffff" stroke="#dcece3" stroke-width="2"/>
+                    <path d="M -38 130 C -38 70 -24 45 0 45 C 24 45 38 70 38 130 Z" fill="var(--primary-bg)" opacity="0.06"/>
+                    <rect x="-10" y="50" width="20" height="60" fill="#eafaf1"/>
+                </g>
+                <!-- consultant silhouette -->
+                <g transform="translate(450,345)">
+                    <circle cx="0" cy="0" r="22" fill="#2b3a37"/>
+                    <path d="M -34 118 C -34 64 -22 42 0 42 C 22 42 34 64 34 118 Z" fill="var(--primary-bg)"/>
+                    <rect x="-9" y="46" width="18" height="55" fill="#fbf1dc"/>
+                </g>
+            </svg>
+
+            <p class="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs text-slate-400 font-medium tracking-wide">Accurate Results. Trusted Care.</p>
+        </div>
+
+        <!-- Right: Login card -->
+        <div class="w-full lg:w-2/5 flex items-center justify-center p-6 sm:p-12" style="background: linear-gradient(180deg, #ffffff 0%, #f6fbf8 100%);">
+            <div class="w-full max-w-sm">
+                <div class="text-center mb-8">
+                    <div class="inline-flex w-16 h-16 rounded-2xl items-center justify-center text-white text-2xl mb-3 shadow-lg" style="background: linear-gradient(135deg, var(--primary-bg), var(--accent-color));"><i class="fa-solid fa-flask-vial"></i></div>
+                    <h1 class="font-display text-2xl font-extrabold tracking-tight" style="color: var(--primary-bg);">DANISH LAB</h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Diagnostic & Research Center</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-lock text-sm"></i></span>
-                        <input type="password" id="loginPass" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
+
+                <h2 class="font-display text-xl font-bold" style="color: var(--primary-bg);">Login</h2>
+                <p class="text-xs text-slate-500 mt-1 mb-6">Enter your username and password to sign in!</p>
+
+                <div id="loginError" class="hidden mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl text-center font-semibold border border-rose-200"></div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5" style="color: var(--primary-bg);">Username:</label>
+                        <input type="text" id="loginUser" required class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm outline-none transition focus:ring-2" style="border-color:#bfe3d2;" onfocus="this.style.boxShadow='0 0 0 3px rgba(47,158,119,0.15)'" onblur="this.style.boxShadow='none'">
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5" style="color: var(--primary-bg);">Password:</label>
+                        <div class="relative">
+                            <input type="password" id="loginPass" required class="w-full px-4 py-2.5 pr-10 bg-white border rounded-xl text-sm outline-none transition" style="border-color:#bfe3d2;" onfocus="this.style.boxShadow='0 0 0 3px rgba(47,158,119,0.15)'" onblur="this.style.boxShadow='none'">
+                            <button type="button" onclick="toggleLoginPasswordView()" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye text-sm" id="loginPassEyeIcon"></i></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 text-white font-bold rounded-xl shadow-xl transition active:scale-[0.99]" style="background: linear-gradient(135deg, var(--primary-bg), var(--accent-color)); box-shadow: 0 10px 25px -8px rgba(18,53,41,0.45);">LOGIN</button>
+                </form>
+
+                <div class="mt-8 pt-5 border-t border-slate-100 text-center space-y-1">
+                    <p class="text-xs text-slate-600"><strong style="color: var(--primary-bg);">Application Developed by</strong> Muhammad Danish</p>
+                    <p class="text-xs text-slate-600"><strong style="color: var(--primary-bg);">Website:</strong> facebook.com/danishy51</p>
+                    <p class="text-xs text-slate-600"><strong style="color: var(--primary-bg);">Email:</strong> danishy51@gmail.com</p>
+                    <p class="text-xs text-slate-600"><strong style="color: var(--primary-bg);">For Support:</strong> 03067488053</p>
                 </div>
-                <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-xl shadow-slate-900/10 transition active:scale-[0.99]">Login to System</button>
-            </form>
+            </div>
         </div>
     </div>
 
+
     <!-- DIGITAL SLIP VIEW -->
     <div id="qrDigitalView" class="hidden min-h-screen bg-slate-100 p-4 flex items-center justify-center">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border-t-8 border-sky-600">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border-t-8 border-emerald-600">
             <div class="text-center border-b border-slate-100 pb-4 mb-4">
                 <h2 class="text-xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
                 <p class="text-[11px] text-slate-500 font-medium">Chowk Muneer Shaheed Road | +92 306 7488053</p>
@@ -98,13 +183,13 @@
 
     <!-- MAIN APP INTERFACE -->
     <div id="mainApp" class="hidden flex-grow flex flex-col min-h-screen">
-        <header class="nav-header text-white sticky top-0 z-50">
+        <header class="nav-header text-white sticky top-0 z-50 border-b-2" style="border-color: var(--gold-color);">
             <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-white/10 rounded-xl"><i class="fa-solid fa-dna text-xl"></i></div>
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-inner" style="background: rgba(255,255,255,0.12);"><i class="fa-solid fa-flask-vial"></i></div>
                     <div>
-                        <h1 class="text-base md:text-lg font-bold tracking-tight">Danish Lab</h1>
-                        <p class="text-[10px] text-white/70 tracking-wider uppercase font-medium">Cash Receipt & Management Portal</p>
+                        <h1 class="font-display text-base md:text-lg font-extrabold tracking-tight">DANISH LAB</h1>
+                        <p class="text-[10px] tracking-widest uppercase font-medium" style="color: var(--gold-color);">Diagnostic & Research Center</p>
                     </div>
                 </div>
                 <nav id="navMenuContainer" class="flex flex-wrap items-center gap-1.5 md:gap-2"></nav>
@@ -118,31 +203,31 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
-                            <span class="p-2 bg-sky-50 text-sky-600 rounded-xl mr-2 text-sm"><i class="fa-solid fa-user-plus"></i></span> 
+                            <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl mr-2 text-sm"><i class="fa-solid fa-user-plus"></i></span> 
                             New Patient Registration & Receipt
                         </h2>
                         <form id="patientForm" onsubmit="savePatient(event)" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Patient Name</label>
-                                    <input type="text" id="pName" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                    <input type="text" id="pName" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp No.</label>
-                                    <input type="text" id="pPhone" placeholder="03001234567" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                    <input type="text" id="pPhone" placeholder="03001234567" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Address</label>
-                                    <input type="text" id="pAddress" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                    <input type="text" id="pAddress" oninput="updateLiveSlip()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                 </div>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Age</label>
-                                        <input type="number" id="pAge" oninput="updateLiveSlip()" required min="0" max="120" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                        <input type="number" id="pAge" oninput="updateLiveSlip()" required min="0" max="120" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Gender</label>
-                                        <select id="pGender" onchange="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                        <select id="pGender" onchange="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                             <option value="Male">Male</option>
                                             <option value="Female">Female</option>
                                             <option value="Other">Other</option>
@@ -151,7 +236,7 @@
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Referred By (Doctor)</label>
-                                    <input type="text" id="pDoctor" value="Self" oninput="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                                    <input type="text" id="pDoctor" value="Self" oninput="updateLiveSlip()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
                                 </div>
                             </div>
 
@@ -160,35 +245,35 @@
                                 <div id="testsCheckboxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 max-h-48 overflow-y-auto"></div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-sky-50/50 p-4 rounded-2xl border border-sky-100 items-center">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 items-center">
                                 <div>
-                                    <label class="block text-xs font-bold text-sky-900 uppercase mb-1"><i class="fa-solid fa-percent mr-1"></i> Discount (%)</label>
-                                    <input type="number" id="pDiscount" value="0" min="0" max="100" oninput="calculateTotal(); updateLiveSlip();" class="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none font-semibold">
+                                    <label class="block text-xs font-bold text-emerald-900 uppercase mb-1"><i class="fa-solid fa-percent mr-1"></i> Discount (%)</label>
+                                    <input type="number" id="pDiscount" value="0" min="0" max="100" oninput="calculateTotal(); updateLiveSlip();" class="w-full px-3 py-2 bg-white border border-emerald-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xs text-slate-500 font-bold uppercase">Grand Total:</p>
-                                    <h3 id="displayGrandTotal" class="text-2xl font-black text-sky-900">Rs. 0</h3>
+                                    <h3 id="displayGrandTotal" class="text-2xl font-black text-emerald-900">Rs. 0</h3>
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-3.5 btn-primary-theme text-white font-bold rounded-xl shadow-lg shadow-sky-600/20"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
+                            <button type="submit" class="w-full py-3.5 btn-primary-theme text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20"><i class="fa-solid fa-floppy-disk mr-2"></i> Save & Print Cash Receipt</button>
                         </form>
                     </div>
 
                     <!-- Live Preview -->
                     <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sticky top-20">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-eye text-sky-600 mr-1"></i> Live Slip Preview</h3>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2"><i class="fa-solid fa-eye text-emerald-600 mr-1"></i> Live Slip Preview</h3>
                         <div class="border border-dashed border-slate-300 p-4 rounded-2xl bg-white text-xs space-y-3">
                             <div class="text-center border-b border-slate-100 pb-3">
                                 <h2 class="text-base font-black text-slate-900 tracking-wider">Danish Lab</h2>
                                 <p class="text-[10px] text-slate-500 font-medium">Chowk Muneer Shaheed Road | +92 306 7488053</p>
-                                <h3 class="text-[11px] font-bold text-sky-800 mt-1 uppercase tracking-wider bg-sky-50 py-1 rounded-md">Cash Receipt Slip</h3>
+                                <h3 class="text-[11px] font-bold text-emerald-800 mt-1 uppercase tracking-wider bg-emerald-50 py-1 rounded-md">Cash Receipt Slip</h3>
                             </div>
                             <div class="grid grid-cols-2 gap-1.5 text-slate-700">
                                 <div><strong>Name:</strong> <span id="liveSlipName" class="text-slate-900 font-medium">---</span></div>
                                 <div><strong>Date:</strong> <span id="liveSlipDate" class="text-slate-900 font-medium">---</span></div>
                                 <div><strong>Age/Gen:</strong> <span id="liveSlipAgeGender" class="text-slate-900 font-medium">---</span></div>
-                                <div><strong>Receipt:</strong> <span class="text-sky-700 font-bold">DL-Preview</span></div>
+                                <div><strong>Receipt:</strong> <span class="text-emerald-700 font-bold">DL-Preview</span></div>
                                 <div class="col-span-2"><strong>Address:</strong> <span id="liveSlipAddress" class="text-slate-900 font-medium">---</span></div>
                                 <div class="col-span-2"><strong>Ref By:</strong> <span id="liveSlipDoctor" class="text-slate-900 font-medium">---</span></div>
                             </div>
@@ -207,7 +292,7 @@
                                 <span>Discount:</span>
                                 <span id="liveSlipDiscountVal">0%</span>
                             </div>
-                            <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
+                            <div class="text-center font-bold text-sm text-emerald-900 border-t border-slate-100 pt-2">
                                 Total: <span id="liveSlipTotalAmount">Rs. 0</span>
                             </div>
                         </div>
@@ -220,18 +305,18 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
                         <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-users text-sky-600 mr-2"></i> Patient List & History</h2>
+                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-users text-emerald-600 mr-2"></i> Patient List & History</h2>
                             <button onclick="exportPatientListPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
                                 <i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF
                             </button>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="relative">
-                                <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-sky-500">
+                                <input type="text" id="patientSearchInput" oninput="renderPatientList()" placeholder="Search Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                             </div>
                             <div class="flex items-center space-x-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
-                                <i class="fa-solid fa-calendar-days text-sky-600 text-xs ml-2"></i>
+                                <i class="fa-solid fa-calendar-days text-emerald-600 text-xs ml-2"></i>
                                 <input type="date" id="filterDate" onchange="renderPatientList()" class="bg-transparent border-none text-xs outline-none px-1">
                                 <button onclick="clearDateFilter()" class="px-2.5 py-1 bg-white hover:bg-slate-200 text-xs rounded-lg font-bold shadow-sm">Reset</button>
                             </div>
@@ -259,13 +344,13 @@
             <!-- 3. TEST REPORT DESK -->
             <section id="tab-testReport" class="tab-content hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 max-w-4xl mx-auto">
-                    <h2 class="text-lg font-bold text-slate-900 mb-4"><i class="fa-solid fa-flask text-sky-600 mr-2"></i> Add Patient Test Report</h2>
+                    <h2 class="text-lg font-bold text-slate-900 mb-4"><i class="fa-solid fa-flask text-emerald-600 mr-2"></i> Add Patient Test Report</h2>
                     <div class="flex gap-2 mb-6">
-                        <input type="text" id="searchReportInput" placeholder="Search Patient by Receipt No or Name (e.g., DL-3204)" class="flex-grow px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm">
+                        <input type="text" id="searchReportInput" placeholder="Search Patient by Receipt No or Name (e.g., DL-3204)" class="flex-grow px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
                         <button onclick="searchPatientForReport()" class="px-6 py-2.5 btn-primary-theme text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md">Search</button>
                     </div>
                     <div id="reportFormContainer" class="hidden space-y-4">
-                        <div id="patientReportInfo" class="bg-sky-50/50 p-4 rounded-xl border border-sky-100 text-xs space-y-1"></div>
+                        <div id="patientReportInfo" class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-xs space-y-1"></div>
                         <div id="testInputsContainer" class="space-y-4"></div>
                         <button onclick="saveTestReport()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Complete Test Report</button>
                     </div>
@@ -277,13 +362,13 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b border-slate-100 pb-3">
                         <div class="flex items-center space-x-3">
-                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-medical text-sky-600 mr-2"></i> Completed Reports List</h2>
+                            <h2 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-file-medical text-emerald-600 mr-2"></i> Completed Reports List</h2>
                             <button onclick="exportReportListPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center transition">
                                 <i class="fa-solid fa-file-pdf mr-1.5"></i> Export PDF
                             </button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-sky-500">
+                            <input type="text" id="reportSearchInput" oninput="renderReportList()" placeholder="Search Report by Name or Receipt..." class="px-3.5 py-2 pl-9 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500">
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                         </div>
                     </div>
@@ -313,9 +398,9 @@
                             <p class="text-xs font-bold text-emerald-800 uppercase">Today Total Earnings</p>
                             <h3 id="statToday" class="text-3xl font-black text-emerald-900 mt-2">Rs. 0</h3>
                         </div>
-                        <div class="p-5 bg-sky-50 rounded-2xl border border-sky-100">
-                            <p class="text-xs font-bold text-sky-800 uppercase">Total Patients Today</p>
-                            <h3 id="statPatientsToday" class="text-3xl font-black text-sky-900 mt-2">0</h3>
+                        <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <p class="text-xs font-bold text-emerald-800 uppercase">Total Patients Today</p>
+                            <h3 id="statPatientsToday" class="text-3xl font-black text-emerald-900 mt-2">0</h3>
                         </div>
                         <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100">
                             <p class="text-xs font-bold text-indigo-800 uppercase">All Time Overall Collection</p>
@@ -330,7 +415,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-6">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-sliders text-sky-600 mr-2"></i> Manage Tests & Normal Ranges</h2>
+                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-sliders text-emerald-600 mr-2"></i> Manage Tests & Normal Ranges</h2>
                             <form onsubmit="addNewTest(event)" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
                                 <h3 class="text-xs font-bold text-slate-700 uppercase">Add New Investigation Test</h3>
                                 <div>
@@ -366,7 +451,7 @@
 
                         <!-- EXPORT & RESTORE JSON BACKUP SECTION -->
                         <div class="pt-4 border-t border-slate-100">
-                            <h2 class="text-sm font-bold text-slate-900 mb-2"><i class="fa-solid fa-database text-sky-600 mr-2"></i> System Data Backup & Restore</h2>
+                            <h2 class="text-sm font-bold text-slate-900 mb-2"><i class="fa-solid fa-database text-emerald-600 mr-2"></i> System Data Backup & Restore</h2>
                             <p class="text-xs text-slate-500 mb-3">Export system backup or restore data from a previous JSON file.</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <button onclick="exportJSONBackup()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center">
@@ -385,13 +470,13 @@
                         <!-- USER RIGHTS MANAGEMENT (ADMIN ONLY VISIBLE) -->
                         <div id="adminUserRightsCard" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 hidden">
                             <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3 flex justify-between items-center">
-                                <span><i class="fa-solid fa-user-shield text-sky-600 mr-2"></i> User Rights & Roles (Admin Only)</span>
-                                <button onclick="toggleNewUserForm()" class="px-2.5 py-1 bg-sky-600 text-white text-xs font-bold rounded-lg hover:bg-sky-700"><i class="fa-solid fa-plus mr-1"></i> Add User</button>
+                                <span><i class="fa-solid fa-user-shield text-emerald-600 mr-2"></i> User Rights & Roles (Admin Only)</span>
+                                <button onclick="toggleNewUserForm()" class="px-2.5 py-1 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700"><i class="fa-solid fa-plus mr-1"></i> Add User</button>
                             </h2>
 
                             <!-- Add / Edit User Form -->
                             <form id="userForm" onsubmit="saveCustomUser(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/60 mb-4">
-                                <h3 id="userFormTitle" class="text-xs font-bold text-sky-900 uppercase">Create New User Account</h3>
+                                <h3 id="userFormTitle" class="text-xs font-bold text-emerald-900 uppercase">Create New User Account</h3>
                                 <input type="hidden" id="editUserId" value="">
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
@@ -459,9 +544,9 @@
                         </div>
 
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
-                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-palette text-sky-600 mr-2"></i> Premium UI Themes</h2>
+                            <h2 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3"><i class="fa-solid fa-palette text-emerald-600 mr-2"></i> Premium UI Themes</h2>
                             <div class="grid grid-cols-2 gap-2.5">
-                                <button onclick="setTheme('theme-clinical')" class="p-3 rounded-xl bg-slate-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Clinical Dark Blue</button>
+                                <button onclick="setTheme('theme-clinical')" class="p-3 rounded-xl text-white font-bold text-xs shadow hover:scale-[1.02] transition" style="background: linear-gradient(135deg, #123529, #2f9e77);">Emerald & Gold (Default)</button>
                                 <button onclick="setTheme('theme-emerald')" class="p-3 rounded-xl bg-emerald-800 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Emerald Healthcare</button>
                                 <button onclick="setTheme('theme-royal')" class="p-3 rounded-xl bg-indigo-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Royal Indigo</button>
                                 <button onclick="setTheme('theme-darkmode')" class="p-3 rounded-xl bg-zinc-900 text-white font-bold text-xs shadow hover:scale-[1.02] transition">Minimal Zinc</button>
@@ -473,10 +558,14 @@
         </main>
 
         <!-- FOOTER -->
-        <footer class="no-print mt-auto border-t border-slate-200 bg-white py-3 px-4 text-xs font-semibold text-slate-600">
+        <footer class="no-print mt-auto border-t-2 bg-white py-3 px-4 text-xs font-semibold text-slate-600" style="border-color: var(--gold-color);">
             <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
-                <div>Email : danishy51@gmail.com</div>
-                <div>Contact/Whatsapp : 03067488053</div>
+                <div>Application Developed by <span style="color: var(--primary-bg);">Muhammad Danish</span></div>
+                <div class="flex flex-wrap gap-4">
+                    <span>Website : facebook.com/danishy51</span>
+                    <span>Email : danishy51@gmail.com</span>
+                    <span>Contact/Whatsapp : 03067488053</span>
+                </div>
             </div>
         </footer>
     </div>
@@ -489,13 +578,13 @@
                 <div class="text-center border-b border-slate-100 pb-4">
                     <h2 class="text-2xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
                     <p class="text-xs text-slate-500 font-medium">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
-                    <h3 class="text-xs font-bold text-sky-800 mt-1 uppercase tracking-widest bg-sky-50 py-1 rounded-lg">Cash Receipt Slip</h3>
+                    <h3 class="text-xs font-bold text-emerald-800 mt-1 uppercase tracking-widest bg-emerald-50 py-1 rounded-lg">Cash Receipt Slip</h3>
                 </div>
                 <div class="grid grid-cols-2 text-xs gap-2 text-slate-700">
                     <div><strong>Patient Name:</strong> <span id="modalSlipName" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Date:</strong> <span id="modalSlipDate" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Age / Gender:</strong> <span id="modalSlipAgeGender" class="text-slate-900 font-semibold">---</span></div>
-                    <div><strong>Receipt No:</strong> <span id="modalSlipReceiptNo" class="text-sky-700 font-bold">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="modalSlipReceiptNo" class="text-emerald-700 font-bold">---</span></div>
                     <div><strong>Address:</strong> <span id="modalSlipAddress" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Paid Verified</span></div>
                     <div class="col-span-2"><strong>Ref By:</strong> <span id="modalSlipDoctor" class="text-slate-900 font-semibold">---</span></div>
@@ -513,7 +602,7 @@
                     <span>Discount Applied:</span>
                     <span id="modalSlipDiscountVal">0%</span>
                 </div>
-                <div class="text-center font-bold text-sm text-sky-900 border-t border-slate-100 pt-2">
+                <div class="text-center font-bold text-sm text-emerald-900 border-t border-slate-100 pt-2">
                     Total Cash Paid: <span id="modalSlipTotalAmount">Rs. 0</span>
                 </div>
                 <div class="flex justify-center pt-2">
@@ -570,13 +659,13 @@
                 <div class="text-center border-b border-slate-100 pb-4">
                     <h2 class="text-2xl font-black text-slate-900 tracking-wider">Danish Lab</h2>
                     <p class="text-xs text-slate-500 font-medium">Chowk Muneer Shaheed Road, Near Qasim Plaza | Contact: +92 306 7488053</p>
-                    <h3 class="text-xs font-bold text-sky-800 mt-2 uppercase tracking-widest bg-sky-50 py-1 rounded-lg">Official Test Report</h3>
+                    <h3 class="text-xs font-bold text-emerald-800 mt-2 uppercase tracking-widest bg-emerald-50 py-1 rounded-lg">Official Test Report</h3>
                 </div>
                 <div class="grid grid-cols-2 text-xs gap-2 text-slate-700">
                     <div><strong>Patient Name:</strong> <span id="rModalPatientName" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Report Date:</strong> <span id="rModalReportDate" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Age / Gender:</strong> <span id="rModalAgeGender" class="text-slate-900 font-semibold">---</span></div>
-                    <div><strong>Receipt No:</strong> <span id="rModalReceiptNo" class="text-sky-700 font-bold">---</span></div>
+                    <div><strong>Receipt No:</strong> <span id="rModalReceiptNo" class="text-emerald-700 font-bold">---</span></div>
                     <div><strong>Address:</strong> <span id="rModalAddress" class="text-slate-900 font-semibold">---</span></div>
                     <div><strong>Status:</strong> <span class="text-emerald-600 font-bold">• Verified Report</span></div>
                     <div class="col-span-2"><strong>Ref By:</strong> <span id="rModalRefBy" class="text-slate-900 font-semibold">---</span></div>
@@ -785,7 +874,7 @@
 
             container.innerHTML = `
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-1.5 text-xs text-slate-700">
-                    <p><strong>Receipt No:</strong> <span class="text-sky-700 font-bold">${patient.receiptNo}</span></p>
+                    <p><strong>Receipt No:</strong> <span class="text-emerald-700 font-bold">${patient.receiptNo}</span></p>
                     <p><strong>Patient Name:</strong> <span class="text-slate-900 font-semibold">${patient.name}</span></p>
                     <p><strong>Age / Gender:</strong> ${patient.age} Yrs / ${patient.gender}</p>
                     <p><strong>Address:</strong> ${patient.address}</p>
@@ -797,7 +886,7 @@
                     <p class="font-bold text-xs text-slate-700 uppercase tracking-wider mb-2">Investigations Performed:</p>
                     <ul class="space-y-1">${testsHtml}</ul>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between font-black text-sm text-sky-900">
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between font-black text-sm text-emerald-900">
                     <span>Total Paid:</span>
                     <span>Rs. ${patient.grandTotal.toLocaleString()}</span>
                 </div>
@@ -806,6 +895,20 @@
 
         function closeQrView() {
             window.location.href = window.location.pathname;
+        }
+
+        function toggleLoginPasswordView() {
+            const input = document.getElementById('loginPass');
+            const icon = document.getElementById('loginPassEyeIcon');
+            if(input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
 
         async function handleLogin(e) {
@@ -946,9 +1049,9 @@
             container.innerHTML = '';
             tests.forEach(t => {
                 container.innerHTML += `
-                    <label class="flex items-center space-x-2.5 text-xs cursor-pointer p-2.5 bg-white rounded-xl border border-slate-200/60 hover:border-sky-300 transition">
-                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-sky-600 focus:ring-sky-500">
-                        <span class="font-bold text-slate-800">${t.name} — <span class="text-sky-700 font-semibold">Rs. ${t.price}</span></span>
+                    <label class="flex items-center space-x-2.5 text-xs cursor-pointer p-2.5 bg-white rounded-xl border border-slate-200/60 hover:border-emerald-300 transition">
+                        <input type="checkbox" value="${t.id}" data-price="${t.price}" data-name="${t.name}" data-range="${t.range}" onchange="calculateTotal(); updateLiveSlip();" class="test-checkbox rounded text-emerald-600 focus:ring-emerald-500">
+                        <span class="font-bold text-slate-800">${t.name} — <span class="text-emerald-700 font-semibold">Rs. ${t.price}</span></span>
                     </label>
                 `;
             });
@@ -1200,14 +1303,14 @@
 
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50/80">
-                        <td class="p-3 font-bold text-sky-700">${p.receiptNo}</td>
+                        <td class="p-3 font-bold text-emerald-700">${p.receiptNo}</td>
                         <td class="p-3 font-semibold text-slate-900">${p.name}</td>
                         <td class="p-3 text-slate-600 text-xs">${p.phone || 'N/A'}</td>
                         <td class="p-3 text-xs text-slate-500 max-w-xs truncate">${testNames}</td>
                         <td class="p-3 font-bold text-emerald-600">Rs. ${p.grandTotal.toLocaleString()}</td>
                         <td class="p-3">${statusBadge}</td>
                         <td class="p-3 text-center space-x-3 no-print">
-                            <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-sky-600 hover:text-sky-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick='showReceiptModal(${JSON.stringify(p)})' class="text-emerald-600 hover:text-emerald-800" title="View Cash Receipt"><i class="fa-solid fa-eye"></i></button>
                             <button onclick="deletePatient('${p.docId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
@@ -1258,7 +1361,7 @@
                 testInputs.innerHTML += `
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-1.5">
                         <label class="block text-xs font-bold text-slate-800">${t.name} <span class="text-[11px] font-normal text-slate-500">(Normal Range: ${t.range})</span></label>
-                        <textarea id="res_${i}" rows="2" placeholder="Enter test result (e.g., 14.2 g/dL)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none text-xs"></textarea>
+                        <textarea id="res_${i}" rows="2" placeholder="Enter test result (e.g., 14.2 g/dL)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-xs"></textarea>
                     </div>
                 `;
             });
@@ -1312,12 +1415,12 @@
             filtered.forEach((r, idx) => {
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50/80">
-                        <td class="p-3 font-bold text-sky-700">${r.receiptNo}</td>
+                        <td class="p-3 font-bold text-emerald-700">${r.receiptNo}</td>
                         <td class="p-3 font-semibold text-slate-900">${r.name}</td>
                         <td class="p-3 text-xs text-slate-400 font-medium">${r.date}</td>
                         <td class="p-3"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] rounded-full font-bold border border-emerald-200">• Verified</span></td>
                         <td class="p-3 text-center space-x-3 no-print">
-                            <button onclick="printReportModal(${idx})" class="text-sky-600 hover:text-sky-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="printReportModal(${idx})" class="text-emerald-600 hover:text-emerald-800" title="View & Print Report"><i class="fa-solid fa-eye"></i></button>
                             <button onclick="deleteReport('${r.docId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
@@ -1353,7 +1456,7 @@
                             <div class="font-bold text-slate-900">${res.name}</div>
                             <div class="text-[11px] text-slate-400">Range: ${res.range}</div>
                         </td>
-                        <td class="py-2 px-2 text-right font-bold text-sky-800">${res.value}</td>
+                        <td class="py-2 px-2 text-right font-bold text-emerald-800">${res.value}</td>
                     </tr>
                 `;
             });
@@ -1439,9 +1542,9 @@
                     <tr class="border-b border-slate-100">
                         <td class="p-2 font-bold text-slate-800">${u.username}</td>
                         <td class="p-2 text-slate-400 tracking-widest">••••••••</td>
-                        <td class="p-2 text-[10px] text-sky-700 font-medium">${perms.join(', ')}</td>
+                        <td class="p-2 text-[10px] text-emerald-700 font-medium">${perms.join(', ')}</td>
                         <td class="p-2 text-center space-x-2">
-                            <button onclick="editUser('${u.docId}')" class="text-sky-600 hover:text-sky-800"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="editUser('${u.docId}')" class="text-emerald-600 hover:text-emerald-800"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteUser('${u.docId}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
@@ -1538,7 +1641,7 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50">
                         <td class="p-2 text-slate-800 font-semibold">${log.browser.substring(0, 30)}...</td>
-                        <td class="p-2 font-mono text-sky-800 font-bold">${ipOrDev}</td>
+                        <td class="p-2 font-mono text-emerald-800 font-bold">${ipOrDev}</td>
                         <td class="p-2 font-bold text-slate-800">${log.username}</td>
                         <td class="p-2 text-[10px] text-slate-500">${log.time}</td>
                         <td class="p-2 text-center">${btnHtml}</td>
@@ -1611,7 +1714,7 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50">
                         <td class="p-2 font-bold text-slate-800">${t.name}</td>
-                        <td class="p-2 font-semibold text-sky-700">Rs. ${t.price}</td>
+                        <td class="p-2 font-semibold text-emerald-700">Rs. ${t.price}</td>
                         <td class="p-2 text-[11px] text-slate-500">${t.range}</td>
                         <td class="p-2 text-center">
                             <button onclick="deleteTest('${t.docId}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
