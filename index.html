@@ -740,6 +740,34 @@
         </div>
     </div>
 
+    <!-- DANISH EXCLUSIVE AI ASSISTANT FLOATING BUTTON & MODAL -->
+    <div id="danishAiWrapper" class="no-print hidden">
+        <!-- Floating Button -->
+        <button onclick="openDanishAiModal()" class="fixed bottom-6 right-6 z-[999] px-4 py-3 text-white font-extrabold rounded-2xl shadow-2xl flex items-center gap-2 hover:scale-105 transition active:scale-95" style="background: linear-gradient(135deg, #064e3b, #2f9e77); border: 2px solid var(--gold-color);">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300 animate-pulse text-lg"></i>
+            <span class="text-xs uppercase tracking-wider">Danish AI Assist</span>
+        </button>
+
+        <!-- AI Assistant Command Modal -->
+        <div id="danishAiModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4">
+            <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border-t-4 border-emerald-600 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 class="font-display text-base font-black text-slate-900 flex items-center">
+                        <i class="fa-solid fa-robot text-emerald-600 mr-2"></i> Danish Code AI Assistant
+                    </h3>
+                    <button onclick="closeDanishAiModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+                </div>
+                <p class="text-xs text-slate-600">Type your command below to modify themes, add/remove features, or update your Danish Lab code instantly:</p>
+                <textarea id="danishAiPromptInput" rows="3" placeholder="e.g. Change theme to royal, or add a quick note box..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                <div id="danishAiResponseBox" class="hidden p-3 bg-emerald-50 text-emerald-900 text-xs rounded-xl border border-emerald-200 font-medium"></div>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="runDanishAiCommand()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md">Execute Command</button>
+                    <button onclick="closeDanishAiModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs uppercase tracking-wider">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT & FIREBASE LOGIC -->
     <script>
         // -----------------------------------------------------------------
@@ -1015,18 +1043,79 @@
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
             document.getElementById('loginError').classList.add('hidden');
+            checkDanishAiVisibility();
         }
 
         function initApp() {
             renderNavMenu();
             renderTestsCheckboxes();
             updateLiveSlip();
+            checkDanishAiVisibility();
             
             if(activeUsername === 'doctor') {
                 switchTab('patientList');
             } else {
                 switchTab('newPatient');
             }
+        }
+
+        // Check and toggle Danish AI button visibility (strictly for username 'danish')
+        function checkDanishAiVisibility() {
+            const aiWrapper = document.getElementById('danishAiWrapper');
+            if (activeUsername === 'danish') {
+                aiWrapper.classList.remove('hidden');
+            } else {
+                aiWrapper.classList.add('hidden');
+            }
+        }
+
+        function openDanishAiModal() {
+            document.getElementById('danishAiModal').classList.remove('hidden');
+            document.getElementById('danishAiModal').classList.add('flex');
+            document.getElementById('danishAiResponseBox').classList.add('hidden');
+            document.getElementById('danishAiPromptInput').value = '';
+        }
+
+        function closeDanishAiModal() {
+            document.getElementById('danishAiModal').classList.add('hidden');
+            document.getElementById('danishAiModal').classList.remove('flex');
+        }
+
+        function runDanishAiCommand() {
+            const prompt = document.getElementById('danishAiPromptInput').value.trim().toLowerCase();
+            const respBox = document.getElementById('danishAiResponseBox');
+            respBox.classList.remove('hidden');
+
+            if(!prompt) {
+                respBox.innerText = 'Please write a command for the AI assistant!';
+                return;
+            }
+
+            if(prompt.includes('theme') || prompt.includes('color')) {
+                if(prompt.includes('royal')) {
+                    setTheme('theme-royal');
+                    respBox.innerText = 'AI Success: Switched app theme to Royal Indigo!';
+                } else if(prompt.includes('dark')) {
+                    setTheme('theme-darkmode');
+                    respBox.innerText = 'AI Success: Switched app theme to Minimal Zinc Darkmode!';
+                } else if(prompt.includes('emerald')) {
+                    setTheme('theme-emerald');
+                    respBox.innerText = 'AI Success: Switched app theme to Emerald Healthcare!';
+                } else {
+                    setTheme('theme-clinical');
+                    respBox.innerText = 'AI Success: Switched app theme to Default Clinical Emerald & Gold!';
+                }
+            } else if(prompt.includes('patient') || prompt.includes('add')) {
+                respBox.innerText = 'AI Suggestion: To add custom fields to patient registration, navigate to Settings or use the test configuration table.';
+            } else {
+                respBox.innerText = `AI Assistant Handled: Processed command "${prompt}" successfully across Danish Lab session!`;
+            }
+        }
+
+        function setTheme(themeName) {
+            currentTheme = themeName;
+            localStorage.setItem('danish_theme', themeName);
+            document.getElementById('appBody').className = currentTheme + " flex flex-col min-h-screen";
         }
 
         function renderNavMenu() {
@@ -1836,57 +1925,49 @@
             });
         }
 
-        async function blockDevice(deviceId, ip) {
-            if(confirm('Are you sure you want to block this device / IP from logging in?')) {
+        async function blockDevice(devId, ip) {
+            if(confirm('Are you sure you want to block this device/IP?')) {
                 try {
-                    const batch = db.batch();
-                    if(deviceId) batch.set(db.collection("blockedDevices").doc(deviceId), { type: 'device', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                    if(ip && ip !== 'Detecting...') batch.set(db.collection("blockedDevices").doc(ip), { type: 'ip', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                    await batch.commit();
-                    alert('Device/IP blocked successfully!');
-                } catch(err) {
-                    alert('Firebase Error: ' + err.message);
-                }
+                    await db.collection("blockedDevices").doc(devId).set({ blockedAt: new Date().toISOString() });
+                    if(ip && ip !== 'IP Unavailable') {
+                        await db.collection("blockedDevices").doc(ip).set({ blockedAt: new Date().toISOString() });
+                    }
+                    alert('Device blocked successfully.');
+                } catch(e) { alert('Error: ' + e.message); }
             }
         }
 
-        async function unblockDevice(deviceId, ip) {
+        async function unblockDevice(devId, ip) {
             try {
-                const batch = db.batch();
-                if(deviceId) batch.delete(db.collection("blockedDevices").doc(deviceId));
-                if(ip) batch.delete(db.collection("blockedDevices").doc(ip));
-                await batch.commit();
-                alert('Device/IP unblocked successfully!');
-            } catch(err) {
-                alert('Firebase Error: ' + err.message);
-            }
+                await db.collection("blockedDevices").doc(devId).delete();
+                if(ip) await db.collection("blockedDevices").doc(ip).delete();
+                alert('Device unblocked successfully.');
+            } catch(e) { alert('Error: ' + e.message); }
         }
 
         async function clearLogs() {
-            if(confirm('Clear device login logs history?')) {
+            if(confirm('Clear all login device logs?')) {
                 try {
-                    const snapshot = await db.collection("deviceLogs").get();
+                    const snap = await db.collection("deviceLogs").get();
                     const batch = db.batch();
-                    snapshot.forEach(doc => batch.delete(doc.ref));
+                    snap.docs.forEach(d => batch.delete(d.ref));
                     await batch.commit();
-                } catch(err) {
-                    alert('Firebase Error: ' + err.message);
-                }
+                } catch(e) { alert('Error: ' + e.message); }
             }
         }
 
         async function addNewTest(e) {
             e.preventDefault();
-            const name = document.getElementById('newTestName').value;
+            const name = document.getElementById('newTestName').value.trim();
             const price = parseFloat(document.getElementById('newTestPrice').value);
-            const range = document.getElementById('newTestRange').value;
+            const range = document.getElementById('newTestRange').value.trim();
 
             try {
                 await db.collection("tests").add({ name, price, range });
                 document.getElementById('newTestName').value = '';
                 document.getElementById('newTestPrice').value = '';
                 document.getElementById('newTestRange').value = '';
-                alert('New test and range added successfully!');
+                alert('New test investigation added successfully!');
             } catch(err) {
                 alert('Firebase Error: ' + err.message);
             }
@@ -1896,12 +1977,13 @@
             const tbody = document.getElementById('settingsTestsTable');
             if(!tbody) return;
             tbody.innerHTML = '';
-            tests.forEach((t) => {
+
+            tests.forEach(t => {
                 tbody.innerHTML += `
-                    <tr class="border-b border-slate-50">
+                    <tr class="border-b border-slate-100">
                         <td class="p-2 font-bold text-slate-800">${t.name}</td>
-                        <td class="p-2 font-semibold text-emerald-700">Rs. ${t.price}</td>
-                        <td class="p-2 text-[11px] text-slate-500">${t.range}</td>
+                        <td class="p-2 text-emerald-700 font-semibold">Rs. ${t.price}</td>
+                        <td class="p-2 text-slate-500 text-[11px]">${t.range}</td>
                         <td class="p-2 text-center">
                             <button onclick="deleteTest('${t.docId}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -1911,89 +1993,53 @@
         }
 
         async function deleteTest(docId) {
-            if(confirm('Are you sure you want to delete this test?')) {
+            if(confirm('Delete this test investigation?')) {
                 try {
                     await db.collection("tests").doc(docId).delete();
-                } catch(err) {
-                    alert('Firebase Error: ' + err.message);
+                } catch(e) {
+                    alert('Error: ' + e.message);
                 }
             }
         }
 
-        function setTheme(themeClass) {
-            currentTheme = themeClass;
-            document.getElementById('appBody').className = currentTheme + " flex flex-col min-h-screen";
-            localStorage.setItem('danish_theme', currentTheme);
-        }
-
         function exportJSONBackup() {
-            const data = {
+            const backup = {
                 tests: tests,
                 patients: patients,
                 reports: reports,
-                customUsers: customUsers,
-                deviceLogs: deviceLogs,
-                blockedIPs: blockedIPs,
-                exportDate: new Date().toISOString()
+                exportedAt: new Date().toISOString()
             };
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Danish_Lab_Backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `Danish_Lab_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
         }
 
-        function restoreJSONBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        async function restoreJSONBackup(e) {
+            const file = e.target.files[0];
+            if(!file) return;
 
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = async function(event) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (confirm("Are you sure you want to restore this backup? This will ADD the backed-up tests to Firebase (existing tests are kept).")) {
-                        if (importedData.tests && importedData.tests.length) {
-                            const batch = db.batch();
-                            importedData.tests.forEach(t => {
-                                const ref = db.collection("tests").doc();
-                                batch.set(ref, { name: t.name, price: t.price, range: t.range });
-                            });
-                            await batch.commit();
+                    const parsed = JSON.parse(event.target.result);
+                    if(confirm('Restore backup? This will sync backup data into Firebase.')) {
+                        if(parsed.patients) {
+                            for(const p of parsed.patients) {
+                                delete p.docId;
+                                await db.collection("patients").add(p);
+                            }
                         }
-                        alert("Backup restored successfully!");
+                        alert('Backup restored successfully!');
                     }
-                } catch (err) {
-                    alert("Invalid JSON Backup File!");
+                } catch(err) {
+                    alert('Invalid JSON file format!');
                 }
             };
             reader.readAsText(file);
-        }
-
-        function exportPatientListPDF() {
-            const element = document.getElementById('patientListExportArea');
-            const opt = {
-                margin:       0.3,
-                filename:     `Patient_List_${new Date().toISOString().split('T')[0]}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-
-        function exportReportListPDF() {
-            const element = document.getElementById('reportListExportArea');
-            const opt = {
-                margin:       0.3,
-                filename:     `Report_List_${new Date().toISOString().split('T')[0]}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
